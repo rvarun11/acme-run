@@ -9,8 +9,8 @@ import (
 
 // Person is a entity that represents a person in all Domains
 type HeartRateMonitor struct {
-	// WorkoutSessionID is the .....
-	WorkoutSessionID uuid.UUID
+	// WorkoutID is the .....
+	WorkoutID uuid.UUID
 	//
 	minHeartRate float32
 	//

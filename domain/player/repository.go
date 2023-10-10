@@ -1,4 +1,4 @@
-package workoutsession
+package Workout
 
 import (
 	"errors"

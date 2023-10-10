@@ -9,11 +9,11 @@ import (
 )
 
 var (
-	ErrInvalidWorkoutSession = errors.New("no player associated with the workout session")
+	ErrInvalidWorkout = errors.New("no player associated with the workout session")
 )
 
 // Person is a entity that represents a person in all Domains
-type WorkoutSession struct {
+type Workout struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
 	id uuid.UUID
 	// PlayerID of the player starting the workout session
@@ -32,12 +32,12 @@ type WorkoutSession struct {
 	heartRate []float64
 }
 
-func NewWorkoutSession(playerID uuid.UUID, hardcoreMode bool, isCardio bool) (WorkoutSession, error) {
+func NewWorkout(playerID uuid.UUID, hardcoreMode bool, isCardio bool) (Workout, error) {
 	if playerID == uuid.Nil {
-		return WorkoutSession{}, ErrInvalidWorkoutSession
+		return Workout{}, ErrInvalidWorkout
 	}
 
-	return WorkoutSession{
+	return Workout{
 		id:              uuid.New(),
 		playerID:        playerID,
 		isCardio:        isCardio,
@@ -49,19 +49,19 @@ func NewWorkoutSession(playerID uuid.UUID, hardcoreMode bool, isCardio bool) (Wo
 	}, nil
 }
 
-func (ws *WorkoutSession) GetID() uuid.UUID {
+func (ws *Workout) GetID() uuid.UUID {
 	return ws.id
 }
 
-func (ws *WorkoutSession) SetID(id uuid.UUID) {
+func (ws *Workout) SetID(id uuid.UUID) {
 	ws.id = id
 }
 
-func (ws *WorkoutSession) GetPlayerID() uuid.UUID {
+func (ws *Workout) GetPlayerID() uuid.UUID {
 	return ws.playerID
 }
 
-func (ws *WorkoutSession) SetPlayerID(playerID uuid.UUID) {
+func (ws *Workout) SetPlayerID(playerID uuid.UUID) {
 	ws.playerID = playerID
 }
 

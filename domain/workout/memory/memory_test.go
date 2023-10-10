@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rvarun11/macrun-teamvs/aggregate"
-	workoutsession "github.com/rvarun11/macrun-teamvs/domain/workout_session"
+	workout "github.com/rvarun11/macrun-teamvs/domain/workout"
 )
 
 func TestMemory_GetWorkout(t *testing.T) {
@@ -16,7 +16,7 @@ func TestMemory_GetWorkout(t *testing.T) {
 		expectedErr error
 	}
 
-	ws, err := aggregate.NewWorkoutSession(uuid.New(), false, false)
+	ws, err := aggregate.NewWorkout(uuid.New(), false, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,7 +24,7 @@ func TestMemory_GetWorkout(t *testing.T) {
 	id := ws.GetID()
 
 	repo := MemoryRepository{
-		workoutSessions: map[uuid.UUID]aggregate.WorkoutSession{
+		Workouts: map[uuid.UUID]aggregate.Workout{
 			id: ws,
 		},
 	}
@@ -33,7 +33,7 @@ func TestMemory_GetWorkout(t *testing.T) {
 		{
 			name:        "no workout session by id",
 			id:          uuid.MustParse("bd0776ac-581e-4a62-93d3-011ec4e072cd"),
-			expectedErr: workoutsession.ErrWorkoutSessionNotFound,
+			expectedErr: workout.ErrWorkoutNotFound,
 		}, {
 			name:        "workout session by id",
 			id:          id,
