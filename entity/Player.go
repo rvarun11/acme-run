@@ -29,5 +29,4 @@ type Player struct {
 	CreatedAt time.Time
 	// UpdatedAt is the time when the player last updated the profile
 	UpdatedAt time.Time
-	// TODO: History of weights fluctuations
 }

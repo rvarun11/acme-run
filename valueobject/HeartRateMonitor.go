@@ -2,6 +2,8 @@
 package entity
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -10,9 +12,11 @@ type HeartRateMonitor struct {
 	// WorkoutSessionID is the .....
 	WorkoutSessionID uuid.UUID
 	//
-	Min_HR float32
+	minHeartRate float32
 	//
-	Max_HR float32
+	maxHeartRate float32
 	// HardcoreMode is the difficulty level chosen by the player
-	Interval float32
+	interval float32
+
+	createdAt time.Time
 }
