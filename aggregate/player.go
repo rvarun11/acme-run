@@ -19,20 +19,20 @@ type Player struct {
 	// User is the root entity of Player
 	user *entity.User
 
-	Weight float32
+	weight float32
 	// Height of the player
-	Height float32
+	height float32
 	// GeographicalZone is a group of trails in a region
-	GeographicalZone string
+	geographicalzone string
 	// CreatedAt is the time when the player registered
-	CreatedAt time.Time
+	createdat time.Time
 	// UpdatedAt is the time when the player last updated the profile
-	UpdatedAt time.Time
+	updatedat time.Time
 }
 
 // NewPlayer is a factory to create a new Player aggregate
 // It will validate that the name is not empty
-func NewPlayer(name string, email string, dob string, Weight float32, Height float32, GeographicalZone string) (Player, error) {
+func NewPlayer(name string, email string, dob string, weight float32, height float32, geographicalzone string) (Player, error) {
 	// Validate that the Email has @
 	_, err := mail.ParseAddress(email)
 	if err != nil {
@@ -49,9 +49,9 @@ func NewPlayer(name string, email string, dob string, Weight float32, Height flo
 	// Create a customer object and initialize all the values to avoid nil pointer exceptions
 	return Player{
 		user:             user,
-		Weight:           Weight,
-		Height:           Height,
-		GeographicalZone: GeographicalZone,
+		weight:           weight,
+		height:           height,
+		geographicalzone: geographicalzone,
 	}, nil
 }
 
