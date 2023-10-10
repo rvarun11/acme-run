@@ -20,7 +20,7 @@ type WorkoutSession struct {
 	playerID uuid.UUID
 	// CreatedAt is the time when the workout was started/created at?
 	createdAt time.Time
-	// TODO: Duration of the workout
+	// Duration of the workout, TODO: fix type
 	duration time.Duration
 	// DurationCovered is the total distance covered during the session
 	distanceCovered float64
@@ -65,4 +65,4 @@ func (ws *WorkoutSession) SetPlayerID(playerID uuid.UUID) {
 	ws.playerID = playerID
 }
 
-// Add the rest when needed
+// TODO: Add the rest as per need
