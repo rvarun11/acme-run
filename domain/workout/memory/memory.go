@@ -6,7 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rvarun11/macrun-teamvs/aggregate"
-	Workout "github.com/rvarun11/macrun-teamvs/domain/workout"
+	workout "github.com/rvarun11/macrun-teamvs/domain/workout"
 )
 
 type MemoryRepository struct {
@@ -24,7 +24,7 @@ func (mr *MemoryRepository) Get(id uuid.UUID) (aggregate.Workout, error) {
 	if Workout, ok := mr.Workouts[id]; ok {
 		return Workout, nil
 	}
-	return aggregate.Workout{}, Workout.ErrWorkoutNotFound
+	return aggregate.Workout{}, workout.ErrWorkoutNotFound
 }
 
 func (mr *MemoryRepository) Add(ws aggregate.Workout) error {
@@ -34,7 +34,7 @@ func (mr *MemoryRepository) Add(ws aggregate.Workout) error {
 		mr.Unlock()
 	}
 	if _, ok := mr.Workouts[ws.GetID()]; ok {
-		return fmt.Errorf("workout session already exist: %w", Workout.ErrAddWorkoutFailed)
+		return fmt.Errorf("workout session already exist: %w", workout.ErrAddWorkoutFailed)
 	}
 	mr.Lock()
 	mr.Workouts[ws.GetID()] = ws
@@ -44,7 +44,7 @@ func (mr *MemoryRepository) Add(ws aggregate.Workout) error {
 
 func (mr *MemoryRepository) Update(ws aggregate.Workout) error {
 	if _, ok := mr.Workouts[ws.GetID()]; ok {
-		return fmt.Errorf("workout session does not exist: %w", Workout.ErrorUpdateWorkoutFailed)
+		return fmt.Errorf("workout session does not exist: %w", workout.ErrorUpdateWorkoutFailed)
 	}
 	mr.Lock()
 	mr.Workouts[ws.GetID()] = ws

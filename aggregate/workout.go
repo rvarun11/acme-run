@@ -12,27 +12,29 @@ var (
 	ErrInvalidWorkout = errors.New("no player associated with the workout session")
 )
 
-// Person is a entity that represents a person in all Domains
+// Workout is a entity that represents a workout in all Domains
 type Workout struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
 	id uuid.UUID
+	// trailId is the id of the trail player is on
+	trailId uuid.UUID
 	// PlayerID of the player starting the workout session
 	playerID uuid.UUID
 	// CreatedAt is the time when the workout was started/created at?
 	createdAt time.Time
 	// Duration of the workout, TODO: fix type
-	duration time.Duration
+	endedAt *time.Time
 	// DurationCovered is the total distance covered during the session
 	distanceCovered float64
-	// isCardio is for determining whether it's a cardio workout or strength workout
-	isCardio bool
+	// TODO: temp value. It can be either "cardio", "physical" or "dynamic"
+	option string
 	// HardcoreMode is the difficulty level chosen by the player
 	hardcoreMode bool
 	//  HRM Reading from the workout
-	heartRate []float64
+	// heartRate []valueobject.HeartRate
 }
 
-func NewWorkout(playerID uuid.UUID, hardcoreMode bool, isCardio bool) (Workout, error) {
+func NewWorkout(playerID uuid.UUID, trailId uuid.UUID, hardcoreMode bool, option string) (Workout, error) {
 	if playerID == uuid.Nil {
 		return Workout{}, ErrInvalidWorkout
 	}
@@ -40,12 +42,13 @@ func NewWorkout(playerID uuid.UUID, hardcoreMode bool, isCardio bool) (Workout, 
 	return Workout{
 		id:              uuid.New(),
 		playerID:        playerID,
-		isCardio:        isCardio,
+		trailId:         trailId,
+		option:          option,
 		hardcoreMode:    hardcoreMode,
 		createdAt:       time.Now(),
-		duration:        0,
+		endedAt:         nil,
 		distanceCovered: 0,
-		heartRate:       make([]float64, 0),
+		// heartRates:      make([]valueobject.HeartRate, 0),
 	}, nil
 }
 

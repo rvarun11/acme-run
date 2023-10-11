@@ -16,7 +16,7 @@ func TestMemory_GetWorkout(t *testing.T) {
 		expectedErr error
 	}
 
-	ws, err := aggregate.NewWorkout(uuid.New(), false, false)
+	ws, err := aggregate.NewWorkout(uuid.New(), uuid.New(), false, "dynamic")
 	if err != nil {
 		t.Fatal(err)
 	}

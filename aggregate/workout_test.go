@@ -15,6 +15,7 @@ func TestWorkout_NewWorkout(t *testing.T) {
 		expectedErr error
 	}
 
+	// TODO: Add test case of workout type, dynamic strength or cardio
 	testCases := []testCase{
 		{
 			test:        "Empty workout session param validation",
@@ -29,7 +30,7 @@ func TestWorkout_NewWorkout(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
-			_, err := aggregate.NewWorkout(tc.id, false, true)
+			_, err := aggregate.NewWorkout(tc.id, uuid.New(), false, "dynamic")
 
 			if !errors.Is(err, tc.expectedErr) {
 				t.Errorf("expected error %v, got %v", tc.expectedErr, err)
