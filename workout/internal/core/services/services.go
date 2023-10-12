@@ -30,6 +30,7 @@ func (s *WorkoutService) Get(id uuid.UUID) (*domain.Workout, error) {
 // TODO: Add start workout logic here
 func (s *WorkoutService) Start(workout domain.Workout) error {
 	// this will create the workout
+	// Send request Get HRM
 	return s.repo.Create(workout)
 }
 
