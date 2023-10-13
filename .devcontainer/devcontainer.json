@@ -12,6 +12,8 @@
 	"features": {
     	"ghcr.io/devcontainers/features/common-utils:2": {
 			"configureZshAsDefaultShell": true
+		},
+		"ghcr.io/itsmechlark/features/rabbitmq-server:1" : {
 		}
 		// "ghcr.io/devcontainers-contrib/features/protoc:1": {}
 	},
@@ -20,7 +22,7 @@
 	"forwardPorts": [8000, "8000:8000"],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "bash ./.devcontainer/install.sh",
+	"postCreateCommand": "bash ./.devcontainer/RabbitMQInit.sh",
 
 	// Configure tool-specific properties.
 	"customizations": {

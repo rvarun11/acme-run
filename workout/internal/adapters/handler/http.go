@@ -36,16 +36,28 @@ func (h *HTTPHandler) ListWorkouts(ctx *gin.Context) {
 }
 
 func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
+
+	// TODO: Temp DTO
+	type tempDTO struct {
+		TrailID uuid.UUID `json:"trailID"`
+		// PlayerID of the player starting the workout session
+		PlayerID uuid.UUID `json:"playerID"`
+	}
 	var p domain.Workout
-	if err := ctx.ShouldBindJSON(&p); err != nil {
+	var tempDTOInstance tempDTO
+	if err := ctx.ShouldBindJSON(&tempDTOInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"Error": err,
 		})
 		return
 	}
 
+	p.PlayerID = tempDTOInstance.PlayerID
+	p.TrailID = tempDTOInstance.TrailID
 	// TODO: Should this be here or in the service?
+	// @Samkith : I think in the service
 	// Keeping it here for now so that uuid can be sent back
+	// TODO: Only one workout can be active for a given player at any given time, handle that case
 	workout, err := domain.NewWorkout(p)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -66,6 +78,36 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 		"id":      workout.ID,
 		"message": "New workout created successfully",
 	})
+}
+
+func (h *HTTPHandler) StopWorkout(ctx *gin.Context) {
+
+	// TODO: Temp DTO
+	type tempDTO struct {
+		// WorkoutID
+		WorkoutID uuid.UUID `json:"workoutID"`
+	}
+
+	var tempDTOInstance tempDTO
+	if err := ctx.ShouldBindJSON(&tempDTOInstance); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"Error": err,
+		})
+		return
+	}
+
+	var p *domain.Workout
+	var err error
+	// TODO: The two error handling are the same, it can be refactored
+	p, err = h.svc.Stop(tempDTOInstance.WorkoutID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusAccepted, p)
 }
 
 func (h *HTTPHandler) GetWorkout(ctx *gin.Context) {

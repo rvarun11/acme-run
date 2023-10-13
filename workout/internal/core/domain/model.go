@@ -25,7 +25,7 @@ type Workout struct {
 	// CreatedAt is the time when the workout was started/created at?
 	CreatedAt time.Time `json:"created_at"`
 	// Duration of the workout, TODO: fix type
-	EndedAt string `json:"ended_at"`
+	EndedAt time.Time `json:"ended_at"`
 	// DurationCovered is the total distance covered during the session
 	DistanceCovered float64 `json:"DistancCovered"`
 	// TODO: temp value. It can be either "cardio", "physical" or "dynamic"
@@ -49,7 +49,7 @@ func NewWorkout(w Workout) (Workout, error) {
 		InProgress:      true,
 		HardcoreMode:    w.HardcoreMode,
 		CreatedAt:       time.Now(),
-		EndedAt:         "",
+		EndedAt:         time.Time{},
 		DistanceCovered: 0,
 		// heartRates:      make([]valueobject.HeartRate, 0),
 	}, nil

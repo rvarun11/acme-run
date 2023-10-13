@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/ports"
 
 	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/domain"
@@ -41,5 +43,23 @@ func (s *WorkoutService) Pause(id uuid.UUID) (*domain.Workout, error) {
 
 func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	// Call Update() to update InProgress to False & EndedAt to time.Now()
-	return s.repo.Get(id)
+	var tempWorkout *domain.Workout
+	var err error
+	tempWorkout, err = s.repo.Get(id)
+
+	// TODO: Better error handling
+	if err != nil {
+		return nil, err
+	}
+	// TODO: More logic to find distance covered and other things
+	tempWorkout.EndedAt = time.Now()
+	tempWorkout.InProgress = false
+
+	s.repo.Update(*tempWorkout)
+
+	return tempWorkout, err
+}
+
+func (s *WorkoutService) UpdateHRValue() error {
+
 }
