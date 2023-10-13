@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"sync"
 
 	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/adapters/handler"
 	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/adapters/repository"
@@ -30,16 +31,29 @@ func main() {
 		store := repository.NewMemoryRepository()
 		svc = services.NewWorkoutService(store)
 	}
+	var wg sync.WaitGroup
+	wg.Add(1)
 
+	go InitRabbitMQ(&wg)
 	InitRoutes()
 
+	wg.Wait()
+}
+
+func InitRabbitMQ(wg *sync.WaitGroup) {
+
+	defer wg.Done()
+
+	handler.HRMReceiver(*svc)
 }
 
 func InitRoutes() {
+
 	router := gin.Default()
 	handler := handler.NewHTTPHandler(*svc)
 	router.GET("/workouts", handler.ListWorkouts)
 	router.POST("/workout", handler.StartWorkout)
+	router.PUT("/workout", handler.StopWorkout)
 	router.GET("/workouts/:id", handler.GetWorkout)
 	// TODO: Implement when needed
 	// router.POST("/player", handler.UpdatePlayer)
