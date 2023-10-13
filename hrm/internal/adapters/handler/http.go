@@ -3,27 +3,26 @@ package handler
 import (
 	"net/http"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/services"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/domain"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type HTTPHandler struct {
-	svc services.PlayerService
+	svc services.HRMService
 }
 
-func NewHTTPHandler(PlayerService services.PlayerService) *HTTPHandler {
+func NewHTTPHandler(HRMService services.HRMService) *HTTPHandler {
 	return &HTTPHandler{
-		svc: PlayerService,
+		svc: HRMService,
 	}
 }
 
-func (h *HTTPHandler) ListPlayers(ctx *gin.Context) {
+func (h *HTTPHandler) ListHRM(ctx *gin.Context) {
 
-	players, err := h.svc.List()
+	hrms, err := h.svc.List()
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -31,13 +30,13 @@ func (h *HTTPHandler) ListPlayers(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, players)
+	ctx.JSON(http.StatusOK, hrms)
 
 }
 
-func (h *HTTPHandler) CreatePlayer(ctx *gin.Context) {
-	var p domain.Player
-	if err := ctx.ShouldBindJSON(&p); err != nil {
+func (h *HTTPHandler) CreateHRM(ctx *gin.Context) {
+	var hrms domain.HRM
+	if err := ctx.ShouldBindJSON(&hrms); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"Error": err,
 		})
@@ -46,7 +45,7 @@ func (h *HTTPHandler) CreatePlayer(ctx *gin.Context) {
 
 	// TODO: Should this be here or in the service?
 	// Keeping it here for now so that uuid can be sent back
-	player, err := domain.NewPlayer(p)
+	hrms, err := domain.NewHRM(hrms)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
@@ -54,7 +53,7 @@ func (h *HTTPHandler) CreatePlayer(ctx *gin.Context) {
 		return
 	}
 	// TODO: The two error handling are the same, it can be refactored
-	err = h.svc.Create(player)
+	err = h.svc.Create(hrms)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
@@ -63,31 +62,26 @@ func (h *HTTPHandler) CreatePlayer(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"id":      player.User.ID,
-		"message": "New player created successfully",
+		"id":      hrms.HRMId,
+		"message": "New HRM created successfully",
 	})
 }
 
-func (h *HTTPHandler) GetPlayer(ctx *gin.Context) {
-	id, err := uuid.Parse(ctx.Param("id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
-		})
-		return
-	}
+func (h *HTTPHandler) GetHRM(ctx *gin.Context) {
+	var hid string
+	hid = ctx.Param("id")
 
-	player, err := h.svc.Get(id)
+	hrms, err := h.svc.Get(hid)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, player)
+	ctx.JSON(http.StatusOK, hrms)
 }
 
 // TODO: To be implemented
-func (h *HTTPHandler) UpdatePlayer(ctx *gin.Context) {
+func (h *HTTPHandler) UpdateHRM(ctx *gin.Context) {
 
 }

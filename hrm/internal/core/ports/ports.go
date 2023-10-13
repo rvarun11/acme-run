@@ -3,9 +3,7 @@ package ports
 import (
 	"errors"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/domain"
-
-	"github.com/google/uuid"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/domain"
 )
 
 var (
@@ -15,17 +13,16 @@ var (
 	ErrorUpdatePlayerFailed = errors.New("failed to update player")
 )
 
-type PlayerService interface {
-	// TODO: I think this place should be able to handle other business functions as well
-	List() ([]*domain.Player, error)
-	Get(id uuid.UUID) (*domain.Player, error)
-	Create(player domain.Player) error
-	Update(player domain.Player) (*domain.Player, error)
+type HRMService interface {
+	List() ([]*domain.HRM, error)
+	Get(id string) (*domain.HRM, error)
+	Create(hrm domain.HRM) error
+	Update(hrm domain.HRM) (*domain.HRM, error)
 }
 
-type PlayerRepository interface {
-	List() ([]*domain.Player, error)
-	Create(player domain.Player) error
-	Get(id uuid.UUID) (*domain.Player, error)
-	Update(player domain.Player) error
+type HRMRepository interface {
+	List() ([]*domain.HRM, error)
+	Create(hrm domain.HRM) error
+	Get(id string) (*domain.HRM, error)
+	Update(hrm domain.HRM) error
 }

@@ -1,32 +1,30 @@
 package services
 
 import (
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/ports"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/domain"
-
-	"github.com/google/uuid"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/domain"
 )
 
-type PlayerService struct {
-	repo ports.PlayerRepository
+type HRMService struct {
+	repo ports.HRMRepository
 }
 
 // Factory for creating a new PlayerService
-func NewPlayerService(repo ports.PlayerRepository) *PlayerService {
-	return &PlayerService{
+func NewHRMService(repo ports.HRMRepository) *HRMService {
+	return &HRMService{
 		repo: repo,
 	}
 }
 
-func (s *PlayerService) List() ([]*domain.Player, error) {
+func (s *HRMService) List() ([]*domain.HRM, error) {
 	return s.repo.List()
 }
 
-func (s *PlayerService) Create(player domain.Player) error {
-	return s.repo.Create(player)
+func (s *HRMService) Create(hrm domain.HRM) error {
+	return s.repo.Create(hrm)
 }
 
-func (s *PlayerService) Get(id uuid.UUID) (*domain.Player, error) {
+func (s *HRMService) Get(id string) (*domain.HRM, error) {
 	return s.repo.Get(id)
 }
