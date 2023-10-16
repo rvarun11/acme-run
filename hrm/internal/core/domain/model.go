@@ -3,7 +3,6 @@ package domain
 import (
 	"errors"
 	"time"
-
 	"github.com/google/uuid"
 )
 
@@ -48,7 +47,7 @@ func (hrm *HRM) readHRate() {
 
 func NewHRM(hrm HRM) (HRM, error) {
 
-	// Create a customer object and initialize all the values to avoid nil pointer exceptions
+	// Create a hrm object and initialize all the values to avoid nil pointer exceptions
 	hrmN := HRM{
 		HRMId:     hrm.HRMId,
 		CreatedAt: time.Now(),
