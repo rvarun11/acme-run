@@ -42,6 +42,10 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 		TrailID uuid.UUID `json:"trailID"`
 		// PlayerID of the player starting the workout session
 		PlayerID uuid.UUID `json:"playerID"`
+
+		HRMConnected bool `json:"hrmConnected"`
+
+		HRMId uuid.UUID `json:"hrmID"`
 	}
 	var p domain.Workout
 	var tempDTOInstance tempDTO
@@ -65,6 +69,12 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 		})
 		return
 	}
+
+	// Send request to Tie HRM to Workout
+	if tempDTOInstance.HRMConnected {
+		TieWorkoutToHRM(tempDTOInstance.HRMId, workout.ID)
+	}
+
 	// TODO: The two error handling are the same, it can be refactored
 	err = h.svc.Start(workout)
 	if err != nil {

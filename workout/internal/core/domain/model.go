@@ -33,7 +33,7 @@ type Workout struct {
 	// HardcoreMode is the difficulty level chosen by the player
 	HardcoreMode bool `json:"HardcoreMode"`
 	//  HRM Reading from the workout
-	// heartRate []valueobject.HeartRate
+	HeartRate []uint16
 }
 
 func NewWorkout(w Workout) (Workout, error) {
@@ -51,6 +51,7 @@ func NewWorkout(w Workout) (Workout, error) {
 		CreatedAt:       time.Now(),
 		EndedAt:         time.Time{},
 		DistanceCovered: 0,
+		HeartRate:       []uint16{},
 		// heartRates:      make([]valueobject.HeartRate, 0),
 	}, nil
 }
