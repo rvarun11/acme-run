@@ -53,7 +53,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	}
 	// TODO: More logic to find distance covered and other things
 	tempWorkout.EndedAt = time.Now()
-	tempWorkout.InProgress = false
+	tempWorkout.IsCompleted = true
 
 	s.repo.Update(*tempWorkout)
 

@@ -22,7 +22,7 @@
 	"forwardPorts": [8000, "8000:8000"],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "bash ./.devcontainer/RabbitMQInit.sh",
+	"postCreateCommand": "sudo rabbitmq-plugins enable rabbitmq_management",
 
 	// Configure tool-specific properties.
 	"customizations": {

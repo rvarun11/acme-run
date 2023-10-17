@@ -35,6 +35,7 @@ func (h *HTTPHandler) ListWorkouts(ctx *gin.Context) {
 
 }
 
+// TODO: Move all the logic to Start() of WorkoutService
 func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 
 	// TODO: Temp DTO
@@ -42,12 +43,12 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 		TrailID uuid.UUID `json:"trailID"`
 		// PlayerID of the player starting the workout session
 		PlayerID uuid.UUID `json:"playerID"`
-
+		// TODO: Remove this field. If hrmId == nil then it's the same thing
 		HRMConnected bool `json:"hrmConnected"`
 
 		HRMId uuid.UUID `json:"hrmID"`
 	}
-	var p domain.Workout
+	var w domain.Workout
 	var tempDTOInstance tempDTO
 	if err := ctx.ShouldBindJSON(&tempDTOInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -56,13 +57,13 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 		return
 	}
 
-	p.PlayerID = tempDTOInstance.PlayerID
-	p.TrailID = tempDTOInstance.TrailID
+	w.PlayerID = tempDTOInstance.PlayerID
+	w.TrailID = tempDTOInstance.TrailID
 	// TODO: Should this be here or in the service?
 	// @Samkith : I think in the service
 	// Keeping it here for now so that uuid can be sent back
 	// TODO: Only one workout can be active for a given player at any given time, handle that case
-	workout, err := domain.NewWorkout(p)
+	workout, err := domain.NewWorkout(w)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
@@ -70,9 +71,10 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 		return
 	}
 
-	// Send request to Tie HRM to Workout
+	// Send request to tie HRM to Workout
 	if tempDTOInstance.HRMConnected {
-		TieWorkoutToHRM(tempDTOInstance.HRMId, workout.ID)
+		// TODO: Move to the service later along with the above code
+		StartHRM(tempDTOInstance.HRMId, workout.ID)
 	}
 
 	// TODO: The two error handling are the same, it can be refactored
@@ -106,10 +108,10 @@ func (h *HTTPHandler) StopWorkout(ctx *gin.Context) {
 		return
 	}
 
-	var p *domain.Workout
+	var w *domain.Workout
 	var err error
 	// TODO: The two error handling are the same, it can be refactored
-	p, err = h.svc.Stop(tempDTOInstance.WorkoutID)
+	w, err = h.svc.Stop(tempDTOInstance.WorkoutID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
@@ -117,7 +119,7 @@ func (h *HTTPHandler) StopWorkout(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusAccepted, p)
+	ctx.JSON(http.StatusAccepted, w)
 }
 
 func (h *HTTPHandler) GetWorkout(ctx *gin.Context) {
@@ -139,7 +141,7 @@ func (h *HTTPHandler) GetWorkout(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, workout)
 }
 
-// TODO: To be implemented
+// TODO: This should probably be in the rabbitmq handler
 func (h *HTTPHandler) UpdateWorkout(ctx *gin.Context) {
 
 }

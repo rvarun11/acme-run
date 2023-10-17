@@ -19,15 +19,8 @@ type WorkoutService interface {
 	// TODO: List should only return workouts for a particular Player
 	List() ([]*domain.Workout, error)
 	Get(id uuid.UUID) (*domain.Workout, error)
-
-	// TODO: Implement their logic
-	// RequestHR()
-	// Get HRData()
 	Start(workout domain.Workout) error
-	Pause(workout domain.Workout) error
 	Stop(workout domain.Workout) (*domain.Workout, error)
-
-	// Add HRM Service too?
 }
 
 type WorkoutRepository interface {

@@ -44,7 +44,7 @@ func InitRabbitMQ(wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
-	handler.HRMReceiver(*svc)
+	handler.HRMSubscriber(*svc)
 }
 
 func InitRoutes() {

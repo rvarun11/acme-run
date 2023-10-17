@@ -17,7 +17,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func HRMReceiver(svc services.WorkoutService) {
+func HRMSubscriber(svc services.WorkoutService) {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -70,7 +70,7 @@ func HRMReceiver(svc services.WorkoutService) {
 	<-forever
 }
 
-func TieWorkoutToHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
+func StartHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
 
 	// Just connect for now and send
 	// TODO: Should we connect once and use the same for sending and receiving?
@@ -109,7 +109,7 @@ func TieWorkoutToHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
 
 	var body []byte
 
-	body, err = json.Marshal(tempDTOVar)
+	body, _ = json.Marshal(tempDTOVar)
 
 	err = ch.PublishWithContext(ctx,
 		"",     // exchange
@@ -122,5 +122,4 @@ func TieWorkoutToHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
 		})
 	failOnError(err, "Failed to publish a message")
 	log.Printf(" [x] Sent %s\n", body)
-
 }
