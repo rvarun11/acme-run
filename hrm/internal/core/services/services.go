@@ -45,10 +45,8 @@ func (s *HRMService) DisconnectHRM(hrmID uuid.UUID) {
 }
 
 func (s *HRMService) BindHRMtoWorkout(hrmID uuid.UUID, workoutID uuid.UUID) {
-	var hrmInstance *domain.HRM
-	var err error
 	//var err error
-	hrmInstance, err = s.repo.Get(hrmID)
+	hrmInstance, _ := s.repo.Get(hrmID)
 	//TODO Error Handling
 	hrmInstance.WorkoutId = workoutID
 	s.repo.Update(*hrmInstance)

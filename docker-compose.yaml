@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  player:
+    container_name: player
+    build: ../player
+    ports:
+      - "8000:8000"
+hrm:
+    container_name: player
+    build: ../player
+    ports:
+      - "8004:8004"
+    depends_on:
+      rabbitmq
+      player
+  workout:
+    container_name: workout
+    build: ../workout
+    ports:
+      - "8001:8001"
+    depends_on:
+      - rabbitmq
+      - player
+      - hrm
