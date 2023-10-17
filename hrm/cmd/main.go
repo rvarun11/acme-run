@@ -4,8 +4,8 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/adapters/repository"
 	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/handler"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/repository"
 	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/services"
 	"github.com/gin-gonic/gin"
 )
@@ -38,9 +38,9 @@ func main() {
 func InitRoutes() {
 	router := gin.Default()
 	handler := handler.NewHTTPHandler(*svc)
-	router.GET("/hrmss", handler.ListHRM)
+	router.GET("/hrms", handler.ListHRM)
 	router.POST("/hrm", handler.CreateHRM)
-	router.GET("/hrmss/:id", handler.GetHRM)
+	router.GET("/hrms/:id", handler.GetHRM)
 	// TODO: Implement when needed
 	// router.PUT("/player", handler.UpdatePlayer)
 	router.Run(":8000")

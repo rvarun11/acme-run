@@ -7,10 +7,10 @@ import (
 )
 
 var (
-	ErrorListPlayersFailed  = errors.New("failed to list players")
-	ErrorPlayerNotFound     = errors.New("the player session not found in repository")
-	ErrorCreatePlayerFailed = errors.New("failed to add the player")
-	ErrorUpdatePlayerFailed = errors.New("failed to update player")
+	ErrorListHRMSFailed  = errors.New("failed to list hrms")
+	ErrorHRMNotFound     = errors.New("the hrm session not found in repository")
+	ErrorCreateHRMFailed = errors.New("failed to add the hrm")
+	ErrorUpdateHRMFailed = errors.New("failed to update hrm")
 )
 
 type HRMService interface {

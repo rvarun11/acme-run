@@ -3,6 +3,7 @@ package domain
 import (
 	"errors"
 	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -26,13 +27,21 @@ type HRM struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Getters and Setters for Player
+// Getters and Setters for HRM
 func (hrm *HRM) GetID() uuid.UUID {
 	return hrm.HRMId
 }
 
 func (hrm *HRM) SetID(id uuid.UUID) {
 	hrm.HRMId = id
+}
+
+func (hrm *HRM) getState() string {
+	return hrm.Status
+}
+
+func (hrm *HRM) initializeHRM() {
+	hrm.Status = "Connected"
 }
 
 func (hrm *HRM) getHRate() string {
@@ -52,7 +61,7 @@ func NewHRM(hrm HRM) (HRM, error) {
 		HRMId:     hrm.HRMId,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Status:    "connected"
+		Status:    "connected",
 	}
 	return hrmN, nil
 }
