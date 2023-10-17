@@ -27,13 +27,21 @@ type HRM struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Getters and Setters for Player
+// Getters and Setters for HRM
 func (hrm *HRM) GetID() uuid.UUID {
 	return hrm.HRMId
 }
 
 func (hrm *HRM) SetID(id uuid.UUID) {
 	hrm.HRMId = id
+}
+
+func (hrm *HRM) getState() string {
+	return hrm.Status
+}
+
+func (hrm *HRM) connectToHRM() {
+	hrm.Status = "Connected"
 }
 
 func (hrm *HRM) getHRate() string {
@@ -48,7 +56,7 @@ func (hrm *HRM) readHRate() {
 
 func NewHRM(hrm HRM) (HRM, error) {
 
-	// Create a customer object and initialize all the values to avoid nil pointer exceptions
+	// Create a hrm object and initialize all the values to avoid nil pointer exceptions
 	hrmN := HRM{
 		HRMId:     hrm.HRMId,
 		CreatedAt: time.Now(),

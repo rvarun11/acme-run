@@ -22,10 +22,10 @@ func NewMemoryRepository() *MemoryRepository {
 	}
 }
 
-func (r *MemoryRepository) List() ([]*domain.Player, error) {
+func (r *MemoryRepository) List() ([]*domain.HRM, error) {
 	if r.hrms == nil {
-		// If r.players is nil, return an error or handle the case accordingly
-		return nil, fmt.Errorf("hrms map doesn't exit %w", ports.ErrorListPlayersFailed)
+		// If r.hrms is nil, return an error or handle the case accordingly
+		return nil, fmt.Errorf("hrms map doesn't exit %w", ports.ErrorListHRMSFailed)
 	}
 	hrms := make([]*domain.HRM, 0, len(r.hrms))
 
@@ -36,14 +36,14 @@ func (r *MemoryRepository) List() ([]*domain.Player, error) {
 }
 
 func (r *MemoryRepository) Create(hrm domain.HRM) error {
-	if r.hrms[] == nil {
+	if r.hrms == nil {
 		r.Lock()
 		r.hrms = make(map[uuid.UUID]domain.HRM)
 		r.Unlock()
 	}
 
 	if _, ok := r.hrms[hrm.GetID()]; ok {
-		return fmt.Errorf("player already exist: %w", ports.ErrorCreatePlayerFailed)
+		return fmt.Errorf("hrm already exist: %w", ports.ErrorCreateHRMFailed)
 	}
 	r.Lock()
 	r.hrms[hrm.GetID()] = hrm
@@ -55,12 +55,12 @@ func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.HRM, error) {
 	if hrm, ok := mr.hrms[pid]; ok {
 		return &hrm, nil
 	}
-	return &domain.HRM{}, ports.ErrorPlayerNotFound
+	return &domain.HRM{}, ports.ErrorHRMNotFound
 }
 
 func (r *MemoryRepository) Update(hrm domain.HRM) error {
 	if _, ok := r.hrms[hrm.GetID()]; ok {
-		return fmt.Errorf("player does not exist: %w", ports.ErrorUpdatePlayerFailed)
+		return fmt.Errorf("hrm does not exist: %w", ports.ErrorUpdateHRMFailed)
 	}
 	r.Lock()
 	r.hrms[hrm.GetID()] = hrm

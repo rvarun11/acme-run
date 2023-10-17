@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/adapters/handler"
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/adapters/repository"
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/handler"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/repository"
+	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,7 +14,7 @@ var (
 	repo = flag.String("db", "postgres", "Database for storing messages")
 	//    redisHost   = "localhost:6379"
 	//    httpHandler *handler.HTTPHandler
-	svc *services.PlayerService
+	svc *services.HRMService
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 	//        svc = services.NewMessengerService(store)
 	default:
 		store := repository.NewMemoryRepository()
-		svc = services.NewPlayerService(store)
+		svc = services.NewHRMService(store)
 	}
 
 	InitRoutes()
@@ -38,9 +38,9 @@ func main() {
 func InitRoutes() {
 	router := gin.Default()
 	handler := handler.NewHTTPHandler(*svc)
-	router.GET("/players", handler.ListPlayers)
-	router.POST("/player", handler.CreatePlayer)
-	router.GET("/players/:id", handler.GetPlayer)
+	router.GET("/hrms", handler.ListHRM)
+	router.POST("/hrm", handler.CreateHRM)
+	router.GET("/hrms/:id", handler.GetHRM)
 	// TODO: Implement when needed
 	// router.PUT("/player", handler.UpdatePlayer)
 	router.Run(":8000")
