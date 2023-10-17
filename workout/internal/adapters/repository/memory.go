@@ -59,7 +59,7 @@ func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.Workout, error) {
 }
 
 func (r *MemoryRepository) Update(workout domain.Workout) error {
-	if _, ok := r.workouts[workout.GetID()]; ok {
+	if _, ok := r.workouts[workout.GetID()]; !ok {
 		return fmt.Errorf("workout does not exist: %w", ports.ErrorUpdateWorkoutFailed)
 	}
 	r.Lock()

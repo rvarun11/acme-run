@@ -59,7 +59,7 @@ func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.Player, error) {
 }
 
 func (r *MemoryRepository) Update(player domain.Player) error {
-	if _, ok := r.players[player.GetID()]; ok {
+	if _, ok := r.players[player.GetID()]; !ok {
 		return fmt.Errorf("player does not exist: %w", ports.ErrorUpdatePlayerFailed)
 	}
 	r.Lock()
