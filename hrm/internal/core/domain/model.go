@@ -40,7 +40,7 @@ func (hrm *HRM) getState() string {
 	return hrm.Status
 }
 
-func (hrm *HRM) initializeHRM() {
+func (hrm *HRM) connectToHRM() {
 	hrm.Status = "Connected"
 }
 
