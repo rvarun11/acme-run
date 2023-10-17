@@ -12,19 +12,10 @@ var (
 )
 
 type HRM struct {
-	// ID is the identifier of the Entity, the ID is shared for all sub domains
-	HRMId uuid.UUID `json:"hrmid"`
-	// Name of the user
-	Status string `json:"status"`
-}
-
-// Player is a entity that represents a Player in all Domains
-type HRM struct {
-	// Email
-	HRate     string    `json:"hrate"`
+	WorkoutId uuid.UUID `json:"workout_id"`
+	HRMId     uuid.UUID `json:"hrm_id"`
+	HRate     string    `json:"heart_rate"`
 	CreatedAt time.Time `json:"created_at"`
-	// UpdatedAt is the time when the player last updated the profile
-	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // Getters and Setters for HRM
@@ -36,14 +27,15 @@ func (hrm *HRM) SetID(id uuid.UUID) {
 	hrm.HRMId = id
 }
 
-func (hrm *HRM) getState() string {
-	return hrm.Status
-}
+/*
+	func (hrm *HRM) getState() string {
+		return hrm.Status
+	}
 
-func (hrm *HRM) connectToHRM() {
-	hrm.Status = "Connected"
-}
-
+	func (hrm *HRM) connectToHRM() {
+		hrm.Status = "Connected"
+	}
+*/
 func (hrm *HRM) getHRate() string {
 	return hrm.HRate
 }
@@ -60,8 +52,6 @@ func NewHRM(hrm HRM) (HRM, error) {
 	hrmN := HRM{
 		HRMId:     hrm.HRMId,
 		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-		Status:    "connected",
 	}
 	return hrmN, nil
 }

@@ -22,20 +22,7 @@ func NewMemoryRepository() *MemoryRepository {
 	}
 }
 
-func (r *MemoryRepository) List() ([]*domain.HRM, error) {
-	if r.hrms == nil {
-		// If r.hrms is nil, return an error or handle the case accordingly
-		return nil, fmt.Errorf("hrms map doesn't exit %w", ports.ErrorListHRMSFailed)
-	}
-	hrms := make([]*domain.HRM, 0, len(r.hrms))
-
-	for _, hrm := range r.hrms {
-		hrms = append(hrms, &hrm)
-	}
-	return hrms, nil
-}
-
-func (r *MemoryRepository) Create(hrm domain.HRM) error {
+func (r *MemoryRepository) AddHRMIntance(hrm domain.HRM) error {
 	if r.hrms == nil {
 		r.Lock()
 		r.hrms = make(map[uuid.UUID]domain.HRM)
@@ -43,27 +30,52 @@ func (r *MemoryRepository) Create(hrm domain.HRM) error {
 	}
 
 	if _, ok := r.hrms[hrm.GetID()]; ok {
-		return fmt.Errorf("hrm already exist: %w", ports.ErrorCreateHRMFailed)
+		return fmt.Errorf("hrm already connected: %w", ports.ErrorCreateHRMFailed)
 	}
 	r.Lock()
 	r.hrms[hrm.GetID()] = hrm
 	r.Unlock()
 	return nil
+
 }
 
-func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.HRM, error) {
-	if hrm, ok := mr.hrms[pid]; ok {
+func (r *MemoryRepository) DeleteHRMInstance(hrmid uuid.UUID) error {
+
+	if _, ok := r.hrms[hrmid]; !ok {
+		return fmt.Errorf("hrm is not connected: %w", ports.ErrorCreateHRMFailed)
+	}
+	r.Lock()
+	delete(r.hrms, hrmid)
+	r.Unlock()
+	return nil
+
+}
+
+func (r *MemoryRepository) Get(hrmId uuid.UUID) (*domain.HRM, error) {
+	if hrm, ok := r.hrms[hrmId]; ok {
 		return &hrm, nil
 	}
 	return &domain.HRM{}, ports.ErrorHRMNotFound
 }
 
 func (r *MemoryRepository) Update(hrm domain.HRM) error {
-	if _, ok := r.hrms[hrm.GetID()]; ok {
+	if _, ok := r.hrms[hrm.GetID()]; !ok {
 		return fmt.Errorf("hrm does not exist: %w", ports.ErrorUpdateHRMFailed)
 	}
 	r.Lock()
 	r.hrms[hrm.GetID()] = hrm
 	r.Unlock()
 	return nil
+}
+
+func (r *MemoryRepository) List() ([]*domain.HRM, error) {
+	if r.hrms == nil {
+		// If r.workouts is nil, return an error or handle the case accordingly
+		return nil, fmt.Errorf("hrms map doesn't exit %w", ports.ErrorListHRMSFailed)
+	}
+	hrms := make([]*domain.HRM, 0, len(r.hrms))
+	for _, hrm := range r.hrms {
+		hrms = append(hrms, &hrm)
+	}
+	return hrms, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"sync"
 
 	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/handler"
 	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/repository"
@@ -30,19 +31,29 @@ func main() {
 		store := repository.NewMemoryRepository()
 		svc = services.NewHRMService(store)
 	}
+	var wg sync.WaitGroup
+	wg.Add(2)
 
+	go InitRabbitMQ(&wg)
+	go svc.SendHRM(&wg)
 	InitRoutes()
 
+	wg.Wait()
+}
+
+func InitRabbitMQ(wg *sync.WaitGroup) {
+
+	defer wg.Done()
+
+	handler.HRMWorkoutBinder(*svc)
 }
 
 func InitRoutes() {
 	router := gin.Default()
 	handler := handler.NewHTTPHandler(*svc)
-	router.GET("/hrms", handler.ListHRM)
-	router.POST("/hrm", handler.CreateHRM)
-	router.GET("/hrms/:id", handler.GetHRM)
+	router.POST("/hrms", handler.ConnectHRM)
 	// TODO: Implement when needed
 	// router.PUT("/player", handler.UpdatePlayer)
-	router.Run(":8000")
+	router.Run(":8004")
 
 }
