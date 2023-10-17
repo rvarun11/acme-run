@@ -53,7 +53,7 @@ func NewHRM(hrm HRM) (HRM, error) {
 		HRMId:     hrm.HRMId,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
-		Status:    "connected"
+		Status:    "connected",
 	}
 	return hrmN, nil
 }
