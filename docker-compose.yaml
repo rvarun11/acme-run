@@ -12,7 +12,7 @@ services:
     build: ../player
     ports:
       - "8000:8000"
-hrm:
+  hrm:
     container_name: player
     build: ../player
     ports:
