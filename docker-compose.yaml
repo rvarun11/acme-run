@@ -7,27 +7,41 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
   player:
     container_name: player
     build: ./player
     ports:
      - "8000:8000"
-    depends_on:
-     - rabbitmq
+
   hrm:
     container_name: hrm
     build: ./hrm
     ports:
       - "8004:8004"
     depends_on:
-      - rabbitmq
-      - player
+      rabbitmq:
+        condition: service_healthy
+      player:
+        condition: service_started
+      
   workout:
     container_name: workout
     build: ./workout
     ports:
       - "8001:8001"
     depends_on:
-      - rabbitmq
-      - player
-      - hrm
+      rabbitmq:
+        condition: service_healthy
+      hrm:
+        condition: service_started
+      player:
+        condition: service_started
+      
+      
+      

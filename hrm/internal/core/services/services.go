@@ -55,7 +55,7 @@ func (s *HRMService) BindHRMtoWorkout(hrmID uuid.UUID, workoutID uuid.UUID) {
 func (s *HRMService) SendHRM(wg *sync.WaitGroup) {
 	defer wg.Done()
 
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
