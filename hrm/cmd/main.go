@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/handler"
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/adapters/repository"
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/adapters/handler"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/adapters/repository"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/services"
 	"github.com/gin-gonic/gin"
 )
 

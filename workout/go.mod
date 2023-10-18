@@ -1,4 +1,4 @@
-module github.com/CAS735-F23/macrun-teamvs_/workout
+module github.com/CAS735-F23/macrun-teamvsl/workout
 
 go 1.21.1
 

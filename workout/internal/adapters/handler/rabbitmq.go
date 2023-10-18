@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )

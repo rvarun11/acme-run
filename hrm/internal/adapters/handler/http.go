@@ -3,7 +3,7 @@ package handler
 import (
 	"net/http"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/services"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"

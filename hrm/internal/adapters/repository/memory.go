@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/ports"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/domain"
 
 	"github.com/google/uuid"
 )

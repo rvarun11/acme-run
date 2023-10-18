@@ -1,4 +1,4 @@
-module github.com/CAS735-F23/macrun-teamvs_/hrm
+module github.com/CAS735-F23/macrun-teamvsl/hrm
 
 go 1.21.1
 

@@ -10,10 +10,10 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/ports"
 	"github.com/google/uuid"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/domain"
 )
 
 func failOnError(err error, msg string) {
