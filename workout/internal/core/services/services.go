@@ -1,10 +1,10 @@
 package services
 
 import (
-	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/ports"
+	"time"
 
-	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/domain"
-
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/ports"
 	"github.com/google/uuid"
 )
 
@@ -31,7 +31,9 @@ func (s *WorkoutService) Get(id uuid.UUID) (*domain.Workout, error) {
 func (s *WorkoutService) Start(workout domain.Workout) error {
 	// this will create the workout
 	// Send request Get HRM
-	return s.repo.Create(workout)
+	var temp = s.repo.Create(workout)
+
+	return temp
 }
 
 func (s *WorkoutService) Pause(id uuid.UUID) (*domain.Workout, error) {
@@ -41,5 +43,33 @@ func (s *WorkoutService) Pause(id uuid.UUID) (*domain.Workout, error) {
 
 func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	// Call Update() to update InProgress to False & EndedAt to time.Now()
-	return s.repo.Get(id)
+	var tempWorkout *domain.Workout
+	var err error
+	tempWorkout, err = s.repo.Get(id)
+
+	// TODO: Better error handling
+	if err != nil {
+		return nil, err
+	}
+	// TODO: More logic to find distance covered and other things
+	tempWorkout.EndedAt = time.Now()
+	tempWorkout.IsCompleted = true
+
+	s.repo.Update(*tempWorkout)
+
+	return tempWorkout, err
+}
+
+func (s *WorkoutService) UpdateHRValue(workoutID uuid.UUID, hrValue uint16) error {
+	var tempWorkout *domain.Workout
+	var err error
+	tempWorkout, err = s.Get(workoutID)
+
+	if err != nil {
+		return nil
+	}
+
+	tempWorkout.HeartRate = append(tempWorkout.HeartRate, hrValue)
+	s.repo.Update(*tempWorkout)
+	return nil
 }

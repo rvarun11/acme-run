@@ -1,10 +1,11 @@
-module github.com/CAS735-F23/macrun-teamvs_
+module github.com/CAS735-F23/macrun-teamvsl/hrm
 
 go 1.21.1
 
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/uuid v1.3.1
+	github.com/rabbitmq/amqp091-go v1.9.0
 )
 
 require (

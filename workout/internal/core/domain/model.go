@@ -17,23 +17,24 @@ type Workout struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
 	ID uuid.UUID `json:"id"`
 	// trailId is the id of the trail player is on
-	TrailID uuid.UUID `json:"trailID"`
+	TrailID uuid.UUID `json:"trail_id"`
 	// PlayerID of the player starting the workout session
-	PlayerID uuid.UUID `json:"playerID"`
+	PlayerID uuid.UUID `json:"player_id"`
 	// InProgress tells whether the workout is in progress
-	InProgress bool `json:"IsProgress"`
+	IsCompleted bool `json:"is_completed"`
 	// CreatedAt is the time when the workout was started/created at?
 	CreatedAt time.Time `json:"created_at"`
 	// Duration of the workout, TODO: fix type
-	EndedAt string `json:"ended_at"`
+	EndedAt time.Time `json:"ended_at"`
 	// DurationCovered is the total distance covered during the session
-	DistanceCovered float64 `json:"DistancCovered"`
+	DistanceCovered float64 `json:"distance_covered"`
 	// TODO: temp value. It can be either "cardio", "physical" or "dynamic"
 	Category string `json:"category"`
 	// HardcoreMode is the difficulty level chosen by the player
 	HardcoreMode bool `json:"HardcoreMode"`
 	//  HRM Reading from the workout
-	// heartRate []valueobject.HeartRate
+	// TODO: HeartRate should be a valueobject of hrmValue + created_at
+	HeartRate []uint16
 }
 
 func NewWorkout(w Workout) (Workout, error) {
@@ -46,11 +47,12 @@ func NewWorkout(w Workout) (Workout, error) {
 		PlayerID:        w.PlayerID,
 		TrailID:         w.TrailID,
 		Category:        w.Category,
-		InProgress:      true,
+		IsCompleted:     false,
 		HardcoreMode:    w.HardcoreMode,
 		CreatedAt:       time.Now(),
-		EndedAt:         "",
+		EndedAt:         time.Time{},
 		DistanceCovered: 0,
+		HeartRate:       []uint16{},
 		// heartRates:      make([]valueobject.HeartRate, 0),
 	}, nil
 }

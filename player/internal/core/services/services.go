@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/ports"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
 
 	"github.com/google/uuid"
 )

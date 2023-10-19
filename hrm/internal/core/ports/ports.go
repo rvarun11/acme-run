@@ -3,7 +3,8 @@ package ports
 import (
 	"errors"
 
-	"github.com/CAS735-F23/macrun-teamvs_/hrm/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/domain"
+	"github.com/google/uuid"
 )
 
 var (
@@ -14,15 +15,17 @@ var (
 )
 
 type HRMService interface {
-	List() ([]*domain.HRM, error)
-	Get(id string) (*domain.HRM, error)
-	Create(hrm domain.HRM) error
-	Update(hrm domain.HRM) (*domain.HRM, error)
+	ConnectHRM(HRMId uuid.UUID) error
+	DisconnectHRM(HRMId uuid.UUID) error
+	BindHRMtoWorkout(HRMId uuid.UUID, workout uuid.UUID)
+	Get(hrmId uuid.UUID) (*domain.HRM, error)
+	SendHRM()
 }
 
 type HRMRepository interface {
-	List() ([]*domain.HRM, error)
-	Create(hrm domain.HRM) error
-	Get(id string) (*domain.HRM, error)
+	AddHRMIntance(hrm domain.HRM) error
+	DeleteHRMInstance(hrmId uuid.UUID) error
+	Get(hrmID uuid.UUID) (*domain.HRM, error)
 	Update(hrm domain.HRM) error
+	List() ([]*domain.HRM, error)
 }

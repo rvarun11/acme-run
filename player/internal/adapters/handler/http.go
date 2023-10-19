@@ -3,9 +3,9 @@ package handler
 import (
 	"net/http"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/services"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

@@ -4,9 +4,9 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/adapters/handler"
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/adapters/repository"
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/adapters/handler"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/adapters/repository"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/services"
 	"github.com/gin-gonic/gin"
 )
 

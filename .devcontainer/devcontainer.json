@@ -1,7 +1,7 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/go
 {
-	"name": "macrun-teamvs_",
+	"name": "macrun-teamvsl",
 	// "build": {
 		// "dockerfile": "Dockerfile"
 	// },
@@ -10,17 +10,19 @@
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
-    	"ghcr.io/devcontainers/features/common-utils:2": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
 			"configureZshAsDefaultShell": true
+		},
+		"ghcr.io/itsmechlark/features/rabbitmq-server:1" : {
 		}
 		// "ghcr.io/devcontainers-contrib/features/protoc:1": {}
 	},
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
-	"forwardPorts": [8000, "8000:8000"],
+	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "bash ./.devcontainer/install.sh",
+	"postCreateCommand": "sudo rabbitmq-plugins enable rabbitmq_management",
 
 	// Configure tool-specific properties.
 	"customizations": {

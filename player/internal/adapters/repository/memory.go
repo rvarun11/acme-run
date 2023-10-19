@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/ports"
 
-	"github.com/CAS735-F23/macrun-teamvs_/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
 
 	"github.com/google/uuid"
 )
@@ -59,7 +59,7 @@ func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.Player, error) {
 }
 
 func (r *MemoryRepository) Update(player domain.Player) error {
-	if _, ok := r.players[player.GetID()]; ok {
+	if _, ok := r.players[player.GetID()]; !ok {
 		return fmt.Errorf("player does not exist: %w", ports.ErrorUpdatePlayerFailed)
 	}
 	r.Lock()

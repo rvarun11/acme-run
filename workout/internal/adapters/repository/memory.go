@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/ports"
 
-	"github.com/CAS735-F23/macrun-teamvs_/workout/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 
 	"github.com/google/uuid"
 )
@@ -59,7 +59,7 @@ func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.Workout, error) {
 }
 
 func (r *MemoryRepository) Update(workout domain.Workout) error {
-	if _, ok := r.workouts[workout.GetID()]; ok {
+	if _, ok := r.workouts[workout.GetID()]; !ok {
 		return fmt.Errorf("workout does not exist: %w", ports.ErrorUpdateWorkoutFailed)
 	}
 	r.Lock()
