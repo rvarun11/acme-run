@@ -24,17 +24,22 @@ services:
     build: ./hrm
     ports:
       - "8004:8004"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      #- POSTGRES_URL=postgres://postgres:postgres@postgres:5432/postgres
     depends_on:
       rabbitmq:
         condition: service_healthy
       player:
         condition: service_started
-      
+
   workout:
     container_name: workout
     build: ./workout
     ports:
       - "8001:8001"
+    environment:
+      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -42,6 +47,3 @@ services:
         condition: service_started
       player:
         condition: service_started
-      
-      
-      

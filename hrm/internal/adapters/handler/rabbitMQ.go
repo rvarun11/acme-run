@@ -15,8 +15,8 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func HRMWorkoutBinder(svc services.HRMService) {
-	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq/")
+func HRMWorkoutBinder(svc services.HRMService, url string) {
+	conn, err := amqp.Dial(url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 

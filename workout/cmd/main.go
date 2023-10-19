@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/handler"
@@ -41,10 +42,9 @@ func main() {
 }
 
 func InitRabbitMQ(wg *sync.WaitGroup) {
-
 	defer wg.Done()
-
-	handler.HRMSubscriber(*svc)
+	cfg := NewConfig()
+	handler.HRMSubscriber(*svc, cfg.RABBITMQ_URL)
 }
 
 func InitRoutes() {
@@ -59,4 +59,22 @@ func InitRoutes() {
 	// router.POST("/player", handler.UpdatePlayer)
 	router.Run(":8001")
 
+}
+
+// TODO: Handle service configurations properly
+type Config struct {
+	RABBITMQ_URL string
+}
+
+func NewConfig() Config {
+	return Config{
+		RABBITMQ_URL: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
+	}
+}
+
+func getEnv(key, defaultValue string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return defaultValue
 }

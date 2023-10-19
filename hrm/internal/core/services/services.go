@@ -16,15 +16,12 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/domain"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
+
 
 type HRMService struct {
 	repo ports.HRMRepository
 }
+
 
 func NewHRMService(repo ports.HRMRepository) *HRMService {
 	return &HRMService{
@@ -110,4 +107,10 @@ func (s *HRMService) SendHRM(wg *sync.WaitGroup) {
 		time.Sleep(5 * time.Second)
 	}
 
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Panicf("%s: %s", msg, err)
+	}
 }
