@@ -1,0 +1,297 @@
+{
+	"info": {
+		"_postman_id": "9d58d4fc-4c61-4f41-9944-6d29c3b2cd9e",
+		"name": "MacRun - Liuyin, Samkith, Varun",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14312203",
+		"_collection_link": "https://winter-satellite-393249.postman.co/workspace/cas-735~2906f288-5f3e-4839-8f70-f7f36274cd09/collection/14312203-9d58d4fc-4c61-4f41-9944-6d29c3b2cd9e?action=share&source=collection_link&creator=14312203"
+	},
+	"item": [
+		{
+			"name": "Player Service",
+			"item": [
+				{
+					"name": "Create Player",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const playerId = responseJson.id;",
+									"",
+									"pm.collectionVariables.set('playerId', playerId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"user\": {\n        \"name\": \"Player1\",\n        \"email\": \"player1@gmail.com\",\n        \"dob\": \"1998-07-19\"\n    },\n    \"height\": 175,\n    \"weight\": 80,\n    \"geographicalZone\": \"McMaster University\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8000/player",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"player"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Players",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/players",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"players"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Player",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8000/players/{{playerId}}",
+							"host": [
+								"localhost"
+							],
+							"port": "8000",
+							"path": [
+								"players",
+								"{{playerId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "HRM Service",
+			"item": [
+				{
+					"name": "Connect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8004/hrms",
+							"host": [
+								"localhost"
+							],
+							"port": "8004",
+							"path": [
+								"hrms"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8004/hrms",
+							"host": [
+								"localhost"
+							],
+							"port": "8004",
+							"path": [
+								"hrms"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "WorkoutService",
+			"item": [
+				{
+					"name": "Start Work Out",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trailID\":\"{{trailId}}\",\n    \"playerID\":\"{{playerId}}\",\n    \"hrmConnected\":true,\n    \"hrmID\":\"{{hrmId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8001/workout",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Workouts",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8001/workouts",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"workouts"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Work Out",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workoutID\": \"4bbb5ae9-d7c4-4a24-8264-be12a2d8b5b5\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8001/workout",
+							"host": [
+								"localhost"
+							],
+							"port": "8001",
+							"path": [
+								"workout"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "playerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "hrmId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "trailId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workoutId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

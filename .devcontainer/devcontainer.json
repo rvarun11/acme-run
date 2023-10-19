@@ -10,7 +10,7 @@
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
-    	"ghcr.io/devcontainers/features/common-utils:2": {
+		"ghcr.io/devcontainers/features/common-utils:2": {
 			"configureZshAsDefaultShell": true
 		},
 		"ghcr.io/itsmechlark/features/rabbitmq-server:1" : {

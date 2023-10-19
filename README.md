@@ -1,1 +1,35 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/I8UeB_vA)
+# ACME RUN - Liuyin, Samkith, Varun
+
+Welcome to our implementation of ACME RUN, a collaborative project developed by Liuyin, Samkith, and Varun as part of CAS 735 (Fall 2023).
+
+## Installation
+
+1. Clone the Repository:
+```bash
+git clone https://github.com/CAS735-F23/macrun-teamvsl.git
+cd macrun-teamvsl
+```
+
+2. Run Docker Compose
+```bash
+docker compose up
+```
+
+## Getting Started
+
+Now that you have the project running, follow these steps to get started:
+
+1. **Import Postman Collection**:
+- Import the provided Postman Collection into your Postman workspace.
+- The collection includes predefined API requests for ACME RUN.
+
+2. **Run APIs**:
+- Execute the API requests from the top of the Postman Collection.
+- Explore and interact with the various endpoints available in ACME RUN.
+
+
+## Contributors
+
+- Liuyin Shi (shil9@mcmaster.ca)
+- Samkith Jain (kishors@mcmaster.ca)
+- Varun Rajput (rajpuv2@mcmaster.ca)
