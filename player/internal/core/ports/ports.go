@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
-
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/dto"
 	"github.com/google/uuid"
 )
 
@@ -16,16 +16,17 @@ var (
 )
 
 type PlayerService interface {
-	// TODO: I think this place should be able to handle other business functions as well
-	List() ([]*domain.Player, error)
-	Get(id uuid.UUID) (*domain.Player, error)
-	Create(player domain.Player) error
-	Update(player domain.Player) (*domain.Player, error)
+	Register(playerDTO *dto.PlayerDTO) (*dto.PlayerDTO, error)
+	Get(uuid uuid.UUID) (*dto.PlayerDTO, error)
+	// GetByID(email string) (*domain.Player, error)
+	Update(playerDTO *dto.PlayerDTO) (*dto.PlayerDTO, error)
+	List() ([]*dto.PlayerDTO, error)
 }
 
 type PlayerRepository interface {
+	Create(player *domain.Player) (*domain.Player, error)
+	Get(uuid uuid.UUID) (*domain.Player, error)
+	GetByEmail(email string) (*domain.Player, error)
+	Update(player *domain.Player) (*domain.Player, error)
 	List() ([]*domain.Player, error)
-	Create(player domain.Player) error
-	Get(id uuid.UUID) (*domain.Player, error)
-	Update(player domain.Player) error
 }
