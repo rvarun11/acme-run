@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"fmt"
@@ -9,6 +9,34 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
+
+type Repository struct {
+	db *gorm.DB
+}
+
+func NewRepository() *Repository {
+	host := conf.host
+	port := conf.port
+	user := conf.user
+	password := conf.password
+	dbname := conf.dbname
+	encoding := conf.encoding
+
+	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
+		host, port, user, dbname, password, encoding,
+	)
+
+	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	db.AutoMigrate(&postgresUser{}, &postgresPlayer{})
+	// db.Model(&postgresPlayer{}).Association("user_id")
+
+	return &Repository{
+		db: db,
+	}
+}
 
 // Repository Types
 
@@ -39,41 +67,9 @@ type postgresPlayer struct {
 	UpdatedAt time.Time
 }
 
-type PostgresRepository struct {
-	db *gorm.DB
-}
-
-func NewPostgresRepository() *PostgresRepository {
-	host := "localhost"
-	port := "5432"
-	user := "postgres"
-	password := "postgres"
-	dbname := "postgres"
-	encoding := "UTF8"
-
-	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
-		host,
-		port,
-		user,
-		dbname,
-		password,
-		encoding,
-	)
-
-	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-	db.AutoMigrate(&postgresUser{}, &postgresPlayer{})
-	// db.Model(&postgresPlayer{}).Association("user_id")
-
-	return &PostgresRepository{
-		db: db,
-	}
-}
-
 // Repository Functions
-func (r *PostgresRepository) Create(player *domain.Player) (*domain.Player, error) {
+
+func (r *Repository) Create(player *domain.Player) (*domain.Player, error) {
 	pu := &postgresUser{
 		ID:          player.User.ID,
 		Name:        player.User.Name,
@@ -109,7 +105,7 @@ func (r *PostgresRepository) Create(player *domain.Player) (*domain.Player, erro
 	return p, nil
 }
 
-func (r *PostgresRepository) Get(pid uuid.UUID) (*domain.Player, error) {
+func (r *Repository) Get(pid uuid.UUID) (*domain.Player, error) {
 	var pp postgresPlayer
 	var pu postgresUser
 	println(pid.String())
@@ -127,7 +123,7 @@ func (r *PostgresRepository) Get(pid uuid.UUID) (*domain.Player, error) {
 	return player, nil
 }
 
-func (r *PostgresRepository) GetByEmail(email string) (*domain.Player, error) {
+func (r *Repository) GetByEmail(email string) (*domain.Player, error) {
 	var pp postgresPlayer
 	var pu postgresUser
 
@@ -146,7 +142,7 @@ func (r *PostgresRepository) GetByEmail(email string) (*domain.Player, error) {
 	return player, nil
 }
 
-func (r *PostgresRepository) Update(player *domain.Player) (*domain.Player, error) {
+func (r *Repository) Update(player *domain.Player) (*domain.Player, error) {
 	var pu postgresUser
 	var pp postgresPlayer
 	if err := r.db.First(&pu, "id = ?", player.User.ID).Error; err != nil {
@@ -182,7 +178,7 @@ func (r *PostgresRepository) Update(player *domain.Player) (*domain.Player, erro
 	return player, nil
 }
 
-func (r *PostgresRepository) List() ([]*domain.Player, error) {
+func (r *Repository) List() ([]*domain.Player, error) {
 	var playersFromDB []postgresPlayer
 	if err := r.db.Find(&playersFromDB).Error; err != nil {
 		return nil, err
@@ -203,6 +199,7 @@ func (r *PostgresRepository) List() ([]*domain.Player, error) {
 }
 
 // Helper for converting to/from domain model
+
 func toAggregate(pu *postgresUser, pp *postgresPlayer) *domain.Player {
 	return &domain.Player{
 		ID: pp.ID,
@@ -220,7 +217,7 @@ func toAggregate(pu *postgresUser, pp *postgresPlayer) *domain.Player {
 	}
 }
 
-// Might be needed later
+// May be needed later
 // func fromAggregate(player *domain.Player) (*postgresUser, *postgresPlayer) {
 // 	pu := &postgresUser{
 // 		ID:          player.User.ID,
