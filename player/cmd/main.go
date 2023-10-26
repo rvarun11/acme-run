@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/adapters/handler"
-	postgres "github.com/CAS735-F23/macrun-teamvsl/player/internal/adapters/repository"
+	"github.com/CAS735-F23/macrun-teamvsl/player/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/services"
 	"github.com/gin-gonic/gin"
 )
@@ -13,7 +13,7 @@ var svc *services.PlayerService
 
 func main() {
 	fmt.Println("Player Service is running")
-	store := postgres.NewPostgresRepository()
+	store := postgres.NewRepository()
 	svc = services.NewPlayerService(store)
 	InitRoutes()
 }
