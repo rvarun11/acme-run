@@ -8,17 +8,27 @@ import (
 	"github.com/google/uuid"
 )
 
-type Handler struct {
+type ChallengeHandler struct {
+	gin *gin.Engine
 	svc services.ChallengeService
 }
 
-func NewHandler(ChallengeService services.ChallengeService) *Handler {
-	return &Handler{
-		svc: ChallengeService,
+func NewChallengeHandler(gin *gin.Engine, challengeSvc services.ChallengeService) *ChallengeHandler {
+	return &ChallengeHandler{
+		gin: gin,
+		svc: challengeSvc,
 	}
 }
 
-func (h *Handler) CreateChallenge(ctx *gin.Context) {
+func (h *ChallengeHandler) InitRouter() {
+	router := h.gin.Group("/api/v1")
+	router.POST("/challenges", h.createChallenge)
+	router.GET("/challenges/:id", h.getChallengeByID)
+	router.PUT("/challenges", h.updateChallenge)
+	router.GET("/challenges", h.listChallenges)
+}
+
+func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	var req challengeDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -41,7 +51,7 @@ func (h *Handler) CreateChallenge(ctx *gin.Context) {
 	})
 }
 
-func (h *Handler) GetChallengeByID(ctx *gin.Context) {
+func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 	cid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -60,7 +70,7 @@ func (h *Handler) GetChallengeByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-func (h *Handler) UpdateChallenge(ctx *gin.Context) {
+func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	var req *challengeDTO
 	if err := ctx.ShouldBindJSON(req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -85,8 +95,9 @@ func (h *Handler) UpdateChallenge(ctx *gin.Context) {
 	})
 }
 
-func (h *Handler) ListChallenges(ctx *gin.Context) {
-	chs, err := h.svc.List()
+func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
+	status := ctx.Query("status")
+	chs, err := h.svc.List(status)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,

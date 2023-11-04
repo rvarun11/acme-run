@@ -1,38 +1,32 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/adapters/handler/http"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
+	log "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
 	"github.com/gin-gonic/gin"
 )
 
-var svc *services.ChallengeService
-
 func main() {
-	fmt.Println("Challenge Service is running")
+	log.Info("Challenge Manager is starting")
+	// Initialize router
+	router := gin.New()
+	router.Use(gin.Recovery())
+
+	// Initialize postgres repository
 	store := postgres.NewRepository()
-	svc = services.NewChallengeService(store)
-	InitRoutes()
-}
 
-func InitRoutes() {
-	router := gin.Default()
-	handler := http.NewHandler(*svc)
+	// Initialize Challenge Manager
+	challengeSvc := services.NewChallengeService(store)
+	challengeHandler := http.NewChallengeHandler(router, *challengeSvc)
+	challengeHandler.InitRouter()
 
-	// Challenge Routes
-	router.POST("/challenges", handler.CreateChallenge)
-	router.GET("/challenges/:id", handler.GetChallengeByID)
-	router.PUT("/challenges", handler.UpdateChallenge)
-	router.GET("/challenges", handler.ListChallenges)
-	// router.GET("/challenges", handler.ListActiveChallenges)
+	// Initialize Badge Manager
+	// badgeSvc := services.NewBadgeService(store)
+	// badgeHandler := http.NewBadgeHandler(router, *badgeSvc)
+	// badgeHandler.InitRouter()
 
-	// Badge Routes
-	// router.POST("/player", handler.CreateAdmin)
-	// router.GET("/players/:id", handler.GetAdmin)
-	// router.PUT("/player", handler.UpdateAdmin)
-	// router.GET("/players", handler.ListPlayers)
+	// Start Server
 	router.Run(":8001")
 }

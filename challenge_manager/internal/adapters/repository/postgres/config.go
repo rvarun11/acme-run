@@ -1,12 +1,12 @@
 package postgres
 
-import "os"
+import "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 
 // Repository Config
 
-var conf config
+var conf *postgresConfig
 
-type config struct {
+type postgresConfig struct {
 	host     string
 	port     string
 	user     string
@@ -19,20 +19,13 @@ func init() {
 	conf = newConfig()
 }
 
-func newConfig() config {
-	return config{
-		host:     getEnv("POSTGRES_HOSTNAME", "localhost"),
-		port:     getEnv("POSTGRES_PORT", "5432"),
-		user:     getEnv("POSTGRES_USER", "postgres"),
-		password: getEnv("POSTGRES_PASSWORD", "postgres"),
-		dbname:   getEnv("POSTGRES_DB", "postgres"),
-		encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
+func newConfig() *postgresConfig {
+	return &postgresConfig{
+		host:     config.GetEnv("POSTGRES_HOSTNAME", "localhost"),
+		port:     config.GetEnv("POSTGRES_PORT", "5432"),
+		user:     config.GetEnv("POSTGRES_USER", "postgres"),
+		password: config.GetEnv("POSTGRES_PASSWORD", "postgres"),
+		dbname:   config.GetEnv("POSTGRES_DB", "postgres"),
+		encoding: config.GetEnv("POSTGRES_ENCODING", "UTF8"),
 	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
 }

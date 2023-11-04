@@ -10,12 +10,15 @@ type Badge struct {
 	ID          uuid.UUID
 	ChallengeID uuid.UUID
 	PlayerID    uuid.UUID
-	CompletedOn time.Time
+	CreatedAt   time.Time
 	// score is the total score obtained by the player when completing the challenge
 	Score float32
 }
 
 func NewBadge(pid uuid.UUID, ch *Challenge, score float32) (*Badge, error) {
+	if !ch.IsActive() {
+		return &Badge{}, ErrorChallengeInactive
+	}
 	err := ch.ValidateScore(score)
 	if err != nil {
 		return &Badge{}, err
@@ -24,7 +27,7 @@ func NewBadge(pid uuid.UUID, ch *Challenge, score float32) (*Badge, error) {
 		ID:          uuid.New(),
 		ChallengeID: ch.ID,
 		PlayerID:    pid,
-		CompletedOn: time.Now(),
+		CreatedAt:   time.Now(),
 		Score:       score,
 	}, nil
 }

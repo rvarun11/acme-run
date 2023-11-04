@@ -19,7 +19,10 @@ This service is supposed to be called by:
 	i) When workout sessions starts, it should send the total stats of the player, enemies fought
 */
 
-var ErrorInvalidCriteria = errors.New("criteria can only be DistanceCovered, Escape, Fight, FightMoreThanEscape or EscapeMoreThanFight")
+var (
+	ErrorInvalidCriteria   = errors.New("criteria can only be DistanceCovered, Escape, Fight, FightMoreThanEscape or EscapeMoreThanFight")
+	ErrorChallengeInactive = errors.New("cannot create a badge as challenge is inactive")
+)
 
 type Criteria string
 
