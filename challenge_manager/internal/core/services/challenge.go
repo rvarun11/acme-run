@@ -50,11 +50,48 @@ func (svc *ChallengeService) Update(req *domain.Challenge) (*domain.Challenge, e
 	return ch, nil
 }
 
-func (svc *ChallengeService) List() ([]*domain.Challenge, error) {
+func (svc *ChallengeService) List(status string) ([]*domain.Challenge, error) {
 	chs, err := svc.repo.List()
 	if err != nil {
 		return []*domain.Challenge{}, err
 	}
 
+	if status == "active" {
+		var activeChs []*domain.Challenge
+		for _, ch := range chs {
+			if ch.IsActive() {
+				activeChs = append(activeChs, ch)
+			}
+		}
+		return activeChs, nil
+	}
+
 	return chs, nil
+}
+
+func (svc *ChallengeService) CreateBadge(pid uuid.UUID, ch *domain.Challenge, score float32) (*domain.Badge, error) {
+	b, err := domain.NewBadge(pid, ch, score)
+	if err != nil {
+		return &domain.Badge{}, err
+	}
+	badge, err := svc.repo.CreateBadge(b)
+	if err != nil {
+		return &domain.Badge{}, err
+	}
+
+	return badge, nil
+}
+
+// This should be part of the Badge Service
+func (svc *ChallengeService) X(pid uuid.UUID, ch *domain.Challenge, score float32) (*domain.Badge, error) {
+	// b, err := domain.NewBadge(pid, ch, score)
+	// if err != nil {
+	// 	return &domain.Badge{}, err
+	// }
+	// badge, err := svc.repo.CreateBadge(b)
+	// if err != nil {
+	// 	return &domain.Badge{}, err
+	// }
+
+	return &domain.Badge{}, nil
 }

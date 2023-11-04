@@ -1,10 +1,35 @@
 package amqp
 
-import "os"
+import config "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 
-var conf config
+var conf *rabbitmqConfig
 
-type config struct {
+const (
+	exchangeKind       = "direct"
+	exchangeDurable    = true
+	exchangeAutoDelete = false
+	exchangeInternal   = false
+	exchangeNoWait     = false
+
+	queueDurable    = true
+	queueAutoDelete = false
+	queueExclusive  = false
+	queueNoWait     = false
+
+	// publishMandatory = false
+	// publishImmediate = false
+
+	prefetchCount  = 1
+	prefetchSize   = 0
+	prefetchGlobal = false
+
+	consumeAutoAck   = false
+	consumeExclusive = false
+	consumeNoLocal   = false
+	consumeNoWait    = false
+)
+
+type rabbitmqConfig struct {
 	host     string
 	port     string
 	user     string
@@ -15,18 +40,11 @@ func init() {
 	conf = newConfig()
 }
 
-func newConfig() config {
-	return config{
-		host:     getEnv("RABBITMQ_HOSTNAME", "localhost"),
-		port:     getEnv("RABBITMQ_PORT", "5432"),
-		user:     getEnv("RABBITMQ_USER", "guest"),
-		password: getEnv("RABBITMQ_PASSWORD", "guest"),
+func newConfig() *rabbitmqConfig {
+	return &rabbitmqConfig{
+		host:     config.GetEnv("RABBITMQ_HOSTNAME", "localhost"),
+		port:     config.GetEnv("RABBITMQ_PORT", "5432"),
+		user:     config.GetEnv("RABBITMQ_USER", "guest"),
+		password: config.GetEnv("RABBITMQ_PASSWORD", "guest"),
 	}
-}
-
-func getEnv(key, defaultValue string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-	return defaultValue
 }

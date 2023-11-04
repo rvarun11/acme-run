@@ -30,7 +30,7 @@ func NewRepository() *Repository {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&postgresChallenge{})
+	db.AutoMigrate(&postgresChallenge{}, &postgresBadge{})
 
 	return &Repository{
 		db: db,
@@ -50,6 +50,13 @@ type postgresChallenge struct {
 	CreatedAt   time.Time
 }
 
+type postgresBadge struct {
+	ID          uuid.UUID `gorm:"type:uuid;primary_key"`
+	PlayerID    uuid.UUID `gorm:"not null"`
+	ChallengeID uuid.UUID `gorm:"not null"`
+	CreatedAt   time.Time
+}
+
 // Repository Functions
 
 func (r *Repository) Create(ch *domain.Challenge) (*domain.Challenge, error) {
@@ -60,7 +67,7 @@ func (r *Repository) Create(ch *domain.Challenge) (*domain.Challenge, error) {
 		BadgeURL:    ch.BadgeURL,
 		Criteria:    string(ch.Criteria),
 		Goal:        ch.Goal,
-		CreatedAt:   time.Now(),
+		CreatedAt:   ch.CreatedAt,
 	}
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -115,6 +122,81 @@ func (r *Repository) Update(req *domain.Challenge) (*domain.Challenge, error) {
 	return ch, nil
 }
 
+func (r *Repository) List() ([]*domain.Challenge, error) {
+	var challengesFromDB []postgresChallenge
+	if err := r.db.Find(&challengesFromDB).Error; err != nil {
+		return nil, err
+	}
+
+	var chs []*domain.Challenge
+	for _, pc := range challengesFromDB {
+
+		ch := toAggregate(&pc)
+		chs = append(chs, ch)
+	}
+
+	return chs, nil
+}
+
+// Badge Service - might be in separate file
+
+func (r *Repository) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error) {
+	var challengesFromDB []postgresChallenge
+	// TODO: THIS MAY NOT WORK
+	if err := r.db.Where("player_id = ?", pid).Find(&challengesFromDB).Error; err != nil {
+		print("this failed as expected")
+		return nil, err
+	}
+
+	var chs []*domain.Challenge
+	for _, pc := range challengesFromDB {
+
+		ch := toAggregate(&pc)
+		chs = append(chs, ch)
+	}
+
+	return chs, nil
+}
+
+func (r *Repository) CreateBadge(b *domain.Badge) (*domain.Badge, error) {
+	pb := &postgresBadge{
+		ID:          b.ID,
+		PlayerID:    b.PlayerID,
+		ChallengeID: b.ChallengeID,
+		CreatedAt:   b.CreatedAt,
+	}
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&pb).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return &domain.Badge{}, err
+	}
+
+	badge := toBadgeAggregate(pb)
+
+	return badge, nil
+}
+
+func (r *Repository) ListBadges() ([]*domain.Badge, error) {
+	var badgesFromDB []postgresBadge
+	if err := r.db.Find(&badgesFromDB).Error; err != nil {
+		return nil, err
+	}
+
+	var badges []*domain.Badge
+	for _, pb := range badgesFromDB {
+
+		b := toBadgeAggregate(&pb)
+		badges = append(badges, b)
+	}
+
+	return badges, nil
+}
+
 // Helper for converting to/from domain model
 func toAggregate(pc *postgresChallenge) *domain.Challenge {
 	return &domain.Challenge{
@@ -130,18 +212,12 @@ func toAggregate(pc *postgresChallenge) *domain.Challenge {
 	}
 }
 
-func (r *Repository) List() ([]*domain.Challenge, error) {
-	var challengesFromDB []postgresChallenge
-	if err := r.db.Find(&challengesFromDB).Error; err != nil {
-		return nil, err
+// TODO: Might require renaming to match Challenge Aggregate fn
+func toBadgeAggregate(pb *postgresBadge) *domain.Badge {
+	return &domain.Badge{
+		ID:          pb.ID,
+		PlayerID:    pb.PlayerID,
+		ChallengeID: pb.ChallengeID,
+		CreatedAt:   pb.CreatedAt,
 	}
-
-	var chs []*domain.Challenge
-	for _, pc := range challengesFromDB {
-
-		ch := toAggregate(&pc)
-		chs = append(chs, ch)
-	}
-
-	return chs, nil
 }

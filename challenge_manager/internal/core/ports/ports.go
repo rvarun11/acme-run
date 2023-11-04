@@ -18,7 +18,7 @@ type ChallengeService interface {
 	Create(ch *domain.Challenge) (*domain.Challenge, error)
 	GetByID(cid uuid.UUID) (*domain.Challenge, error)
 	Update(ch *domain.Challenge) (*domain.Challenge, error)
-	List() ([]*domain.Challenge, error)
+	List(status string) ([]*domain.Challenge, error)
 }
 
 type ChallengeRepository interface {
@@ -26,6 +26,7 @@ type ChallengeRepository interface {
 	GetByID(cid uuid.UUID) (*domain.Challenge, error)
 	Update(ch *domain.Challenge) (*domain.Challenge, error)
 	List() ([]*domain.Challenge, error)
+	CreateBadge(b *domain.Badge) (*domain.Badge, error)
 }
 
 // // // TODO: To be named properly
