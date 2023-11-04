@@ -12,7 +12,6 @@ var (
 )
 
 func init() {
-	// to add prod config, refer to, https://stackoverflow.com/questions/57745017/how-to-initialize-a-zap-logger-once-and-reuse-it-in-other-go-files
 	var err error
 	if cfg.Mode == "production" {
 		config := zap.NewProductionConfig()
