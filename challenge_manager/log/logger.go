@@ -1,20 +1,35 @@
 package logger
 
 import (
+	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var zapLog *zap.Logger
+var (
+	cfg    config.AppConfiguration
+	zapLog *zap.Logger
+)
 
 func init() {
 	// to add prod config, refer to, https://stackoverflow.com/questions/57745017/how-to-initialize-a-zap-logger-once-and-reuse-it-in-other-go-files
 	var err error
-	config := zap.NewDevelopmentConfig()
-	config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
-	config.EncoderConfig.TimeKey = "timestamp"
-	config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-	zapLog, err = config.Build()
+	if cfg.Mode == "production" {
+		config := zap.NewProductionConfig()
+		enccoderConfig := zap.NewProductionEncoderConfig()
+		zapcore.TimeEncoderOfLayout("Jan _2 15:04:05.000000000")
+		enccoderConfig.StacktraceKey = "" // to hide stacktrace info
+		config.EncoderConfig = enccoderConfig
+
+		zapLog, err = config.Build(zap.AddCallerSkip(1))
+	} else {
+		config := zap.NewDevelopmentConfig()
+		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
+		config.EncoderConfig.TimeKey = "timestamp"
+		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+		zapLog, err = config.Build()
+	}
+
 	if err != nil {
 		panic(err)
 	}
