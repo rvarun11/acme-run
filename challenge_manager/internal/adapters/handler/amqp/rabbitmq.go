@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -18,14 +19,39 @@ type workoutDTO struct {
 	EnemiesEscaped   uint8     `json:"enemies_escaped"`
 }
 
+const (
+	exchangeKind       = "direct"
+	exchangeDurable    = true
+	exchangeAutoDelete = false
+	exchangeInternal   = false
+	exchangeNoWait     = false
+
+	queueDurable    = true
+	queueAutoDelete = false
+	queueExclusive  = false
+	queueNoWait     = false
+
+	// publishMandatory = false
+	// publishImmediate = false
+
+	prefetchCount  = 1
+	prefetchSize   = 0
+	prefetchGlobal = false
+
+	consumeAutoAck   = false
+	consumeExclusive = false
+	consumeNoLocal   = false
+	consumeNoWait    = false
+)
+
 // Initialize new RabbitMQ connection
-func NewConnection() (*amqp.Connection, error) {
+func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
-		conf.user,
-		conf.password,
-		conf.host,
-		conf.port,
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
 	)
 	mq, err := amqp.Dial(conn)
 	if err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
@@ -14,16 +15,15 @@ type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() *Repository {
-	host := conf.host
-	port := conf.port
-	user := conf.user
-	password := conf.password
-	dbname := conf.dbname
-	encoding := conf.encoding
+func NewRepository(cfg *config.Postgres) *Repository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
-		host, port, user, dbname, password, encoding,
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.DB_Name,
+		cfg.Password,
+		cfg.Encoding,
 	)
 
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
