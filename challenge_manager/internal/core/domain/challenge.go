@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -92,11 +91,4 @@ func ValidateCriteria(c Criteria) error {
 	default:
 		return ErrorInvalidCriteria
 	}
-}
-
-func (ch *Challenge) ValidateScore(score float32) error {
-	if ch.Goal > score {
-		return fmt.Errorf("score required %f, got %f", ch.Goal, score)
-	}
-	return nil
 }

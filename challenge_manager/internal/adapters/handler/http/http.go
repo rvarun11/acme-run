@@ -10,10 +10,10 @@ import (
 
 type ChallengeHandler struct {
 	gin *gin.Engine
-	svc services.ChallengeService
+	svc *services.ChallengeService
 }
 
-func NewChallengeHandler(gin *gin.Engine, challengeSvc services.ChallengeService) *ChallengeHandler {
+func NewChallengeHandler(gin *gin.Engine, challengeSvc *services.ChallengeService) *ChallengeHandler {
 	return &ChallengeHandler{
 		gin: gin,
 		svc: challengeSvc,
@@ -22,11 +22,18 @@ func NewChallengeHandler(gin *gin.Engine, challengeSvc services.ChallengeService
 
 func (h *ChallengeHandler) InitRouter() {
 	router := h.gin.Group("/api/v1")
+
+	// Challenges
 	router.POST("/challenges", h.createChallenge)
 	router.GET("/challenges/:id", h.getChallengeByID)
 	router.PUT("/challenges", h.updateChallenge)
 	router.GET("/challenges", h.listChallenges)
+
+	// Badges: This may end up in a separate handler
+	router.GET("/badges", h.listBadgesByPlayerID)
 }
+
+// Challenges
 
 func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	var req challengeDTO
@@ -36,7 +43,7 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 		})
 		return
 	}
-	ch, err := h.svc.Create(toAggregate(&req))
+	ch, err := h.svc.CreateChallenge(toAggregate(&req))
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -59,7 +66,7 @@ func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 		})
 		return
 	}
-	ch, err := h.svc.GetByID(cid)
+	ch, err := h.svc.GetChallengeByID(cid)
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -79,7 +86,7 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 		return
 	}
 
-	ch, err := h.svc.Update(toAggregate(req))
+	ch, err := h.svc.UpdateChallenge(toAggregate(req))
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -97,7 +104,26 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 
 func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
 	status := ctx.Query("status")
-	chs, err := h.svc.List(status)
+	chs, err := h.svc.ListChallenges(status)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, chs)
+}
+
+// Badges
+func (h *ChallengeHandler) listBadgesByPlayerID(ctx *gin.Context) {
+	pid, err := uuid.Parse(ctx.Param("player_id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+	chs, err := h.svc.ListBadgesByPlayerID(pid)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,

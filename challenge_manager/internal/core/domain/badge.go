@@ -8,26 +8,27 @@ import (
 
 type Badge struct {
 	ID          uuid.UUID
-	ChallengeID uuid.UUID
 	PlayerID    uuid.UUID
-	CreatedAt   time.Time
+	Challenge   *Challenge
+	CompletedOn time.Time
 	// score is the total score obtained by the player when completing the challenge
 	Score float32
 }
 
-func NewBadge(pid uuid.UUID, ch *Challenge, score float32) (*Badge, error) {
-	if !ch.IsActive() {
+func NewBadge(cs *ChallengeStats) (*Badge, error) {
+	if !cs.Challenge.IsActive() {
 		return &Badge{}, ErrorChallengeInactive
 	}
-	err := ch.ValidateScore(score)
+	score, err := cs.GetValidatedScore()
 	if err != nil {
 		return &Badge{}, err
 	}
+
 	return &Badge{
 		ID:          uuid.New(),
-		ChallengeID: ch.ID,
-		PlayerID:    pid,
-		CreatedAt:   time.Now(),
+		Challenge:   cs.Challenge,
+		PlayerID:    cs.PlayerID,
+		CompletedOn: time.Now(),
 		Score:       score,
 	}, nil
 }
