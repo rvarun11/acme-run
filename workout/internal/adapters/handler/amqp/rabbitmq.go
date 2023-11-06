@@ -1,4 +1,4 @@
-package handler
+package amqphandler
 
 import (
 	"context"
@@ -61,7 +61,7 @@ func HRMSubscriber(svc services.WorkoutService, url string) {
 			err = json.Unmarshal(d.Body, &tempDTOVar)
 			// TODO: Ignoring Error for now, Handle Error later
 			// Call the following to get the HR Value updated
-			svc.UpdateHRValue(tempDTOVar.WorkoutID, tempDTOVar.HRValue)
+			//svc.UpdateHRValue(tempDTOVar.WorkoutID, tempDTOVar.HRValue)
 
 		}
 	}()

@@ -2,6 +2,7 @@ package ports
 
 import (
 	"errors"
+	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 
@@ -18,14 +19,42 @@ var (
 type WorkoutService interface {
 	// TODO: List should only return workouts for a particular Player
 	List() ([]*domain.Workout, error)
-	Get(id uuid.UUID) (*domain.Workout, error)
-	Start(workout domain.Workout) error
-	Stop(workout domain.Workout) (*domain.Workout, error)
+	GetWorkout(workoutID uuid.UUID) (*domain.Workout, error)
+
+	StartWorkout(workout domain.Workout) error
+	StopWorkout(workout domain.Workout) (*domain.Workout, error)
+
+	GetWorkoutOptions(workoutID uuid.UUID) (uint8, error)
+	StartWorkoutOption(workoutID uuid.UUID, workoutType uint8) error
+	StopWorkoutOption(workoutID uuid.UUID) error
+
+	GetDistanceById(workoutID uuid.UUID) (float64, error)
+	GetDistanceCoveredBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (float64, error)
+	GetEscapesMadeById(workoutID uuid.UUID) (uint16, error)
+	GetEscapesMadeBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
+	GetFightsFoughtById(workoutID uuid.UUID) (uint16, error)
+	GetFightsFoughtBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
+	GetSheltersTakenById(workoutID uuid.UUID) (uint16, error)
+	GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
 }
 
 type WorkoutRepository interface {
-	List() ([]*domain.Workout, error)
-	Create(workout domain.Workout) error
-	Get(workout uuid.UUID) (*domain.Workout, error)
-	Update(workout domain.Workout) error
+	//List() ([]*domain.Workout, error)
+	Create(workout *domain.Workout, workoutOptions *domain.WorkoutOptions) error
+
+	GetWorkout(workoutID uuid.UUID) (*domain.Workout, error)
+	UpdateWorkout(workout *domain.Workout) (*domain.Workout, error)
+	GetWorkoutOptions(workoutID uuid.UUID) (*domain.WorkoutOptions, error)
+	UpdateWorkoutOptions(workoutOptions *domain.WorkoutOptions) (*domain.WorkoutOptions, error)
+
+	DeleteWorkoutOptions(workoutID uuid.UUID) error
+
+	GetDistanceByID(workoutID uuid.UUID) (float64, error)
+	GetDistanceCoveredBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (float64, error)
+	GetEscapesMadeByID(workoutID uuid.UUID) (uint16, error)
+	GetEscapesMadeBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
+	GetFightsFoughtByID(workoutID uuid.UUID) (uint16, error)
+	GetFightsFoughtBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
+	GetSheltersTakenByID(workoutID uuid.UUID) (uint16, error)
+	GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
 }
