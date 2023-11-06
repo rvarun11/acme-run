@@ -86,7 +86,7 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 	return badge, nil
 }
 
-// This should be part of the Badge Service
+// TODO: This should be part of the Badge Service
 func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) (*domain.Badge, error) {
 	// b, err := domain.NewBadge(pid, ch, score)
 	// if err != nil {
@@ -98,4 +98,18 @@ func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) (*domain.Badge,
 	// }
 
 	return &domain.Badge{}, nil
+}
+
+func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float32, ef uint8, ee uint8) error {
+	_, err := svc.ListChallenges("active")
+	if err != nil {
+		return err
+	}
+	// for _, ch := range activeChs {
+	// // 1. If the (PlayerID, ChallengeID) already exists in ChallengeStats, then incremement,
+	// // do db check here
+	// // 2. otherwise create new cs and add to DB
+	// 	// cs := domain.NewChallengeStats(ch, pid, dc, ef, ee)
+	// }
+	return nil
 }

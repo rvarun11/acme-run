@@ -29,7 +29,7 @@ type ChallengeService interface {
 
 	// StatsTracker
 	// Register a player id with the active challenges
-	SubscribeToActiveChallenges(ws *domain.ChallengeStats) error
+	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
 
 	// RemoveTracker(ch *domain.Challenge) error
 	// This notifies all
