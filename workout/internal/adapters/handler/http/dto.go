@@ -1,4 +1,4 @@
-package dto
+package httphandler
 
 import "github.com/google/uuid"
 
@@ -18,4 +18,14 @@ type StartWorkoutOption struct {
 	WorkoutID uuid.UUID `json:"workout_id"`
 	// WorkoutID for which the workout option is to be stopped
 	Option uint8 `json:"option"`
+}
+
+type StopWorkout struct {
+	// WorkoutID for the workout to be stopped
+	WorkoutID uuid.UUID `json:"workout_id"`
+}
+
+type StopWorkoutOption struct {
+	// WorkoutID for which the workout option is to be stopped
+	WorkoutID uuid.UUID `json:"workout_id"`
 }

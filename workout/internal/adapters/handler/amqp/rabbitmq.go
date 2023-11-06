@@ -1,4 +1,4 @@
-package handler
+package amqphandler
 
 import (
 	"context"

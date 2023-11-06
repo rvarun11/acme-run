@@ -1,32 +1,49 @@
-package handler
+package httphandler
 
 import (
 	"net/http"
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
-type HTTPHandler struct {
-	svc services.WorkoutService
+type WorkoutHTTPHandler struct {
+	gin *gin.Engine
+	svc *services.WorkoutService
 }
 
-func NewHTTPHandler(WorkoutService services.WorkoutService) *HTTPHandler {
-	return &HTTPHandler{
-		svc: WorkoutService,
+func NewWorkoutHTTPHandler(gin *gin.Engine, workoutSvc *services.WorkoutService) *WorkoutHTTPHandler {
+	return &WorkoutHTTPHandler{
+		gin: gin,
+		svc: workoutSvc,
 	}
 }
 
-func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
+func (handler *WorkoutHTTPHandler) InitRouter() {
+
+	router := handler.gin.Group("/api/v1")
+
+	router.POST("/workout", handler.StartWorkout)
+	router.PUT("/workout", handler.StopWorkout)
+	router.GET("/workoutOptions", handler.GetWorkoutOptions)
+	router.POST("/workoutOptions", handler.StartWorkoutOption)
+	router.PUT("/workoutOptions", handler.StopWorkoutOption)
+
+	router.GET("workout/distance", handler.GetDistance)
+	router.GET("workout/shelters", handler.GetShelters)
+	router.GET("workout/escapes", handler.GetEscapes)
+	router.GET("workout/fights", handler.GetFights)
+}
+
+func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 
 	//TODO Error Handling
 
-	var startWorkout dto.StartWorkout
+	var startWorkout StartWorkout
 	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"Error": err.Error(),
@@ -59,9 +76,9 @@ func (h *HTTPHandler) StartWorkout(ctx *gin.Context) {
 	})
 }
 
-func (h *HTTPHandler) StopWorkout(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
 
-	var stopWorkout dto.StopWorkout
+	var stopWorkout StopWorkout
 	if err := ctx.ShouldBindJSON(&stopWorkout); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"Error": "Invalid Workout ID",
@@ -80,7 +97,7 @@ func (h *HTTPHandler) StopWorkout(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, w)
 }
 
-func (h *HTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 	workoutID, err := parseUUID(ctx, "workoutID")
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -100,8 +117,8 @@ func (h *HTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, workoutOptions)
 }
 
-func (h *HTTPHandler) StartWorkoutOption(ctx *gin.Context) {
-	var startWorkout dto.StartWorkoutOption
+func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
+	var startWorkout StartWorkoutOption
 
 	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -123,9 +140,9 @@ func (h *HTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 	})
 }
 
-func (h *HTTPHandler) StopWorkoutOption(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
 
-	var stopWorkoutOption dto.StopWorkoutOption
+	var stopWorkoutOption StopWorkoutOption
 
 	if err := ctx.ShouldBindJSON(&stopWorkoutOption); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -165,7 +182,7 @@ func parseTime(ctx *gin.Context, paramName string, layout string) (time.Time, er
 	return parsedTime, nil
 }
 
-func (h *HTTPHandler) GetDistance(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 	workoutID, err := parseUUID(ctx, "workoutID")
 	var distance float64
 
@@ -217,7 +234,7 @@ func (h *HTTPHandler) GetDistance(ctx *gin.Context) {
 	})
 }
 
-func (h *HTTPHandler) GetShelters(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 	var shelterCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -265,7 +282,7 @@ func (h *HTTPHandler) GetShelters(ctx *gin.Context) {
 	})
 }
 
-func (h *HTTPHandler) GetEscapes(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 	var escapeCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -313,7 +330,7 @@ func (h *HTTPHandler) GetEscapes(ctx *gin.Context) {
 	})
 }
 
-func (h *HTTPHandler) GetFights(ctx *gin.Context) {
+func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 	var fightCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")

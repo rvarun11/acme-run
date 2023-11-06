@@ -1,4 +1,4 @@
-package dto
+package amqphandler
 
 import "github.com/google/uuid"
 

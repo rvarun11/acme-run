@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
-	logger "github.com/CAS735-F23/macrun-teamvsl/workout/logger"
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -16,16 +16,15 @@ type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() *Repository {
-	host := conf.host
-	port := conf.port
-	user := conf.user
-	password := conf.password
-	dbname := conf.dbname
-	encoding := conf.encoding
+func NewRepository(cfg *config.Postgres) *Repository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
-		host, port, user, dbname, password, encoding,
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.DB_Name,
+		cfg.Password,
+		cfg.Encoding,
 	)
 
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
@@ -169,7 +168,6 @@ func (r *Repository) Create(workout *domain.Workout, workoutOptions *domain.Work
 		}
 		return nil
 	})
-	logger.Debug("Wokrout added to the Database")
 	// TODO Define Errors in Repo Interface file and return them instead of this
 	if err != nil {
 		return err
@@ -212,19 +210,6 @@ func (r *Repository) UpdateWorkout(workout *domain.Workout) (*domain.Workout, er
 		return &domain.Workout{}, err
 	}
 
-	/*if err := r.db.First(&pworkout, "workout_id = ?", pworkout.WorkoutID).Error; err != nil {
-		return &domain.Workout{}, err
-	}
-
-	tx := r.db.Begin()
-
-	if err := tx.Save(&pworkout).Error; err != nil {
-		tx.Rollback()
-		return &domain.Workout{}, err
-	}
-
-	tx.Commit()*/
-
 	return toWorkoutAggregate(pworkout), nil
 }
 
@@ -235,15 +220,6 @@ func (r *Repository) UpdateWorkoutOptions(workoutOptions *domain.WorkoutOptions)
 	if err := r.db.Save(&pworkoutOptions).Error; err != nil {
 		return &domain.WorkoutOptions{}, err
 	}
-
-	/*tx := r.db.Begin()
-
-	if err := tx.Save(&pworkoutOptions).Error; err != nil {
-		tx.Rollback()
-		return &domain.WorkoutOptions{}, err
-	}
-
-	tx.Commit()*/
 
 	return toWorkoutOptionsAggregate(pworkoutOptions), nil
 }
