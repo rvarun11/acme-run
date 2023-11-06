@@ -1,7 +1,7 @@
 package main
 
 import (
-	config "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/adapters/handler/http"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var cfg config.AppConfiguration
+var cfg *config.AppConfiguration = config.Config
 
 func main() {
 	log.Info("Challenge Manager is starting")
@@ -32,5 +32,5 @@ func main() {
 	// badgeHandler.InitRouter()
 
 	// Start Server
-	router.Run(cfg.Port)
+	router.Run(":" + cfg.Port)
 }
