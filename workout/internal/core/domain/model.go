@@ -9,58 +9,75 @@ import (
 )
 
 var (
-	ErrInvalidWorkout = errors.New("no playerId or trailId associated with the workout session")
+	ErrInvalidWorkout               = errors.New("no workout_id matched")
+	ErrWorkoutOptionAlreadyActive   = errors.New("workout option is already active")
+	ErrWorkoutOptionAlreadyInActive = errors.New("no workout option is active")
 )
 
 // Workout is a entity that represents a workout in all Domains
 type Workout struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
-	ID uuid.UUID `json:"id"`
+	WorkoutID uuid.UUID `json:"workout_id"`
 	// trailId is the id of the trail player is on
 	TrailID uuid.UUID `json:"trail_id"`
 	// PlayerID of the player starting the workout session
 	PlayerID uuid.UUID `json:"player_id"`
 	// InProgress tells whether the workout is in progress
 	IsCompleted bool `json:"is_completed"`
-	// CreatedAt is the time when the workout was started/created at?
+	// CreatedAt is the time when the workout was started
 	CreatedAt time.Time `json:"created_at"`
-	// Duration of the workout, TODO: fix type
+	// Duration of the workout
 	EndedAt time.Time `json:"ended_at"`
-	// DurationCovered is the total distance covered during the session
+	// EndedAt is the time when the workout was ended
 	DistanceCovered float64 `json:"distance_covered"`
-	// TODO: temp value. It can be either "cardio", "physical" or "dynamic"
-	Category string `json:"category"`
+	// Player Profile can be either 'cardio' or 'strength'
+	Profile string `json:"profile"`
 	// HardcoreMode is the difficulty level chosen by the player
-	HardcoreMode bool `json:"HardcoreMode"`
-	//  HRM Reading from the workout
-	// TODO: HeartRate should be a valueobject of hrmValue + created_at
-	HeartRate []uint16
+	HardcoreMode bool `json:"hardcore_mode"`
+	// Shelters taken for a given workout
+	Shelters uint8 `json:"shelters_taken"`
+	// Fights fought in a given workout
+	Fights uint8 `json:"fights_fought"`
+	// Escapes made in a given workout
+	Escapes uint8 `json:"escapes_made"`
 }
 
-func NewWorkout(w Workout) (Workout, error) {
-	if w.PlayerID == uuid.Nil || w.TrailID == uuid.Nil {
+type WorkoutOptions struct {
+	// ID is the identifier of the Entity, the ID is shared for all sub domains
+	WorkoutID uuid.UUID `json:"workout_id"`
+	// 1,2,3 for valid current Workout Options, negative for no current workoutOption
+	CurrentWorkoutOption int8 `json:"current_workout_option"`
+	// FightsPushDown Ranking bool
+	FightsPushDown bool `json:"fights_push_down"`
+	// Is Workout Option Active
+	IsWorkoutOptionActive bool `json:"is_workout_option_active"`
+}
+
+func NewWorkout(PlayerID uuid.UUID, TrailID uuid.UUID, HRMID uuid.UUID, HRMConnected bool) (Workout, error) {
+	if PlayerID == uuid.Nil || TrailID == uuid.Nil {
 		return Workout{}, ErrInvalidWorkout
 	}
 
 	return Workout{
-		ID:              uuid.New(),
-		PlayerID:        w.PlayerID,
-		TrailID:         w.TrailID,
-		Category:        w.Category,
+		WorkoutID:       uuid.New(),
+		PlayerID:        PlayerID,
+		TrailID:         TrailID,
+		Profile:         "cardio",
 		IsCompleted:     false,
-		HardcoreMode:    w.HardcoreMode,
+		HardcoreMode:    false,
 		CreatedAt:       time.Now(),
 		EndedAt:         time.Time{},
 		DistanceCovered: 0,
-		HeartRate:       []uint16{},
-		// heartRates:      make([]valueobject.HeartRate, 0),
+		Shelters:        0,
+		Fights:          0,
+		Escapes:         0,
 	}, nil
 }
 
 func (w *Workout) GetID() uuid.UUID {
-	return w.ID
+	return w.WorkoutID
 }
 
 func (w *Workout) SetID(id uuid.UUID) {
-	w.ID = id
+	w.WorkoutID = id
 }
