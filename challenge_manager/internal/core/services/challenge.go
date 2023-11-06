@@ -17,13 +17,15 @@ func NewChallengeService(repo ports.ChallengeRepository) *ChallengeService {
 	}
 }
 
-func (svc *ChallengeService) Create(req *domain.Challenge) (*domain.Challenge, error) {
+// Challenge Services
+
+func (svc *ChallengeService) CreateChallenge(req *domain.Challenge) (*domain.Challenge, error) {
 	ch, err := domain.NewChallenge(req.Name, req.Description, req.BadgeURL, req.Criteria, req.Goal, req.Start, req.End)
 	if err != nil {
 		return &domain.Challenge{}, ports.ErrorCreateChallengeFailed
 	}
 
-	challenge, err := svc.repo.Create(ch)
+	challenge, err := svc.repo.CreateChallenge(ch)
 	if err != nil {
 		return &domain.Challenge{}, ports.ErrorCreateChallengeFailed
 	}
@@ -32,8 +34,8 @@ func (svc *ChallengeService) Create(req *domain.Challenge) (*domain.Challenge, e
 
 }
 
-func (svc *ChallengeService) GetByID(id uuid.UUID) (*domain.Challenge, error) {
-	ch, err := svc.repo.GetByID(id)
+func (svc *ChallengeService) GetChallengeByID(id uuid.UUID) (*domain.Challenge, error) {
+	ch, err := svc.repo.GetChallengeByID(id)
 	if err != nil {
 		return &domain.Challenge{}, err
 	}
@@ -41,8 +43,8 @@ func (svc *ChallengeService) GetByID(id uuid.UUID) (*domain.Challenge, error) {
 	return ch, nil
 }
 
-func (svc *ChallengeService) Update(req *domain.Challenge) (*domain.Challenge, error) {
-	ch, err := svc.repo.Update(req)
+func (svc *ChallengeService) UpdateChallenge(req *domain.Challenge) (*domain.Challenge, error) {
+	ch, err := svc.repo.UpdateChallenge(req)
 	if err != nil {
 		return &domain.Challenge{}, nil
 	}
@@ -50,8 +52,8 @@ func (svc *ChallengeService) Update(req *domain.Challenge) (*domain.Challenge, e
 	return ch, nil
 }
 
-func (svc *ChallengeService) List(status string) ([]*domain.Challenge, error) {
-	chs, err := svc.repo.List()
+func (svc *ChallengeService) ListChallenges(status string) ([]*domain.Challenge, error) {
+	chs, err := svc.repo.ListChallenges()
 	if err != nil {
 		return []*domain.Challenge{}, err
 	}
@@ -69,8 +71,10 @@ func (svc *ChallengeService) List(status string) ([]*domain.Challenge, error) {
 	return chs, nil
 }
 
-func (svc *ChallengeService) CreateBadge(pid uuid.UUID, ch *domain.Challenge, score float32) (*domain.Badge, error) {
-	b, err := domain.NewBadge(pid, ch, score)
+// Badge Services
+
+func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Badge, error) {
+	b, err := domain.NewBadge(cs)
 	if err != nil {
 		return &domain.Badge{}, err
 	}
@@ -83,7 +87,7 @@ func (svc *ChallengeService) CreateBadge(pid uuid.UUID, ch *domain.Challenge, sc
 }
 
 // This should be part of the Badge Service
-func (svc *ChallengeService) X(pid uuid.UUID, ch *domain.Challenge, score float32) (*domain.Badge, error) {
+func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) (*domain.Badge, error) {
 	// b, err := domain.NewBadge(pid, ch, score)
 	// if err != nil {
 	// 	return &domain.Badge{}, err

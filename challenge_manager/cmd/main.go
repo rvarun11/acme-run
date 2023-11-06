@@ -23,7 +23,7 @@ func main() {
 
 	// Initialize challenge service
 	challengeSvc := services.NewChallengeService(store)
-	challengeHandler := http.NewChallengeHandler(router, *challengeSvc)
+	challengeHandler := http.NewChallengeHandler(router, challengeSvc)
 	challengeHandler.InitRouter()
 
 	// Initialize badge service

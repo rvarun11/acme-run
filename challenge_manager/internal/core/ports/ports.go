@@ -14,30 +14,62 @@ var (
 	ErrorUpdateChallengeFailed = errors.New("failed to update challenge")
 )
 
+// Service Interfaces
+
 type ChallengeService interface {
-	Create(ch *domain.Challenge) (*domain.Challenge, error)
-	GetByID(cid uuid.UUID) (*domain.Challenge, error)
-	Update(ch *domain.Challenge) (*domain.Challenge, error)
-	List(status string) ([]*domain.Challenge, error)
+	// Challenges
+	CreateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+	GetChallengeByID(cid uuid.UUID) (*domain.Challenge, error)
+	UpdateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+	ListChallenges(status string) ([]*domain.Challenge, error)
+
+	// Badges
+	CreateBadge(cid uuid.UUID, pid uuid.UUID) error
+	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error)
+
+	// StatsTracker
+	// Register a player id with the active challenges
+	SubscribeToActiveChallenges(ws *domain.ChallengeStats) error
+
+	// RemoveTracker(ch *domain.Challenge) error
+	// This notifies all
+	// NotifyAll(ch *domain.Challenge) error
 }
+
+// type BadgeService interface {
+// }
+
+// type StatsTrackerService interface {
+// }
+
+// Repository Interfaces
 
 type ChallengeRepository interface {
-	Create(ch *domain.Challenge) (*domain.Challenge, error)
-	GetByID(cid uuid.UUID) (*domain.Challenge, error)
-	Update(ch *domain.Challenge) (*domain.Challenge, error)
-	List() ([]*domain.Challenge, error)
+	// Challenge
+	CreateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+	GetChallengeByID(cid uuid.UUID) (*domain.Challenge, error)
+	UpdateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+	ListChallenges() ([]*domain.Challenge, error)
+	// Badges
 	CreateBadge(b *domain.Badge) (*domain.Badge, error)
+	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error)
+	// ChallengeStats
 }
 
-// // // TODO: To be named properly
-// type BadgeService interface {
-// 	// This service will take in a workout stat and compare it with all active challenges to see if it's meets criteria,
-// 	Add(cid uuid.UUID, pid uuid.UUID) error
-// 	List(playerID uuid.UUID) ([]*domain.Challenge, error)
+// type ChallengeRepository interface {
+// 	CreateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+// 	GetChallengeByID(cid uuid.UUID) (*domain.Challenge, error)
+// 	UpdateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+// 	ListChallenges() ([]*domain.Challenge, error)
 // }
 
 // type BadgeRepository interface {
-// 	// This service will take in
-// 	Create(cid uuid.UUID, pid uuid.UUID) error
-// 	List(pid uuid.UUID) (*[]domain.Challenge, error)
+// 	CreateBadge(b *domain.Badge) (*domain.Badge, error)
+// 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error)
+// }
+
+// type StatsTrackerRepository interface {
+// 	// CreateTracker(ws *domain.WorkoutStats) error
+// 	// Get
+// 	// Delete(ch *domain.Challenge) error
 // }
