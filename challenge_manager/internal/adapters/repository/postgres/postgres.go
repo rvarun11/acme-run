@@ -90,3 +90,14 @@ func (pb *postgresBadge) toAggregate(ch *domain.Challenge) *domain.Badge {
 		CompletedOn: pb.CompletedOn,
 	}
 }
+
+// Helper function to convert to domain Badge
+func (pcs *postgresChallengeStats) toAggregate(ch *domain.Challenge) *domain.ChallengeStats {
+	return &domain.ChallengeStats{
+		PlayerID:        pcs.PlayerID,
+		Challenge:       ch,
+		DistanceCovered: pcs.DistanceCovered,
+		EnemiesFought:   pcs.EnemiesFought,
+		EnemiesEscaped:  pcs.EnemiesEscaped,
+	}
+}

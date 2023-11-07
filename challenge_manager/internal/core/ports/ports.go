@@ -8,10 +8,13 @@ import (
 )
 
 var (
+	// Challenge
 	ErrorListChallengesFailed  = errors.New("failed to list challenges")
 	ErrorChallengeNotFound     = errors.New("the challenge not found in repository")
 	ErrorCreateChallengeFailed = errors.New("failed to add the challenge")
 	ErrorUpdateChallengeFailed = errors.New("failed to update challenge")
+	// Challenge Stats
+	ErrorChallengeStatsNotFound = errors.New("unable to find challenge stats")
 )
 
 // Service Interfaces
@@ -25,11 +28,12 @@ type ChallengeService interface {
 
 	// Badges
 	CreateBadge(cid uuid.UUID, pid uuid.UUID) error
-	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error)
+	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error)
 
 	// StatsTracker
 	// Register a player id with the active challenges
 	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
+	ListChallengeStatsByPlayerID(pid uuid.UUID) error
 
 	// RemoveTracker(ch *domain.Challenge) error
 	// This notifies all
@@ -54,6 +58,9 @@ type ChallengeRepository interface {
 	CreateBadge(b *domain.Badge) (*domain.Badge, error)
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error)
 	// ChallengeStats
+	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error
+	ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error)
+	DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error
 }
 
 // type ChallengeRepository interface {

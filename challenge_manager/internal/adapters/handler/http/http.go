@@ -31,6 +31,9 @@ func (h *ChallengeHandler) InitRouter() {
 
 	// Badges: This may end up in a separate handler
 	router.GET("/badges", h.listBadgesByPlayerID)
+	// ChallengeStats: This may end up in a separate handler
+	// This is for testing
+	router.GET("/stats:id", h.listChallengeStatsByPlayerID)
 }
 
 // Challenges
@@ -131,4 +134,23 @@ func (h *ChallengeHandler) listBadgesByPlayerID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, chs)
+}
+
+// ChallengeStats
+func (h *ChallengeHandler) listChallengeStatsByPlayerID(ctx *gin.Context) {
+	pid, err := uuid.Parse(ctx.Param("player_id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+	csArr, err := h.svc.ListChallengeStatsByPlayerID(pid)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err,
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, csArr)
 }

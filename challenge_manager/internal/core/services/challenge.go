@@ -101,15 +101,33 @@ func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) (*domain.Badge,
 }
 
 func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float32, ef uint8, ee uint8) error {
-	_, err := svc.ListChallenges("active")
+	// TODO: This should be in the context
+	activeChs, err := svc.ListChallenges("active")
 	if err != nil {
 		return err
 	}
-	// for _, ch := range activeChs {
-	// // 1. If the (PlayerID, ChallengeID) already exists in ChallengeStats, then incremement,
-	// // do db check here
-	// // 2. otherwise create new cs and add to DB
-	// 	// cs := domain.NewChallengeStats(ch, pid, dc, ef, ee)
-	// }
+
+	for _, ch := range activeChs {
+		cs := domain.NewChallengeStats(ch, pid, dc, ef, ee)
+		err = svc.repo.CreateOrUpdateChallengeStats(cs)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (svc *ChallengeService) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error) {
+	csArr, err := svc.repo.ListChallengeStatsByPlayerID(pid)
+	if err != nil {
+		return []*domain.ChallengeStats{}, err
+	}
+	return csArr, nil
+}
+
+// This function runs when a challenge ends
+func (svc *ChallengeService) XXXXXXX(ch *domain.Challenge) ([]*domain.Badge, error) {
+	// 1. Fetch Challenge Stats
+	// 2. Create Badge
+	// 3. Delete all Challenge Stats
 }
