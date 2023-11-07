@@ -7,6 +7,7 @@ import (
 )
 
 type ChallengeStats struct {
+	ID              uuid.UUID
 	PlayerID        uuid.UUID
 	Challenge       *Challenge
 	DistanceCovered float32
@@ -16,6 +17,7 @@ type ChallengeStats struct {
 
 func NewChallengeStats(ch *Challenge, pid uuid.UUID, dc float32, ef uint8, ee uint8) *ChallengeStats {
 	return &ChallengeStats{
+		ID:              uuid.New(),
 		PlayerID:        pid,
 		Challenge:       ch,
 		DistanceCovered: dc,

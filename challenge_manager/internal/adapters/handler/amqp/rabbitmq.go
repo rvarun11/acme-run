@@ -8,16 +8,8 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
-	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
-
-type challengeStatsDTO struct {
-	PlayerID        uuid.UUID `json:"player_id"`
-	DistanceCovered float32   `json:"distance_covered"`
-	EnemiesFought   uint8     `json:"enemies_fought"`
-	EnemiesEscaped  uint8     `json:"enemies_escaped"`
-}
 
 const (
 	exchangeKind       = "direct"
@@ -172,13 +164,12 @@ func (c *WorkoutStatsConsumer) StartConsumer(workerPoolSize int, exchange, queue
 
 func (c *WorkoutStatsConsumer) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
+		var csDTO *challengeStatsDTO
 		log.Printf("Received a message: %s", d.Body)
-		err := json.Unmarshal(d.Body, &challengeStatsDTO{})
+		err := json.Unmarshal(d.Body, csDTO)
 		if err != nil {
 			log.Panicf("failed to unmarshal %s", err)
 		}
-		// Call the following to get the HR Value updated
-		svc.
-		// svc.BindHRMtoWorkout(tempDTOVar.HRMId, tempDTOVar.WorkoutID)
+		c.svc.SubscribeToActiveChallenges(csDTO.PlayerID, csDTO.DistanceCovered, csDTO.EnemiesFought, csDTO.EnemiesEscaped)
 	}
 }
