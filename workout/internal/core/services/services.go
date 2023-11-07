@@ -6,11 +6,23 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/ports"
+
 	"github.com/google/uuid"
+	"github.com/umahmood/haversine"
 )
 
+type LastLocation struct {
+	// Latitude of the Player
+	Latitude float64 `json:"latitude"`
+	// Longitude of the Player
+	Longitude float64 `json:"longitude"`
+	// Time of location
+	TimeOfLocation time.Time `json:"time_of_location"`
+}
+
 type WorkoutService struct {
-	repo ports.WorkoutRepository
+	repo        ports.WorkoutRepository
+	locationMap map[uuid.UUID]LastLocation
 }
 
 // Factory for creating a new WorkoutService
@@ -103,6 +115,70 @@ func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8) 
 	}
 
 	return links
+}
+
+func (s *WorkoutService) UpdateDistanceTravelled(workoutID uuid.UUID, latitude float64, longitude float64, timeOfLocation time.Time) error {
+	// Check if the workout ID exists in the location map
+	lastLocation, locationExists := s.locationMap[workoutID]
+
+	if locationExists {
+		// Calculate the distance between existing and new location
+		distanceCovered := 0.0
+		if lastLocation.Latitude != latitude || lastLocation.Longitude != longitude {
+			// Calculate the distance covered using the Haversine formula
+			// Create orb.Point for each coordinate
+			point1 := haversine.Coord{Lat: lastLocation.Latitude, Lon: lastLocation.Longitude}
+			point2 := haversine.Coord{Lat: latitude, Lon: longitude}
+
+			// Calculate the distance using the Haversine formula
+			_, distanceCovered = haversine.Distance(point1, point2)
+		}
+
+		// Update the workout distance if the distance covered is greater than 0
+		if distanceCovered > 0 {
+			// Get the workout from the repository
+			workout, err := s.repo.GetWorkout(workoutID)
+			if err != nil {
+				return err // Propagate the error from the repository
+			}
+
+			// Update the workout distance
+			workout.DistanceCovered += distanceCovered
+
+			// Update the workout in the repository
+			_, err = s.repo.UpdateWorkout(workout)
+			if err != nil {
+				return err // Propagate the error from the repository
+			}
+		}
+	} else {
+		// If the location doesn't exist, add it to the map
+		s.locationMap[workoutID] = LastLocation{
+			Latitude:       latitude,
+			Longitude:      longitude,
+			TimeOfLocation: timeOfLocation,
+		}
+	}
+
+	return nil // Return nil to indicate success
+}
+
+func (s *WorkoutService) UpdateShelter(workoutID uuid.UUID, DistanceToShelter float64) error {
+	// Get the workout options from the repository
+	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	workoutOptions.DistanceToShelter = DistanceToShelter
+
+	s.repo.UpdateWorkoutOptions(workoutOptions)
+
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	return nil // Return nil to indicate success
 }
 
 func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uint8) error {

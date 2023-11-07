@@ -76,6 +76,8 @@ type postgresWorkoutOptions struct {
 	FightsPushDown bool
 	// Is WorkoutOption Active
 	IsWorkoutOptionActive bool
+	// Distance to Shelter
+	DistanceToShelter float64
 }
 
 func toWorkoutAggregate(pworkout *postgresWorkout) *domain.Workout {
@@ -131,6 +133,7 @@ func toWorkoutOptionsPostgres(workoutOptions *domain.WorkoutOptions) *postgresWo
 		CurrentWorkoutOption:  workoutOptions.CurrentWorkoutOption,
 		FightsPushDown:        workoutOptions.FightsPushDown,
 		IsWorkoutOptionActive: workoutOptions.IsWorkoutOptionActive,
+		DistanceToShelter:     workoutOptions.DistanceToShelter,
 	}
 }
 
@@ -157,6 +160,7 @@ func (r *Repository) Create(workout *domain.Workout, workoutOptions *domain.Work
 		IsWorkoutOptionActive: workoutOptions.IsWorkoutOptionActive,
 		CurrentWorkoutOption:  workoutOptions.CurrentWorkoutOption,
 		FightsPushDown:        workoutOptions.FightsPushDown,
+		DistanceToShelter:     workoutOptions.DistanceToShelter,
 	}
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {

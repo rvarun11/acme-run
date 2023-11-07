@@ -1,23 +1,22 @@
 package amqphandler
 
 import (
-	"context"
 	"encoding/json"
-	"log"
-	"time"
+	"fmt"
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
-	"github.com/google/uuid"
+	log "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func failOnError(err error, msg string) {
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+		failMsg := fmt.Sprintf("%s: %s", msg, err)
+		log.Error(failMsg)
 	}
 }
 
-func HRMSubscriber(svc services.WorkoutService, url string) {
+func ShelterSubscriber(svc services.WorkoutService, url string) {
 	conn, err := amqp.Dial(url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -27,14 +26,14 @@ func HRMSubscriber(svc services.WorkoutService, url string) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"HR-Queue-001", // name
-		false,          // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
+		"SHELTER_QUEUE_001", // name
+		false,               // durable
+		false,               // delete when unused
+		false,               // exclusive
+		false,               // no-wait
+		nil,                 // arguments
 	)
-	failOnError(err, "Failed to declare a queue")
+	failOnError(err, "Failed to declare SHELTER_QUEUE_001")
 
 	msgs, err := ch.Consume(
 		q.Name, // queue
@@ -45,37 +44,26 @@ func HRMSubscriber(svc services.WorkoutService, url string) {
 		false,  // no-wait
 		nil,    // args
 	)
-	failOnError(err, "Failed to register a consumer")
+	failOnError(err, "Failed to register ShelterSubscriber")
 
 	var forever chan struct{}
 
-	type tempDTO struct {
-		WorkoutID uuid.UUID `json:"workoutID"`
-		HRValue   uint16    `json:"hrValue"`
-	}
+	var shelterAvailable ShelterAvailable
 
-	var tempDTOVar tempDTO
 	go func() {
 		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-			err = json.Unmarshal(d.Body, &tempDTOVar)
-			// TODO: Ignoring Error for now, Handle Error later
-			// Call the following to get the HR Value updated
-			//svc.UpdateHRValue(tempDTOVar.WorkoutID, tempDTOVar.HRValue)
-
+			log.Info(fmt.Sprintf("Received a message: %s", d.Body))
+			err = json.Unmarshal(d.Body, &shelterAvailable)
+			svc.UpdateShelter(shelterAvailable.WorkoutID, shelterAvailable.DistanceToShelter)
 		}
 	}()
 
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
+	log.Info(" [*] Waiting for messages. To exit press CTRL+C")
 	<-forever
 }
 
-func StartHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
-
-	// Just connect for now and send
-	// TODO: Should we connect once and use the same for sending and receiving?
-
-	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
+func LocationSubscriber(svc services.WorkoutService, url string) {
+	conn, err := amqp.Dial(url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -84,42 +72,38 @@ func StartHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"HR-Workout-001", // name
-		false,            // durable
-		false,            // delete when unused
-		false,            // exclusive
-		false,            // no-wait
-		nil,              // arguments
+		"LOCATION_QUEUE_001", // name
+		false,                // durable
+		false,                // delete when unused
+		false,                // exclusive
+		false,                // no-wait
+		nil,                  // arguments
 	)
-	failOnError(err, "Failed to declare a queue")
+	failOnError(err, "Failed to declare LOCATION_QUEUE_001")
 
-	failOnError(err, "Failed to declare a queue")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+	msgs, err := ch.Consume(
+		q.Name, // queue
+		"",     // consumer
+		true,   // auto-ack
+		false,  // exclusive
+		false,  // no-local
+		false,  // no-wait
+		nil,    // args
+	)
+	failOnError(err, "Failed to register LocationSubscriber")
 
-	// TODO: Temp DTO
-	type tempDTO struct {
-		WorkoutID uuid.UUID `json:"workoutID"`
-		HRMId     uuid.UUID `json:"hrmID"`
-	}
+	var forever chan struct{}
 
-	var tempDTOVar tempDTO
-	tempDTOVar.WorkoutID = workoutID
-	tempDTOVar.HRMId = hrmID
+	var lastLocation LastLocation
 
-	var body []byte
+	go func() {
+		for d := range msgs {
+			log.Info(fmt.Sprintf("Received a message: %s", d.Body))
+			err = json.Unmarshal(d.Body, &lastLocation)
+			svc.UpdateDistanceTravelled(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
+		}
+	}()
 
-	body, _ = json.Marshal(tempDTOVar)
-
-	err = ch.PublishWithContext(ctx,
-		"",     // exchange
-		q.Name, // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing{
-			ContentType: "text/json",
-			Body:        []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", body)
+	log.Info(" [*] Waiting for messages. To exit press CTRL+C")
+	<-forever
 }

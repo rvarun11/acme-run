@@ -28,6 +28,9 @@ type WorkoutService interface {
 	StartWorkoutOption(workoutID uuid.UUID, workoutType uint8) error
 	StopWorkoutOption(workoutID uuid.UUID) error
 
+	UpdateDistanceTravelled(workoutID uuid.UUID, latitude float64, longitude float64, timeOfLocation time.Time) error
+	UpdateShelter(workoutID uuid.UUID, DistanceToShelter float64) error
+
 	GetDistanceById(workoutID uuid.UUID) (float64, error)
 	GetDistanceCoveredBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (float64, error)
 	GetEscapesMadeById(workoutID uuid.UUID) (uint16, error)
