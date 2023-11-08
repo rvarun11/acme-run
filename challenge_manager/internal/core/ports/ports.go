@@ -60,6 +60,8 @@ type ChallengeRepository interface {
 	// ChallengeStats
 	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error
 	ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error)
+	ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.ChallengeStats, error)
+	// ListEligibleChallengeStatsForChallenge(ch *domain.Challenge) ([]*domain.ChallengeStats, error)
 	DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error
 }
 
