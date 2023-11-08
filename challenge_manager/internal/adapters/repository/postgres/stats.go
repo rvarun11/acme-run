@@ -73,7 +73,45 @@ func (r *Repository) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.Chal
 	return csArr, nil
 }
 
+func (r *Repository) ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.ChallengeStats, error) {
+	var pcs []postgresChallengeStats
+	res := r.db.First(&pcs, "challenge_id = ?", cid)
+	if res.Error != nil {
+		return []*domain.ChallengeStats{}, res.Error
+	}
+
+	var csArr []*domain.ChallengeStats
+	for _, pc := range pcs {
+		ch, err := r.GetChallengeByID(pc.ChallengeID)
+		if err != nil {
+			return []*domain.ChallengeStats{}, err
+		}
+		cs := pc.toAggregate(ch)
+		csArr = append(csArr, cs)
+	}
+	return csArr, nil
+}
+
+// func (r *Repository) ListEligibleChallengeStatsForChallenge(ch *domain.Challenge) ([]*domain.ChallengeStats, error) {
+// 	var pcs []postgresChallengeStats
+// 	res := r.db.First(&pcs, "challenge_id = ?", cid)
+// 	if res.Error != nil {
+// 		return []*domain.ChallengeStats{}, res.Error
+// 	}
+
+// 	var csArr []*domain.ChallengeStats
+// 	for _, pc := range pcs {
+// 		ch, err := r.GetChallengeByID(pc.ChallengeID)
+// 		if err != nil {
+// 			return []*domain.ChallengeStats{}, err
+// 		}
+// 		cs := pc.toAggregate(ch)
+// 		csArr = append(csArr, cs)
+// 	}
+// 	return csArr, nil
+// }
+
+// TODO: Once the other parts work, add this
 func (r *Repository) DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error {
-	// This will be called by 
 	return nil
 }

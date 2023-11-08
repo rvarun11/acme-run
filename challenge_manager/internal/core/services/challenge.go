@@ -3,7 +3,9 @@ package services
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/ports"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type ChallengeService struct {
@@ -125,9 +127,26 @@ func (svc *ChallengeService) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*dom
 	return csArr, nil
 }
 
-// This function runs when a challenge ends
-func (svc *ChallengeService) XXXXXXX(ch *domain.Challenge) ([]*domain.Badge, error) {
-	// 1. Fetch Challenge Stats
+// This function runs when a challenge ends, TODO: Rename once you have more clarity
+func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, error) {
+	// 1. Fetch Challenge Stats: NOTE: This should be further be improved by fetching eligible stats directly at repo level
+	csArr, err := svc.repo.ListChallengeStatsByChallengeID(ch.ID)
+	if err != nil {
+		logger.Fatal("error occured while fetching challenge stats for challenge", zap.String("name", ch.Name))
+		return []*domain.Badge{}, err
+	}
 	// 2. Create Badge
+	var badges []*domain.Badge
+	for _, cs := range csArr {
+		badge, err := domain.NewBadge(cs)
+		if err != nil {
+			logger.Debug("unable to create badge for challenge stat")
+			return []*domain.Badge{}, err
+		}
+		badges = append(badges, badge)
+	}
 	// 3. Delete all Challenge Stats
+	// TODO: Delete all challenge stats, once the badges are created and the challenge ends.
+
+	return badges, nil
 }
