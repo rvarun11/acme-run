@@ -32,7 +32,6 @@ func (h *ChallengeHandler) InitRouter() {
 	// Badges: This may end up in a separate handler
 	router.GET("/badges", h.listBadgesByPlayerID)
 	// ChallengeStats: This may end up in a separate handler
-	// This is for testing
 	router.GET("/stats:id", h.listChallengeStatsByPlayerID)
 }
 
