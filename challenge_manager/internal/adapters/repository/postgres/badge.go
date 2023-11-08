@@ -29,20 +29,23 @@ func (r *Repository) CreateBadge(b *domain.Badge) (*domain.Badge, error) {
 	return badge, nil
 }
 
-func (r *Repository) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error) {
-	var challengesFromDB []postgresChallenge
+func (r *Repository) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error) {
+	var badgesFromDB []postgresBadge
 	// TODO: THIS MAY NOT WORK
-	if err := r.db.Where("player_id = ?", pid).Find(&challengesFromDB).Error; err != nil {
+	if err := r.db.Where("player_id = ?", pid).Find(&badgesFromDB).Error; err != nil {
 		print("this failed as expected")
 		return nil, err
 	}
+	var badges []*domain.Badge
+	for _, pb := range badgesFromDB {
+		ch, err := r.GetChallengeByID(pb.ChallengeID)
+		if err != nil {
+			continue
+		}
 
-	var chs []*domain.Challenge
-	for _, pc := range challengesFromDB {
-
-		ch := pc.toAggregate()
-		chs = append(chs, ch)
+		badge := pb.toAggregate(ch)
+		badges = append(badges, badge)
 	}
 
-	return chs, nil
+	return badges, nil
 }

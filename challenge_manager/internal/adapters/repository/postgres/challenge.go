@@ -3,7 +3,6 @@ package postgres
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 // Repository Functions
@@ -19,12 +18,7 @@ func (r *Repository) CreateChallenge(ch *domain.Challenge) (*domain.Challenge, e
 		CreatedAt:   ch.CreatedAt,
 	}
 
-	err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&pc).Error; err != nil {
-			return err
-		}
-		return nil
-	})
+	err := r.db.Create(&pc).Error
 	if err != nil {
 		return &domain.Challenge{}, err
 	}

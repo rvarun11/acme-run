@@ -15,7 +15,7 @@ func main() {
 	logger.Info("Challenge Manager is starting")
 
 	// Initialize router
-	router := gin.New()
+	router := gin.Default()
 	router.Use(gin.Recovery())
 
 	// Initialize postgres repository
