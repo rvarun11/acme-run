@@ -30,9 +30,9 @@ func (h *ChallengeHandler) InitRouter() {
 	router.GET("/challenges", h.listChallenges)
 
 	// Badges: This may end up in a separate handler
-	router.GET("/badges", h.listBadgesByPlayerID)
+	router.GET("/badges/:player_id", h.listBadgesByPlayerID)
 	// ChallengeStats: This may end up in a separate handler
-	router.GET("/stats:id", h.listChallengeStatsByPlayerID)
+	router.GET("/stats/:player_id", h.listChallengeStatsByPlayerID)
 }
 
 // Challenges
@@ -83,7 +83,7 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	var req *challengeDTO
 	if err := ctx.ShouldBindJSON(req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Error": err,
+			"error": err,
 		})
 		return
 	}

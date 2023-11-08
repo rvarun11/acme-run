@@ -31,6 +31,7 @@ func (svc *ChallengeService) CreateChallenge(req *domain.Challenge) (*domain.Cha
 	if err != nil {
 		return &domain.Challenge{}, ports.ErrorCreateChallengeFailed
 	}
+	logger.Info("created new challenge", zap.String("challenge", challenge.Name))
 
 	return challenge, nil
 
@@ -89,17 +90,13 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 }
 
 // TODO: This should be part of the Badge Service
-func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) (*domain.Badge, error) {
-	// b, err := domain.NewBadge(pid, ch, score)
-	// if err != nil {
-	// 	return &domain.Badge{}, err
-	// }
-	// badge, err := svc.repo.CreateBadge(b)
-	// if err != nil {
-	// 	return &domain.Badge{}, err
-	// }
+func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error) {
+	badges, err := svc.repo.ListBadgesByPlayerID(pid)
+	if err != nil {
+		return []*domain.Badge{}, err
+	}
 
-	return &domain.Badge{}, nil
+	return badges, nil
 }
 
 func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float32, ef uint8, ee uint8) error {

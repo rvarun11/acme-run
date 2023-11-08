@@ -57,6 +57,9 @@ func (r *Repository) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.Chal
 	var pcs []postgresChallengeStats
 	res := r.db.First(&pcs, "player_id = ?", pid)
 	if res.Error != nil {
+		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
+			return []*domain.ChallengeStats{}, nil
+		}
 		return []*domain.ChallengeStats{}, res.Error
 	}
 
