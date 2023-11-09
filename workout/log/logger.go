@@ -42,8 +42,20 @@ func Debug(message string, fields ...zap.Field) {
 	zapLog.Debug(message, fields...)
 }
 
+func Warn(message string, fields ...zap.Field) {
+	zapLog.Warn(message, fields...)
+}
+
 func Error(message string, fields ...zap.Field) {
 	zapLog.Error(message, fields...)
+}
+
+func Panic(message string, fields ...zap.Field) {
+	zapLog.Panic(message, fields...)
+}
+
+func DPanic(message string, fields ...zap.Field) {
+	zapLog.DPanic(message, fields...)
 }
 
 func Fatal(message string, fields ...zap.Field) {
