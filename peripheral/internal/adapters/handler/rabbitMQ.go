@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"log"
 
-	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
@@ -15,7 +15,7 @@ func failOnError(err error, msg string) {
 	}
 }
 
-func HRMWorkoutBinder(svc services.HRMService, url string) {
+func PeripheralWorkoutBinder(svc services.PeripheralService, url string) {
 	conn, err := amqp.Dial(url)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
@@ -61,7 +61,7 @@ func HRMWorkoutBinder(svc services.HRMService, url string) {
 			failOnError(err, "Failed to unmarshal")
 			// TODO: Ignoring Error for now, Handle Error later
 			// Call the following to get the HR Value updated
-			svc.BindHRMtoWorkout(tempDTOVar.HRMId, tempDTOVar.WorkoutID)
+			svc.BindPeripheralToWorkout(tempDTOVar.HRMId, tempDTOVar.WorkoutID)
 
 		}
 	}()

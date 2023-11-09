@@ -3,23 +3,23 @@ package handler
 import (
 	"net/http"
 
-	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
 
 type HTTPHandler struct {
-	svc services.HRMService
+	svc services.PeripheralService
 }
 
-func NewHTTPHandler(HRMService services.HRMService) *HTTPHandler {
+func NewHTTPHandler(PeripheralService services.PeripheralService) *HTTPHandler {
 	return &HTTPHandler{
-		svc: HRMService,
+		svc: PeripheralService,
 	}
 }
 
-func (h *HTTPHandler) ConnectHRM(ctx *gin.Context) {
+func (h *HTTPHandler) ConnectPeripheral(ctx *gin.Context) {
 
 	type tempDTO struct {
 		HRMId   uuid.UUID `json:"hrm_id"`
@@ -35,8 +35,8 @@ func (h *HTTPHandler) ConnectHRM(ctx *gin.Context) {
 	}
 
 	if tempDTOInstance.Connect {
-		h.svc.ConnectHRM(tempDTOInstance.HRMId)
+		h.svc.ConnectPeripheral(tempDTOInstance.HRMId)
 	} else {
-		h.svc.DisconnectHRM(tempDTOInstance.HRMId)
+		h.svc.DisconnectPeripheral(tempDTOInstance.HRMId)
 	}
 }
