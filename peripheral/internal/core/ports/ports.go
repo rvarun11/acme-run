@@ -19,8 +19,11 @@ type PeripheralService interface {
 	DisconnectPeripheral(pId uuid.UUID) error
 	BindPeripheralToWorkout(pId uuid.UUID, workout uuid.UUID)
 	Get(pId uuid.UUID) (*domain.Peripheral, error)
+	Get(hrmId uuid.UUID) int
 	SendPeripheralId()
 	SendPeripheralLocation()
+	ReadPeripheralLocation(Longitude float64, Latitude float64)
+	ReadPeripheralHeartRate(pId uuid.UUID, rate int)
 }
 
 type PeripheralRepository interface {

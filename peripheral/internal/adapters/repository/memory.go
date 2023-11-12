@@ -39,23 +39,36 @@ func (r *MemoryRepository) AddPeripheralIntance(p domain.Peripheral) error {
 
 }
 
-func (r *MemoryRepository) DeletePeripheralInstance(hrmid uuid.UUID) error {
+func (r *MemoryRepository) DeletePeripheralInstance(wId uuid.UUID) error {
+	var keyToDelete uuid.UUID
+	found := false
 
-	if _, ok := r.ps[hrmid]; !ok {
-		return fmt.Errorf("peripheral is not connected: %w", ports.ErrorCreateHRMFailed)
-	}
 	r.Lock()
-	delete(r.ps, hrmid)
-	r.Unlock()
-	return nil
+	defer r.Unlock()
 
+	for key, p := range r.ps {
+		if p.WorkoutId == wId {
+			keyToDelete = key
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("peripheral with workout ID %v not found: %w", wId, ports.ErrorPeripheralNotFound)
+	}
+
+	delete(r.ps, keyToDelete)
+	return nil
 }
 
-func (r *MemoryRepository) Get(hrmId uuid.UUID) (*domain.Peripheral, error) {
-	if p, ok := r.ps[hrmId]; ok {
-		return &p, nil
+func (r *MemoryRepository) Get(wid uuid.UUID) (*domain.Peripheral, error) {
+	for _, p := range r.ps {
+		if p.WorkoutId == workoutId {
+			return &p, nil // Found the peripheral with the matching WorkoutId
+		}
 	}
-	return &domain.Peripheral{}, ports.ErrorPeripheralNotFound
+	return nil, ports.ErrorPeripheralNotFound // No peripheral found with the given WorkoutId
 }
 
 func (r *MemoryRepository) Update(p domain.Peripheral) error {

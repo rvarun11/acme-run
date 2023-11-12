@@ -24,21 +24,3 @@ type LastHR struct {
 	// Time of reading
 	TimeOfLocation time.Time `json:"time_of_location"`
 }
-
-type BindPeripheralData struct {
-	// PlayerID
-	PlayerID uuid.UUID `json:"player_id"`
-	// WorkoutID for the workout to be stopped
-	WorkoutID uuid.UUID `json:"workout_id"`
-	// if HRM Connected is false then no HRM mock
-	HRMId uuid.UUID `json:"hrm_id"`
-	// HRM Connected or not
-	HRMConnected bool `json:"hrm_connected"`
-	// Do we need live location? based on Hardcore mode
-	SendLiveLocationToTrailManager bool `json:"send_live_location_to_trail_manager"`
-}
-
-type UnbindPeripheralData struct {
-	// WorkoutID for the workout to be stopped
-	WorkoutID uuid.UUID `json:"workout_id"`
-}

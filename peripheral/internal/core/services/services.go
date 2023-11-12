@@ -26,24 +26,17 @@ func NewPeripheralService(repo ports.PeripheralRepository) *PeripheralService {
 	}
 }
 
-func (s *PeripheralService) ConnectPeripheral(hrmID uuid.UUID) {
+func (s *PeripheralService) ConnectPeripheral(wId uuid.UUID, hrmId uuid.UUID) {
 	var h domain.Peripheral
 	//var err error
 	h.HRMId = hrmID
+	h.WorkoutId = wId
 	p, _ := domain.NewPeripheral(h)
-	s.repo.AddHRMIntance(p)
+	s.repo.AddPeripheralIntance(p)
 }
 
-func (s *PeripheralService) DisconnectPeripheral(hrmID uuid.UUID) {
-	s.repo.DeletePeripheralInstance(hrmID)
-}
-
-func (s *PeripheralService) BindPeripheralToWorkout(hrmID uuid.UUID, workoutID uuid.UUID) {
-	//var err error
-	pInstance, _ := s.repo.Get(hrmID)
-	//TODO Error Handling
-	pInstance.WorkoutId = workoutID
-	s.repo.Update(*pInstance)
+func (s *PeripheralService) DisconnectPeripheral(wId uuid.UUID) {
+	s.repo.DeletePeripheralInstance(wId)
 }
 
 func (s *PeripheralService) SendPeripheralId(wg *sync.WaitGroup) {
@@ -58,12 +51,12 @@ func (s *PeripheralService) SendPeripheralId(wg *sync.WaitGroup) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"HR-Queue-001", // name
-		false,          // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
+		"Peripheral-Queue-001", // name
+		false,                  // durable
+		false,                  // delete when unused
+		false,                  // exclusive
+		false,                  // no-wait
+		nil,                    // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
@@ -112,6 +105,41 @@ func failOnError(err error, msg string) {
 	}
 }
 
+func (s *PeripheralService) GetHRMReading(wId uuid.UUID) LastHR {
+	pInstance, _ := s.repo.Get(wId)
+	return pInstance.GetAverageHRate()
+}
+
+func (s *PeripheralService) SetHRMReading(wId uuid.UUID, rate int) {
+	pInstance, _ := s.repo.Get(wId)
+	return pInstance.SetAverageHRate(rate)
+}
+
+func (s *PeripheralService) GetHRMDevStatus(wId uuid.UUID) bool {
+	pInstance, _ := s.repo.Get(wId)
+	return pInstance.GetHRMStatus()
+}
+
+func (s *PeripheralService) SetHRMDevStatus(wId uuid.UUID, code bool) {
+	pInstance, _ := s.repo.Get(wId)
+	pInstance.SetHRMStatus(code)
+}
+
+func (s *PeripheralService) SetGeoLocation(wId uuid.UUID, longitude float64, latitude float64) {
+	pInstance, _ := s.repo.Get(wId)
+	pInstance.SetLocation(longitude, latitude)
+}
+
+func (s *PeripheralService) GetGeoDevStatus(wId uuid.UUID) bool {
+	pInstance, _ := s.repo.Get(wId)
+	return pInstance.GetGeoStatus()
+}
+
+func (s *PeripheralService) SetGeoDevStatus(wId uuid.UUID, code bool) {
+	pInstance, _ := s.repo.Get(wId)
+	pInstance.SetGeoStatus(code)
+}
+
 func (s *PeripheralService) SendPeripheralLocation(*sync.WaitGroup) {
 	defer wg.Done()
 	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq/")
@@ -123,39 +151,24 @@ func (s *PeripheralService) SendPeripheralLocation(*sync.WaitGroup) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"HR-Queue-002", // name
-		false,          // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
+		"Peripheral-Queue-002", // name
+		false,                  // durable
+		false,                  // delete when unused
+		false,                  // exclusive
+		false,                  // no-wait
+		nil,                    // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
 	failOnError(err, "Failed to declare a queue")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	// TODO: Temp DTO
-	type tempDTO struct {
-		WorkoutId    UUID.uuid `json:"workout_id"`
-		LocationTime time.time `json:"locationTime"`
-		Longitude    float64   `json:"longitude"`
-		Latitude     float64   `json:"latitude"`
-	}
-
 	for {
 		ps, _ := s.repo.List()
 		for i := 0; i < len(ps); i++ {
 			min := 30
 			max := 200
-			var tempDTOVar tempDTO
-
-			locationTime, longitude, latitude := (*ps[i]).getLocation()
-			tempDTOVar.WorkoutId = (*ps[i].WorkoutId)
-			tempDTOVar.LocationTime = locationTime
-			tempDTOVar.Longitude = longitude
-			tempDTOVar.Latitude = latitude
+			tempDTOVar := (*ps[i]).getLocation()
 			var body []byte
 
 			body, _ = json.Marshal(tempDTOVar)
@@ -174,4 +187,9 @@ func (s *PeripheralService) SendPeripheralLocation(*sync.WaitGroup) {
 		}
 		time.Sleep(5 * time.Second)
 	}
+}
+
+func (s *PeripheralService) GetGeoLocation(wId uuid.UUID) {
+	pInstance, _ := s.repo.Get(wId)
+	return pInstance.getLocation()
 }

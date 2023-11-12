@@ -53,7 +53,7 @@ func PeripheralWorkoutBinder(svc services.PeripheralService, url string) {
 		HRMId     uuid.UUID `json:"hrmID"`
 	}
 
-	var tempDTOVar tempDTO
+	var tempDTOVar LastLocation
 	go func() {
 		for d := range msgs {
 			log.Printf("Received a message: %s", d.Body)
