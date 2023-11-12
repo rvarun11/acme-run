@@ -37,16 +37,44 @@ const (
 	consumeNoWait    = false
 )
 
+var cfg *config.RabbitMQ = config.Config.RabbitMQ
+
 // Images Rabbitmq consumer
 type ShelterSubscriber struct {
 	amqpConn *amqp.Connection
-	svc      services.WorkoutService
+	svc      *services.WorkoutService
 }
 
 // Images Rabbitmq consumer
 type LocationSubscriber struct {
 	amqpConn *amqp.Connection
-	svc      services.WorkoutService
+	svc      *services.WorkoutService
+}
+
+type WorkoutAMQPHandler struct {
+	svc                *services.WorkoutService
+	locationSubscriber *LocationSubscriber
+	shelterSubscriber  *ShelterSubscriber
+}
+
+func NewAMQPHandler(workoutSvc *services.WorkoutService) *WorkoutAMQPHandler {
+	amqpConn_shelterSub, _ := NewConnection(cfg)
+	shelterSubscriber := ShelterSubscriber{
+		amqpConn: amqpConn_shelterSub,
+		svc:      workoutSvc,
+	}
+
+	amqpConn_locationSub, _ := NewConnection(cfg)
+	locationSubscriber := LocationSubscriber{
+		amqpConn: amqpConn_locationSub,
+		svc:      workoutSvc,
+	}
+
+	return &WorkoutAMQPHandler{
+		svc:                workoutSvc,
+		locationSubscriber: &locationSubscriber,
+		shelterSubscriber:  &shelterSubscriber,
+	}
 }
 
 // Initialize new RabbitMQ connection
@@ -73,7 +101,7 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Info("Declaring exchange", zap.String("exchange name", exchangeName))
+	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
 	err = ch.ExchangeDeclare(
 		exchangeName,
 		exchangeKind,
@@ -100,7 +128,7 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 		return nil, fmt.Errorf("error ch.QueueDeclare %w", err)
 	}
 
-	logger.Info("Declaring queue and binding it to exchange",
+	logger.Debug("Declaring queue and binding it to exchange",
 		zap.String("queue_name", queue.Name),
 		zap.String("exchange_name", exchangeName),
 		zap.Int("message_count", queue.Messages),
@@ -119,7 +147,7 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 		return nil, fmt.Errorf("error ch.QueueBind %w", err)
 	}
 
-	logger.Info("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
+	logger.Debug("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
 
 	err = ch.Qos(
 		prefetchCount,  // prefetch count
@@ -162,18 +190,19 @@ func (c *ShelterSubscriber) StartConsumer(workerPoolSize int, exchange, queueNam
 		go c.worker(ctx, deliveries)
 	}
 
-	chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
-	logger.Info("ch.NotifyClose", zap.Error(chanErr))
-	return chanErr
+	// TODO Fix blocking error handling
+	//chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
+	//logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	return nil
 }
 
 func (c *ShelterSubscriber) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
 		var shelterAvailable *ShelterAvailable
-		logger.Info("Received a message: %s", zap.Any("delivery", d.Body))
+		logger.Debug("Received a message: %s", zap.Any("delivery", d.Body))
 		err := json.Unmarshal(d.Body, shelterAvailable)
 		if err != nil {
-			logger.Info("failed to unmarshal %s", zap.Error(err))
+			logger.Debug("failed to unmarshal %s", zap.Error(err))
 		}
 		c.svc.UpdateShelter(shelterAvailable.WorkoutID, shelterAvailable.DistanceToShelter)
 	}
@@ -186,7 +215,7 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Info("Declaring exchange", zap.String("exchange name", exchangeName))
+	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
 	err = ch.ExchangeDeclare(
 		exchangeName,
 		exchangeKind,
@@ -213,7 +242,7 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 		return nil, fmt.Errorf("error ch.QueueDeclare %w", err)
 	}
 
-	logger.Info("Declaring queue and binding it to exchange",
+	logger.Debug("Declaring queue and binding it to exchange",
 		zap.String("queue_name", queue.Name),
 		zap.String("exchange_name", exchangeName),
 		zap.Int("message_count", queue.Messages),
@@ -232,7 +261,7 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 		return nil, fmt.Errorf("error ch.QueueBind %w", err)
 	}
 
-	logger.Info("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
+	logger.Debug("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
 
 	err = ch.Qos(
 		prefetchCount,  // prefetch count
@@ -272,22 +301,36 @@ func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueNa
 
 	for i := 0; i < workerPoolSize; i++ {
 		/// Do something with the deliveriesFind
+		logger.Info("HelloStart")
 		go c.worker(ctx, deliveries)
+		logger.Info("HelloEnd")
 	}
 
-	chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
-	logger.Info("ch.NotifyClose", zap.Error(chanErr))
-	return chanErr
+	// TODO Fix blocking error handling
+	//chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
+	//logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	return nil
 }
 
 func (c *LocationSubscriber) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
 		var lastLocation *LastLocation
-		logger.Info("Received a message: %s", zap.Any("delivery", d.Body))
+		logger.Debug("Received a message: %s", zap.Any("delivery", d.Body))
 		err := json.Unmarshal(d.Body, lastLocation)
 		if err != nil {
-			logger.Info("failed to unmarshal %s", zap.Error(err))
+			logger.Debug("failed to unmarshal %s", zap.Error(err))
 		}
 		c.svc.UpdateDistanceTravelled(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
 	}
+}
+
+func (wah *WorkoutAMQPHandler) InitAMQP() error {
+
+	//TODO ERROR HANDLING
+	err := wah.locationSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "LOCATION_PERIPHERAL_WORKOUT", "", "")
+	logger.Debug("Error err", zap.Any("err", err))
+	err = wah.shelterSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "SHELTER_TRAIL_WORKOUT", "", "")
+	logger.Debug("Error err", zap.Any("err", err))
+
+	return nil
 }

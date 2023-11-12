@@ -41,8 +41,6 @@ func (handler *WorkoutHTTPHandler) InitRouter() {
 
 func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 
-	//TODO Error Handling
-
 	var startWorkout StartWorkout
 	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -60,8 +58,7 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 		return
 	}
 
-	// TODO: The two error handling are the same, it can be refactored
-	linkURL, err := h.svc.Start(&workout)
+	linkURL, err := h.svc.Start(&workout, startWorkout.HRMId, startWorkout.HRMConnected)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,

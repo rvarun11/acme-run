@@ -17,7 +17,6 @@ var (
 )
 
 type WorkoutService interface {
-	// TODO: List should only return workouts for a particular Player
 	List() ([]*domain.Workout, error)
 	GetWorkout(workoutID uuid.UUID) (*domain.Workout, error)
 
@@ -30,6 +29,7 @@ type WorkoutService interface {
 
 	UpdateDistanceTravelled(workoutID uuid.UUID, latitude float64, longitude float64, timeOfLocation time.Time) error
 	UpdateShelter(workoutID uuid.UUID, DistanceToShelter float64) error
+	ComputeWorkoutOptionsOrder() error
 
 	GetDistanceById(workoutID uuid.UUID) (float64, error)
 	GetDistanceCoveredBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (float64, error)
@@ -60,4 +60,15 @@ type WorkoutRepository interface {
 	GetFightsFoughtBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
 	GetSheltersTakenByID(workoutID uuid.UUID) (uint16, error)
 	GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
+}
+
+type UserServiceClient interface {
+	GetProfileOfUser(playerID uuid.UUID) (string, error)
+	GetHardcoreModeOfUser(playerID uuid.UUID) (bool, error)
+}
+
+type PeripheralDeviceClient interface {
+	GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error)
+	BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, SendLiveLocationToTrailManager bool) error
+	UnbindPeripheralData(workoutID uuid.UUID) error
 }
