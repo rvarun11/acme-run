@@ -3,123 +3,334 @@ package amqphandler
 import (
 	"context"
 	"encoding/json"
-	"log"
-	"time"
+	"fmt"
 
+	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
-	"github.com/google/uuid"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.uber.org/zap"
 )
 
-func failOnError(err error, msg string) {
+const (
+	exchangeKind       = "direct"
+	exchangeDurable    = true
+	exchangeAutoDelete = false
+	exchangeInternal   = false
+	exchangeNoWait     = false
+
+	queueDurable    = true
+	queueAutoDelete = false
+	queueExclusive  = false
+	queueNoWait     = false
+
+	// publishMandatory = false
+	// publishImmediate = false
+
+	prefetchCount  = 1
+	prefetchSize   = 0
+	prefetchGlobal = false
+
+	consumeAutoAck   = false
+	consumeExclusive = false
+	consumeNoLocal   = false
+	consumeNoWait    = false
+)
+
+var cfg *config.RabbitMQ = config.Config.RabbitMQ
+
+// Images Rabbitmq consumer
+type ShelterSubscriber struct {
+	amqpConn *amqp.Connection
+	svc      *services.WorkoutService
+}
+
+// Images Rabbitmq consumer
+type LocationSubscriber struct {
+	amqpConn *amqp.Connection
+	svc      *services.WorkoutService
+}
+
+type WorkoutAMQPHandler struct {
+	svc                *services.WorkoutService
+	locationSubscriber *LocationSubscriber
+	shelterSubscriber  *ShelterSubscriber
+}
+
+func NewAMQPHandler(workoutSvc *services.WorkoutService) *WorkoutAMQPHandler {
+	amqpConn_shelterSub, _ := NewConnection(cfg)
+	shelterSubscriber := ShelterSubscriber{
+		amqpConn: amqpConn_shelterSub,
+		svc:      workoutSvc,
+	}
+
+	amqpConn_locationSub, _ := NewConnection(cfg)
+	locationSubscriber := LocationSubscriber{
+		amqpConn: amqpConn_locationSub,
+		svc:      workoutSvc,
+	}
+
+	return &WorkoutAMQPHandler{
+		svc:                workoutSvc,
+		locationSubscriber: &locationSubscriber,
+		shelterSubscriber:  &shelterSubscriber,
+	}
+}
+
+// Initialize new RabbitMQ connection
+func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
+	conn := fmt.Sprintf(
+		"amqp://%s:%s@%s:%s/",
+		cfg.User,
+		cfg.Password,
+		cfg.Host,
+		cfg.Port,
+	)
+	mq, err := amqp.Dial(conn)
 	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
-func HRMSubscriber(svc services.WorkoutService, url string) {
-	conn, err := amqp.Dial(url)
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		"HR-Queue-001", // name
-		false,          // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
-	)
-	failOnError(err, "Failed to declare a queue")
-
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	failOnError(err, "Failed to register a consumer")
-
-	var forever chan struct{}
-
-	type tempDTO struct {
-		WorkoutID uuid.UUID `json:"workoutID"`
-		HRValue   uint16    `json:"hrValue"`
+		return &amqp.Connection{}, err
 	}
 
-	var tempDTOVar tempDTO
-	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-			err = json.Unmarshal(d.Body, &tempDTOVar)
-			// TODO: Ignoring Error for now, Handle Error later
-			// Call the following to get the HR Value updated
-			//svc.UpdateHRValue(tempDTOVar.WorkoutID, tempDTOVar.HRValue)
-
-		}
-	}()
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
+	return mq, nil
 }
 
-func StartHRM(hrmID uuid.UUID, workoutID uuid.UUID) {
+// Consume messages
+func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, consumerTag string) (*amqp.Channel, error) {
+	ch, err := c.amqpConn.Channel()
+	if err != nil {
+		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
+	}
 
-	// Just connect for now and send
-	// TODO: Should we connect once and use the same for sending and receiving?
-
-	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
-	defer conn.Close()
-
-	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
-	defer ch.Close()
-
-	q, err := ch.QueueDeclare(
-		"HR-Workout-001", // name
-		false,            // durable
-		false,            // delete when unused
-		false,            // exclusive
-		false,            // no-wait
-		nil,              // arguments
+	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	err = ch.ExchangeDeclare(
+		exchangeName,
+		exchangeKind,
+		exchangeDurable,
+		exchangeAutoDelete,
+		exchangeInternal,
+		exchangeNoWait,
+		nil,
 	)
-	failOnError(err, "Failed to declare a queue")
+	if err != nil {
+		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
+	}
 
-	failOnError(err, "Failed to declare a queue")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	queue, err := ch.QueueDeclare(
+		queueName,
+		queueDurable,
+		queueAutoDelete,
+		queueExclusive,
+		queueNoWait,
+		nil,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("error ch.QueueDeclare %w", err)
+	}
+
+	logger.Debug("Declaring queue and binding it to exchange",
+		zap.String("queue_name", queue.Name),
+		zap.String("exchange_name", exchangeName),
+		zap.Int("message_count", queue.Messages),
+		zap.Int("consumer_count", queue.Consumers),
+		zap.String("binding_key", bindingKey),
+	)
+
+	err = ch.QueueBind(
+		queue.Name,
+		bindingKey,
+		exchangeName,
+		queueNoWait,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error ch.QueueBind %w", err)
+	}
+
+	logger.Debug("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
+
+	err = ch.Qos(
+		prefetchCount,  // prefetch count
+		prefetchSize,   // prefetch size
+		prefetchGlobal, // global
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error ch.Qos %w", err)
+	}
+
+	return ch, nil
+}
+
+// Start new rabbitmq consumer
+func (c *ShelterSubscriber) StartConsumer(workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// TODO: Temp DTO
-	type tempDTO struct {
-		WorkoutID uuid.UUID `json:"workoutID"`
-		HRMId     uuid.UUID `json:"hrmID"`
+	ch, err := c.CreateChannel(exchange, queueName, bindingKey, consumerTag)
+	if err != nil {
+		return fmt.Errorf("create channel error %w", err)
+	}
+	defer ch.Close()
+
+	deliveries, err := ch.Consume(
+		queueName,
+		consumerTag,
+		consumeAutoAck,
+		consumeExclusive,
+		consumeNoLocal,
+		consumeNoWait,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("consume error %w", err)
 	}
 
-	var tempDTOVar tempDTO
-	tempDTOVar.WorkoutID = workoutID
-	tempDTOVar.HRMId = hrmID
+	for i := 0; i < workerPoolSize; i++ {
+		/// Do something with the deliveriesFind
+		go c.worker(ctx, deliveries)
+	}
 
-	var body []byte
+	// TODO Fix blocking error handling
+	//chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
+	//logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	return nil
+}
 
-	body, _ = json.Marshal(tempDTOVar)
+func (c *ShelterSubscriber) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
+	for d := range deliveries {
+		var shelterAvailable *ShelterAvailable
+		logger.Debug("Received a message: %s", zap.Any("delivery", d.Body))
+		err := json.Unmarshal(d.Body, shelterAvailable)
+		if err != nil {
+			logger.Debug("failed to unmarshal %s", zap.Error(err))
+		}
+		c.svc.UpdateShelter(shelterAvailable.WorkoutID, shelterAvailable.DistanceToShelter)
+	}
+}
 
-	err = ch.PublishWithContext(ctx,
-		"",     // exchange
-		q.Name, // routing key
-		false,  // mandatory
-		false,  // immediate
-		amqp.Publishing{
-			ContentType: "text/json",
-			Body:        []byte(body),
-		})
-	failOnError(err, "Failed to publish a message")
-	log.Printf(" [x] Sent %s\n", body)
+// Consume messages
+func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, consumerTag string) (*amqp.Channel, error) {
+	ch, err := c.amqpConn.Channel()
+	if err != nil {
+		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
+	}
+
+	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	err = ch.ExchangeDeclare(
+		exchangeName,
+		exchangeKind,
+		exchangeDurable,
+		exchangeAutoDelete,
+		exchangeInternal,
+		exchangeNoWait,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
+	}
+
+	queue, err := ch.QueueDeclare(
+		queueName,
+		queueDurable,
+		queueAutoDelete,
+		queueExclusive,
+		queueNoWait,
+		nil,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("error ch.QueueDeclare %w", err)
+	}
+
+	logger.Debug("Declaring queue and binding it to exchange",
+		zap.String("queue_name", queue.Name),
+		zap.String("exchange_name", exchangeName),
+		zap.Int("message_count", queue.Messages),
+		zap.Int("consumer_count", queue.Consumers),
+		zap.String("binding_key", bindingKey),
+	)
+
+	err = ch.QueueBind(
+		queue.Name,
+		bindingKey,
+		exchangeName,
+		queueNoWait,
+		nil,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error ch.QueueBind %w", err)
+	}
+
+	logger.Debug("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
+
+	err = ch.Qos(
+		prefetchCount,  // prefetch count
+		prefetchSize,   // prefetch size
+		prefetchGlobal, // global
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error ch.Qos %w", err)
+	}
+
+	return ch, nil
+}
+
+// Start new rabbitmq consumer
+func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	ch, err := c.CreateChannel(exchange, queueName, bindingKey, consumerTag)
+	if err != nil {
+		return fmt.Errorf("create channel error %w", err)
+	}
+	defer ch.Close()
+
+	deliveries, err := ch.Consume(
+		queueName,
+		consumerTag,
+		consumeAutoAck,
+		consumeExclusive,
+		consumeNoLocal,
+		consumeNoWait,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("consume error %w", err)
+	}
+
+	for i := 0; i < workerPoolSize; i++ {
+		/// Do something with the deliveriesFind
+		logger.Info("HelloStart")
+		go c.worker(ctx, deliveries)
+		logger.Info("HelloEnd")
+	}
+
+	// TODO Fix blocking error handling
+	//chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
+	//logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	return nil
+}
+
+func (c *LocationSubscriber) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
+	for d := range deliveries {
+		var lastLocation *LastLocation
+		logger.Debug("Received a message: %s", zap.Any("delivery", d.Body))
+		err := json.Unmarshal(d.Body, lastLocation)
+		if err != nil {
+			logger.Debug("failed to unmarshal %s", zap.Error(err))
+		}
+		c.svc.UpdateDistanceTravelled(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
+	}
+}
+
+func (wah *WorkoutAMQPHandler) InitAMQP() error {
+
+	//TODO ERROR HANDLING
+	err := wah.locationSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "LOCATION_PERIPHERAL_WORKOUT", "", "")
+	logger.Debug("Error err", zap.Any("err", err))
+	err = wah.shelterSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "SHELTER_TRAIL_WORKOUT", "", "")
+	logger.Debug("Error err", zap.Any("err", err))
+
+	return nil
 }

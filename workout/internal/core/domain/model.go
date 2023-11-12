@@ -51,6 +51,8 @@ type WorkoutOptions struct {
 	FightsPushDown bool `json:"fights_push_down"`
 	// Is Workout Option Active
 	IsWorkoutOptionActive bool `json:"is_workout_option_active"`
+	// Distance to Shelter
+	DistanceToShelter float64 `json:"distance_to_shelter"`
 }
 
 func NewWorkout(PlayerID uuid.UUID, TrailID uuid.UUID, HRMID uuid.UUID, HRMConnected bool) (Workout, error) {

@@ -2,6 +2,8 @@ package main
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/clients"
+	amqphandler "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/handler/amqp"
 	http "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/handler/http"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
@@ -20,11 +22,16 @@ func main() {
 
 	// Initialize postgres repository
 	store := postgres.NewRepository(cfg.Postgres)
+	peripheralDeviceClient := clients.NewPeripheralDeviceClient()
+	user := clients.NewUserServiceClient()
 
 	// Initialize Workout service
-	workoutSvc := services.NewWorkoutService(store)
+	workoutSvc := services.NewWorkoutService(store, peripheralDeviceClient, user)
 	workoutHTTPHandler := http.NewWorkoutHTTPHandler(router, workoutSvc)
 	workoutHTTPHandler.InitRouter()
+
+	workoutAMQPHandler := amqphandler.NewAMQPHandler(workoutSvc)
+	workoutAMQPHandler.InitAMQP()
 
 	// Start Server
 	router.Run(":" + cfg.Port)

@@ -4,19 +4,43 @@ import (
 	"fmt"
 	"time"
 
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/ports"
+	"go.uber.org/zap"
+
 	"github.com/google/uuid"
+	"github.com/umahmood/haversine"
 )
 
+type ActiveWorkoutsLastLocation struct {
+	// Latitude of the Player
+	Latitude float64 `json:"latitude"`
+	// Longitude of the Player
+	Longitude float64 `json:"longitude"`
+	// Time of location
+	TimeOfLocation time.Time `json:"time_of_location"`
+}
+
+type ActiveWorkoutsHeartRate struct {
+	// HRM Connection
+	HRMConnected bool
+}
+
 type WorkoutService struct {
-	repo ports.WorkoutRepository
+	repo                       ports.WorkoutRepository
+	peripheral                 ports.PeripheralDeviceClient
+	user                       ports.UserServiceClient
+	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
+	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
 }
 
 // Factory for creating a new WorkoutService
-func NewWorkoutService(repo ports.WorkoutRepository) *WorkoutService {
+func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralDeviceClient, user ports.UserServiceClient) *WorkoutService {
 	return &WorkoutService{
-		repo: repo,
+		repo:       repo,
+		peripheral: peripheral,
+		user:       user,
 	}
 }
 
@@ -28,19 +52,26 @@ func (s *WorkoutService) GetWorkout(id uuid.UUID) (*domain.Workout, error) {
 	return s.repo.GetWorkout(id)
 }
 
-// TODO: Add start workout logic here
-func (s *WorkoutService) Start(workout *domain.Workout) (string, error) {
-	// this will create the workout
-	// Send request Get HRM
-	// TODO Post call to Geo HR Service
-	// Send request to tie HRM to Workout
-	//if startWorkout.HRMConnected {
-	// TODO: Move to the service later along with the above code
-	//	StartHRM(startWorkout.HRMId, workout.ID)
-	//}
+func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConnected bool) (string, error) {
+	profile, err := s.user.GetProfileOfUser(workout.PlayerID)
+	if err != nil {
+		return "", err
+	}
 
-	// TODO : Get profile from Player Service
-	// TODO : Get hardCode mode from Player Service
+	hardcoreMode, err := s.user.GetHardcoreModeOfUser(workout.PlayerID)
+	if err != nil {
+		return "", err
+	}
+	workout.HardcoreMode = hardcoreMode
+	workout.Profile = profile
+	s.repo.UpdateWorkout(workout)
+
+	s.peripheral.BindPeripheralData(workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected)
+
+	s.activeWorkoutsHeartRate[workout.WorkoutID] = ActiveWorkoutsHeartRate{
+		HRMConnected: HRMConnected,
+	}
+
 	workoutOptions := &domain.WorkoutOptions{
 		WorkoutID:             workout.WorkoutID,
 		CurrentWorkoutOption:  7,
@@ -48,11 +79,11 @@ func (s *WorkoutService) Start(workout *domain.Workout) (string, error) {
 		IsWorkoutOptionActive: false,
 	}
 
-	err := s.repo.Create(workout, workoutOptions)
+	err = s.repo.Create(workout, workoutOptions)
 	if err != nil {
 		return "", err
 	}
-
+	logger.Info("Workout Created with ID : workoutID", zap.String("workoutID", workout.WorkoutID.String()))
 	linkURL := fmt.Sprintf("/workoutOptions?workoutID=%s", workout.WorkoutID)
 	return linkURL, err
 }
@@ -78,6 +109,15 @@ const (
 	FightBit   = 1
 	EscapeBit  = 2
 )
+
+func getWorkoutType(bit int8) string {
+	if bit == ShelterBit {
+		return "Shelter"
+	} else if bit == FightBit {
+		return "Fight"
+	}
+	return "Escape"
+}
 
 // Compute the order of options based on FightsPushDown
 func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
@@ -105,6 +145,73 @@ func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8) 
 	return links
 }
 
+func (s *WorkoutService) UpdateDistanceTravelled(workoutID uuid.UUID, latitude float64, longitude float64, timeOfLocation time.Time) error {
+	// Check if the workout ID exists in the location map
+	lastLocation, locationExists := s.activeWorkoutsLastLocation[workoutID]
+
+	if locationExists {
+		// Calculate the distance between existing and new location
+		distanceCovered := 0.0
+		if lastLocation.Latitude != latitude || lastLocation.Longitude != longitude {
+			// Calculate the distance covered using the Haversine formula
+			// Create orb.Point for each coordinate
+			point1 := haversine.Coord{Lat: lastLocation.Latitude, Lon: lastLocation.Longitude}
+			point2 := haversine.Coord{Lat: latitude, Lon: longitude}
+
+			// Calculate the distance using the Haversine formula
+			_, distanceCovered = haversine.Distance(point1, point2)
+		}
+
+		// Update the workout distance if the distance covered is greater than 0
+		if distanceCovered > 0 {
+			// Get the workout from the repository
+			workout, err := s.repo.GetWorkout(workoutID)
+			if err != nil {
+				return err // Propagate the error from the repository
+			}
+
+			// Update the workout distance
+			workout.DistanceCovered += distanceCovered
+
+			// Update the workout in the repository
+			_, err = s.repo.UpdateWorkout(workout)
+			if err != nil {
+				return err // Propagate the error from the repository
+			}
+		}
+	} else {
+		// If the location doesn't exist, add it to the map
+		workout, err := s.repo.GetWorkout(workoutID)
+		if err != nil && !workout.IsCompleted {
+			s.activeWorkoutsLastLocation[workoutID] = ActiveWorkoutsLastLocation{
+				Latitude:       latitude,
+				Longitude:      longitude,
+				TimeOfLocation: timeOfLocation,
+			}
+		}
+	}
+
+	return nil // Return nil to indicate success
+}
+
+func (s *WorkoutService) UpdateShelter(workoutID uuid.UUID, DistanceToShelter float64) error {
+	// Get the workout options from the repository
+	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	workoutOptions.DistanceToShelter = DistanceToShelter
+
+	s.repo.UpdateWorkoutOptions(workoutOptions)
+
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	return nil // Return nil to indicate success
+}
+
 func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uint8) error {
 	// Get the workout options from the repository
 	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
@@ -127,7 +234,7 @@ func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uin
 	if err != nil {
 		return err // Propagate the error from the repository
 	}
-
+	logger.Info("Workout Option OPT started for ID : workoutID", zap.String("workoutID", workoutOptions.WorkoutID.String()), zap.String("OPT", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
 	return nil // Return nil to indicate success
 }
 
@@ -173,7 +280,7 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	if err != nil {
 		return err // Propagate the error from the repository
 	}
-
+	logger.Info("Workout Option OPT stopped for ID : workoutID", zap.String("workoutID", workoutOptions.WorkoutID.String()), zap.String("OPT", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
 	return nil // Return nil to indicate success
 }
 
@@ -193,7 +300,12 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 
 	s.repo.UpdateWorkout(tempWorkout)
 	s.repo.DeleteWorkoutOptions(tempWorkout.WorkoutID)
+	delete(s.activeWorkoutsLastLocation, tempWorkout.WorkoutID)
+	delete(s.activeWorkoutsHeartRate, tempWorkout.WorkoutID)
+
 	// Ask GeoHR to Stop
+	s.peripheral.UnbindPeripheralData(tempWorkout.WorkoutID)
+
 	// Notify ChallengeService
 	return tempWorkout, err
 }
@@ -228,4 +340,113 @@ func (s *WorkoutService) GetSheltersTakenById(workoutID uuid.UUID) (uint16, erro
 
 func (s *WorkoutService) GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error) {
 	return s.repo.GetSheltersTakenBetweenDates(playerID, startDate, endDate)
+}
+
+// Function to run periodically
+func (s *WorkoutService) RunPeriodicTask() {
+	for {
+		// Iterate through active workouts in locationMap
+		for workoutID := range s.activeWorkoutsLastLocation {
+			_ = s.ComputeWorkoutOptionsOrder(workoutID)
+			// TODO
+			//if err != nil {
+			// Handle the error (e.g., log it)
+			//}
+		}
+
+		// Sleep for 4 seconds before the next iteration
+		time.Sleep(4 * time.Second)
+	}
+}
+
+// ComputeWorkoutOptionsOrder is modified to take profile directly
+func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
+	// Get the workout options from the repository
+	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	// Get the workout from the repository
+	workout, err := s.repo.GetWorkout(workoutID)
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	// Calculate the weight based on cardio
+	weight := calculateWeight(workout.Profile)
+
+	// Get the number of fights and escapes
+	fights, err := s.repo.GetFightsFoughtByID(workoutID)
+	if err != nil {
+		return err
+	}
+	escapes, err := s.repo.GetEscapesMadeByID(workoutID)
+	if err != nil {
+		return err
+	}
+
+	// Calculate the weight based on fights and escapes
+	fightEscapeWeight := calculateFightEscapeWeight(fights, escapes)
+
+	avgHeartRate, err := s.peripheral.GetAverageHeartRateOfUser(workout.WorkoutID)
+
+	if err != nil {
+		return err
+	}
+
+	// Calculate the weight based on average heart rate
+	heartRateWeight := calculateHeartRateWeight(avgHeartRate)
+
+	// Sum the weights
+	totalWeight := weight + fightEscapeWeight + heartRateWeight
+
+	// Update FightsPushDown based on the total weight
+	if totalWeight >= 75 {
+		workoutOptions.FightsPushDown = true
+	} else {
+		workoutOptions.FightsPushDown = false
+	}
+
+	// Update the workout options in the repository
+	_, err = s.repo.UpdateWorkoutOptions(workoutOptions)
+	if err != nil {
+		return err // Propagate the error from the repository
+	}
+
+	return nil // Return nil to indicate success
+}
+
+// Helper function to calculate the weight based on cardio
+func calculateWeight(profile string) int {
+	if profile == "cardio" {
+		return 50
+	}
+	return 0
+}
+
+// Helper function to calculate the weight based on fights and escapes
+func calculateFightEscapeWeight(fights, escapes uint16) int {
+	if fights-escapes >= 2 {
+		return 25
+	}
+	return 0
+}
+
+// Helper function to calculate the weight based on average heart rate
+func calculateHeartRateWeight(avgHeartRate uint8) int {
+	// TODO: Fetch user age from profile or another service
+	// age := profile.Age
+
+	// Mock user age for testing
+	age := 30
+
+	maxHeartRate := 220 - age
+	percentageMaxHeartRate := float64(avgHeartRate) / float64(maxHeartRate) * 100
+
+	if percentageMaxHeartRate < 70 {
+		return 25
+	}
+
+	return 0
 }
