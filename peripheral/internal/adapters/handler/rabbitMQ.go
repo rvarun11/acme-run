@@ -1,22 +1,58 @@
-package handler
+package amqphandler
 
 import (
 	"encoding/json"
 	"log"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/ports"
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
+const (
+	exchangeKind       = "direct"
+	exchangeDurable    = true
+	exchangeAutoDelete = false
+	exchangeInternal   = false
+	exchangeNoWait     = false
+
+	queueDurable    = true
+	queueAutoDelete = false
+	queueExclusive  = false
+	queueNoWait     = false
+
+	// publishMandatory = false
+	// publishImmediate = false
+
+	prefetchCount  = 1
+	prefetchSize   = 0
+	prefetchGlobal = false
+
+	consumeAutoAck   = false
+	consumeExclusive = false
+	consumeNoLocal   = false
+	consumeNoWait    = false
+)
+
+const (
+	lastLocationQueueName = "Peripheral-Location-Queue-001"
+	lastHRQueueName       = "Peripheral-HRM-Queue-001"
+)
+
+type RabbitMQHandler struct {
+	peripheralService *ports.PeripheralService
+	amqpURL           string
+}
+
+func NewRabbitMQHandler(peripheralService *ports.PeripheralService, amqpURL string) *RabbitMQHandler {
+	return &RabbitMQHandler{
+		peripheralService: peripheralService,
+		amqpURL:           amqpURL,
 	}
 }
 
-func PeripheralWorkoutBinder(svc services.PeripheralService, url string) {
-	conn, err := amqp.Dial(url)
+func (handler *RabbitMQHandler) SendLastLocation(wId uuid.UUID) {
+	conn, err := amqp.Dial(handler.amqpURL)
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -25,47 +61,72 @@ func PeripheralWorkoutBinder(svc services.PeripheralService, url string) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"HR-Workout-001", // name
-		false,            // durable
-		false,            // delete when unused
-		false,            // exclusive
-		false,            // no-wait
-		nil,              // arguments
+		lastLocationQueueName, // name
+		false,                 // durable
+		false,                 // delete when unused
+		false,                 // exclusive
+		false,                 // no-wait
+		nil,                   // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
+	location := handler.peripheralService.GetGeoLocation(wId)
+	body, err := json.Marshal(location)
+	failOnError(err, "Failed to marshal LastLocation")
+
+	err = ch.Publish(
+		"",     // exchange
+		q.Name, // routing key
+		false,  // mandatory
+		false,  // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		})
+	failOnError(err, "Failed to publish LastLocation")
+
+	log.Printf("Sent LastLocation: %s\n", body)
+}
+
+func (handler *RabbitMQHandler) SendLastHR(wId uuid.UUID) {
+	conn, err := amqp.Dial(handler.amqpURL)
+	failOnError(err, "Failed to connect to RabbitMQ")
+	defer conn.Close()
+
+	ch, err := conn.Channel()
+	failOnError(err, "Failed to open a channel")
+	defer ch.Close()
+
+	q, err := ch.QueueDeclare(
+		lastHRQueueName, // name
+		false,           // durable
+		false,           // delete when unused
+		false,           // exclusive
+		false,           // no-wait
+		nil,             // arguments
 	)
-	failOnError(err, "Failed to register a consumer")
+	failOnError(err, "Failed to declare a queue")
 
-	var forever chan struct{}
+	hrmReading := handler.peripheralService.GetHRMReading(wId)
+	body, err := json.Marshal(hrmReading)
+	failOnError(err, "Failed to marshal LastHR")
 
-	// TODO: Temp DTO
-	type tempDTO struct {
-		WorkoutID uuid.UUID `json:"workoutID"`
-		HRMId     uuid.UUID `json:"hrmID"`
+	err = ch.Publish(
+		"",     // exchange
+		q.Name, // routing key
+		false,  // mandatory
+		false,  // immediate
+		amqp.Publishing{
+			ContentType: "application/json",
+			Body:        body,
+		})
+	failOnError(err, "Failed to publish LastHR")
+
+	log.Printf("Sent LastHR: %s\n", body)
+}
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %s", msg, err)
 	}
-
-	var tempDTOVar LastLocation
-	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
-			err = json.Unmarshal(d.Body, &tempDTOVar)
-			failOnError(err, "Failed to unmarshal")
-			// TODO: Ignoring Error for now, Handle Error later
-			// Call the following to get the HR Value updated
-			svc.BindPeripheralToWorkout(tempDTOVar.HRMId, tempDTOVar.WorkoutID)
-
-		}
-	}()
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<-forever
 }

@@ -45,6 +45,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 	}
 
 	if bindDataInstance.Connect {
+		go handler.rabbitMQHandler.SendLastHR(data.WorkoutID)
 		h.svc.ConnectPeripheral(bindDataInstance.WorkoutId, bindDataInstance.HRMId)
 	} else {
 		h.svc.DisconnectPeripheral(bindDataInstance.WorkoutId)
@@ -93,7 +94,22 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 	latitude := ctx.Query("latitude")
 	longitude := ctx.Query("longitude")
 	wId := ctx.Query("workout_id")
-	ctx.JSON(http.StatusOK, h.svc.SetGeoLocation(wId, longitude, latitude))
+
+	var tempLastLoc LastLocation
+	tempLastLoc.WorkoutID = wId
+	tempLastLoc.TimeOfLocation = time.Time()
+	h.svc.SetGeoLocation(wId, longitude, latitude)
+
+	if err := c.ShouldBindJSON(&tempLastLoc); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Now trigger the RabbitMQHandler to send the updated location
+	go handler.rabbitMQHandler.SendLastLocation(data.WorkoutID)
+	c.JSON(http.StatusOK, gin.H{"message": "Geo reading set and location sent"})
+
+	// ctx.JSON(http.StatusOK, h.svc.SetGeoLocation(wId, longitude, latitude))
 }
 
 func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
