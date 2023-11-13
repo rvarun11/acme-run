@@ -43,7 +43,7 @@ type Trail struct {
 	// end latitude
 	EndLatitude float64 `json:"end_latitude"`
 	// id of the cloest shelter
-	CloestShel terId uuid.UUID `json:"cloest_shelter_id"`
+	CloestShelterId uuid.UUID `json:"cloest_shelter_id"`
 	// created time
 	CreatedAt time.time `json:"created_at"`
 }

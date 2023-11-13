@@ -47,11 +47,11 @@ func (p *Peripheral) GetGeoID(id uuid.UUID) {
 }
 
 func (p *Peripheral) GetAverageHRate() LastHR {
-	var tempDTO LastHR
-	tempDTO.HRMID = p.HRMID
-	tempDTO.TimeOfLocation = p.HRateTime
-	tempDTO.HeartRate = p.AverageHRate
-	return tempDTO
+	var tempHRDTO LastHR
+	tempHRDTO.HRMID = p.HRMID
+	tempHRDTO.TimeOfLocation = p.HRateTime
+	tempHRDTO.HeartRate = p.AverageHRate
+	return tempHRDTO
 }
 
 func (p *Peripheral) SetAverageHRate(rate int) {
@@ -101,12 +101,12 @@ func(p *Peripheral) SetLocation(longitude float64, latitude float64)
 // NOTES: ONLY read location if the peripheral status is on, otherwise it is off, so
 func(p *Peripheral) GetLocation() LastLocation
 {
-	var tempDTO LastLocation
-	tempDTO.LocationTime = p.LocationTime
-	tempDTO.Longitude = p.Latitude
-	tempDTO.LocationTime = p.LocationTime
-	tempDTO.WorkoutID = p.WorkoutId
-	return tempDTO
+	var tempLocationDTO LastLocation
+	tempLocationDTO.LocationTime = p.LocationTime
+	tempLocationDTO.Longitude = p.Latitude
+	tempLocationDTO.LocationTime = p.LocationTime
+	tempLocationDTO.WorkoutID = p.WorkoutId
+	return tempLocationDTO
 
 }
 

@@ -22,7 +22,7 @@ func (handler *PeripheralServiceHTTPHandler) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
 
-	router.POST("/peripheral", handler.CreatePeripheral)
+	router.POST("/peripheral", handler.BindPeripheralToData)
 	router.PUT("/peripheral/hrm_status", handler.SetHRMStatus)
 	router.GET("/peripheral/hrm_staus", handler.GetHRMStatus)
 	router.GET("/peripheral/hrm_reading", handler.GetHRMReading)
@@ -34,20 +34,20 @@ func (handler *PeripheralServiceHTTPHandler) InitRouter() {
 
 }
 
-func (h *HTTPHandler) CreatePeripheral(ctx *gin.Context) {
+func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
-	var tempDTOInstance BindPeripheralData
-	if err := ctx.ShouldBindJSON(&tempDTOInstance); err != nil {
+	var bindDataInstance BindPeripheralData
+	if err := ctx.ShouldBindJSON(&bindDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"Error": err,
 		})
 		return
 	}
 
-	if tempDTOInstance.Connect {
-		h.svc.ConnectPeripheral(tempDTOInstance.WorkoutId, tempDTOInstance.HRMId)
+	if bindDataInstance.Connect {
+		h.svc.ConnectPeripheral(bindDataInstance.WorkoutId, bindDataInstance.HRMId)
 	} else {
-		h.svc.DisconnectPeripheral(tempDTOInstance.WorkoutId)
+		h.svc.DisconnectPeripheral(bindDataInstance.WorkoutId)
 	}
 }
 
