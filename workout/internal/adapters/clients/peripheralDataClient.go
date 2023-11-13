@@ -11,7 +11,7 @@ import (
 type PeripheralDeviceClientImpl struct {
 }
 
-// Factory for creating a new WorkoutService
+// Factory for creating a NewPeripheralDeviceClient
 func NewPeripheralDeviceClient() *PeripheralDeviceClientImpl {
 	return &PeripheralDeviceClientImpl{}
 }
@@ -25,7 +25,6 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 		SendLiveLocationToTrailManager: SendLiveLocationToTrailManager,
 	}
 
-	// Marshal the data for the request body
 	bindPayload, err := json.Marshal(bindData)
 	if err != nil {
 		return err
@@ -46,10 +45,6 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 		return err
 	}
 	defer resp.Body.Close()
-
-	// Handle the response if needed...
-
-	// Rest of your existing code...
 
 	return err
 }

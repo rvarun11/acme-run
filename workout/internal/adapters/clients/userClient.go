@@ -64,5 +64,31 @@ func (u *UserServiceClientImpl) GetHardcoreModeOfUser(playerID uuid.UUID) (bool,
 		return false, err
 	}
 
-	return hardcoreMode == "true", err
+	return hardcoreMode == "true", nil
+}
+
+func (u *UserServiceClientImpl) GetUserAge(playerID uuid.UUID) (uint8, error) {
+
+	url := "http://example.com/get_user_age/" + playerID.String()
+
+	// Create a new GET request to fetch the user's age.
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	var age uint8
+	err = json.NewDecoder(resp.Body).Decode(&age)
+	if err != nil {
+		return 0, err
+	}
+
+	return age, nil
 }

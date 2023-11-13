@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -140,6 +142,8 @@ func toWorkoutOptionsPostgres(workoutOptions *domain.WorkoutOptions) *postgresWo
 // Repository Functions
 
 func (r *Repository) Create(workout *domain.Workout, workoutOptions *domain.WorkoutOptions) error {
+	logger.Info("DEBUG-----CREATE ROW IN REPO")
+
 	pworkout := &postgresWorkout{
 		WorkoutID:       workout.WorkoutID,
 		TrailID:         workout.TrailID,
@@ -164,14 +168,29 @@ func (r *Repository) Create(workout *domain.Workout, workoutOptions *domain.Work
 	}
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(&pworkout).Error; err != nil {
-			return err
+		res := tx.First(&pworkout, "workout_id = ?", workout.WorkoutID)
+		if res.Error != nil {
+			// If error occurs in finding the workout, return the error.
+			return res.Error
 		}
+
+		if res.RowsAffected == 0 {
+			if err := tx.Create(&pworkout).Error; err != nil {
+				// Log and return error if the creation fails.
+				logger.Debug("FAILED TO CREATE WORKOUT", zap.String("error", err.Error()))
+				return err
+			}
+		}
+
+		// Create 'pworkoutOptions' if 'pworkout' creation was successful or it already existed.
 		if err := tx.Create(&pworkoutOptions).Error; err != nil {
+			// Log and return error if the creation fails.
+			logger.Debug("FAILED TO CREATE WORKOUT OPTIONS", zap.String("error", err.Error()))
 			return err
 		}
 		return nil
 	})
+
 	// TODO Define Errors in Repo Interface file and return them instead of this
 	if err != nil {
 		return err
@@ -255,7 +274,7 @@ func (r *Repository) DeleteWorkoutOptions(workoutID uuid.UUID) error {
 func (r *Repository) GetDistanceByID(workoutID uuid.UUID) (float64, error) {
 	var distanceCovered = 0.0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("workout_id = ?", workoutID).
 		Pluck("distance_covered", &distanceCovered).
 		Error
@@ -271,7 +290,7 @@ func (r *Repository) GetDistanceByID(workoutID uuid.UUID) (float64, error) {
 func (r *Repository) GetDistanceCoveredBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (float64, error) {
 	totalDistanceCovered := 0.0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("player_id = ? AND created_at >= ? AND ended_at <= ?", playerID, startDate, endDate).
 		Select("COALESCE(SUM(DistanceCovered), 0)").Row().
 		Scan(&totalDistanceCovered)
@@ -287,7 +306,7 @@ func (r *Repository) GetDistanceCoveredBetweenDates(playerID uuid.UUID, startDat
 func (r *Repository) GetEscapesMadeByID(workoutID uuid.UUID) (uint16, error) {
 	escapesMade := 0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("workout_id = ?", workoutID).
 		Pluck("escapes", &escapesMade).
 		Error
@@ -302,7 +321,7 @@ func (r *Repository) GetEscapesMadeByID(workoutID uuid.UUID) (uint16, error) {
 func (r *Repository) GetEscapesMadeBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error) {
 	totalEscapesMade := 0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("player_id = ? AND created_at >= ? AND ended_at <= ?", playerID, startDate, endDate).
 		Select("COALESCE(SUM(escapes), 0)").Row().
 		Scan(&totalEscapesMade)
@@ -317,7 +336,7 @@ func (r *Repository) GetEscapesMadeBetweenDates(playerID uuid.UUID, startDate ti
 func (r *Repository) GetFightsFoughtByID(workoutID uuid.UUID) (uint16, error) {
 	fightsFought := 0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("workout_id = ?", workoutID).
 		Pluck("fights", &fightsFought).
 		Error
@@ -332,7 +351,7 @@ func (r *Repository) GetFightsFoughtByID(workoutID uuid.UUID) (uint16, error) {
 func (r *Repository) GetFightsFoughtBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error) {
 	totalFightsFought := 0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Select("COALESCE(SUM(fights), 0)").Row().
 		Scan(&totalFightsFought)
 
@@ -346,7 +365,7 @@ func (r *Repository) GetFightsFoughtBetweenDates(playerID uuid.UUID, startDate t
 func (r *Repository) GetSheltersTakenByID(workoutID uuid.UUID) (uint16, error) {
 	sheltersTaken := 0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("workout_id = ?", workoutID).
 		Pluck("shelters", &sheltersTaken).
 		Error
@@ -361,7 +380,7 @@ func (r *Repository) GetSheltersTakenByID(workoutID uuid.UUID) (uint16, error) {
 func (r *Repository) GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error) {
 	totalSheltersTaken := 0
 
-	err := r.db.Table("postgresWorkout").
+	err := r.db.Table("postgres_workouts").
 		Where("player_id = ? AND created_at >= ? AND ended_at <= ?", playerID, startDate, endDate).
 		Select("COALESCE(SUM(shelters), 0)").Row().
 		Scan(&totalSheltersTaken)
