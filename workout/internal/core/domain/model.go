@@ -83,3 +83,8 @@ func (w *Workout) GetID() uuid.UUID {
 func (w *Workout) SetID(id uuid.UUID) {
 	w.WorkoutID = id
 }
+
+type WorkoutOptionLink struct {
+	Name string
+	URL  string
+}

@@ -65,10 +65,11 @@ type WorkoutRepository interface {
 type UserServiceClient interface {
 	GetProfileOfUser(playerID uuid.UUID) (string, error)
 	GetHardcoreModeOfUser(playerID uuid.UUID) (bool, error)
+	GetUserAge(playerID uuid.UUID) (uint8, error)
 }
 
 type PeripheralDeviceClient interface {
 	GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error)
-	BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, SendLiveLocationToTrailManager bool) error
+	BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error
 	UnbindPeripheralData(workoutID uuid.UUID) error
 }

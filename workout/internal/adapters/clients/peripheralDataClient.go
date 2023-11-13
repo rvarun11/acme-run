@@ -11,7 +11,7 @@ import (
 type PeripheralDeviceClientImpl struct {
 }
 
-// Factory for creating a new WorkoutService
+// Factory for creating a NewPeripheralDeviceClient
 func NewPeripheralDeviceClient() *PeripheralDeviceClientImpl {
 	return &PeripheralDeviceClientImpl{}
 }
@@ -25,7 +25,6 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 		SendLiveLocationToTrailManager: SendLiveLocationToTrailManager,
 	}
 
-	// Marshal the data for the request body
 	bindPayload, err := json.Marshal(bindData)
 	if err != nil {
 		return err
@@ -47,11 +46,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 	}
 	defer resp.Body.Close()
 
-	// Handle the response if needed...
-
-	// Rest of your existing code...
-
-	return err
+	return nil
 }
 
 func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) error {
@@ -82,7 +77,7 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 	}
 	defer resp.Body.Close()
 
-	return err
+	return nil
 }
 
 func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
