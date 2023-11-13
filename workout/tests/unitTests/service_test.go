@@ -19,6 +19,13 @@ import (
 
 var cfg *config.AppConfiguration = config.Config
 
+/*
+TestWorkoutService_StartAndStop:
+
+	This test validates the "start" and "stop" workflow of a workout session within the WorkoutService.
+	It checks whether a new workout can be initiated and properly terminated.
+*/
+
 func TestWorkoutService_StartAndStop(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := mocks.NewUserServiceClientMock()
@@ -62,6 +69,16 @@ func TestWorkoutService_StartAndStop(t *testing.T) {
 	peripheralClientMock.AssertCalled(t, "UnbindPeripheralData", workoutID)
 }
 
+/*
+TestWorkoutService_UpdateDistanceTravelled:
+
+	This test case simulates the workout's distance tracking functionality by invoking
+	UpdateDistanceTravelled multiple times with sequential latitude and longitude
+	coordinates to simulate a user moving along a path. It ensures that distance
+	calculations are accumulated correctly in the database. After simulating the workout path,
+	it checks if the total distance reported by the GetDistanceById function matches the expected
+	sum of distances from the updates.
+*/
 func TestWorkoutService_UpdateDistanceTravelled(t *testing.T) {
 	// Mock setup
 	userClientMock := mocks.NewUserServiceClientMock()
@@ -122,6 +139,13 @@ func TestWorkoutService_UpdateDistanceTravelled(t *testing.T) {
 	assert.InDelta(t, expectedTotalDistance, actualTotalDistance, 0.01, "The actual distance should be close to the expected distance")
 }
 
+/*
+TestWorkoutProcess_Shelters:
+
+	Basic Test to check the count of Shelters Taken
+	The test asserts that the Shelters field in the workout data reflects the number of times
+	the user has taken shelter during the workout session.
+*/
 func TestWorkoutProcess_Shelters(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := mocks.NewUserServiceClientMock()
@@ -174,6 +198,11 @@ func TestWorkoutProcess_Shelters(t *testing.T) {
 	assert.Equal(t, uint8(2), sheltersTaken, "shelters taken should be 2")
 }
 
+/*
+TestWorkoutService_HardcoreMode:
+
+	Test to check that Shelter is not given as an option for Hardcore mode
+*/
 func TestWorkoutService_HardcoreMode(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := mocks.NewUserServiceClientMock()
@@ -226,6 +255,14 @@ func TestWorkoutService_HardcoreMode(t *testing.T) {
 	assert.True(t, stoppedWorkout.IsCompleted, "stopped workout should be marked as completed")
 }
 
+/*
+TestWorkoutService_InitialWorkoutOptionsIfCardio:
+
+	Test to check that the options when the Profile is Cardio
+	We flip the average heart rate to greater than 70% of the 220 - Age of User
+	and then check the options, the options will also flip
+	Meaning the Player should now prefer fighting than escaping
+*/
 func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := mocks.NewUserServiceClientMock()
@@ -295,6 +332,12 @@ func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	assert.True(t, stoppedWorkout.IsCompleted, "stopped workout should be marked as completed")
 }
 
+/*
+TestWorkoutService_InitialWorkoutOptionsIfStrength:
+
+	Test to check that the options when the Profile is Strength
+	It only checks the default options order which is fight followed by escape
+*/
 func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := mocks.NewUserServiceClientMock()
