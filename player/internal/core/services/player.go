@@ -20,7 +20,7 @@ func NewPlayerService(repo ports.PlayerRepository) *PlayerService {
 
 func (s *PlayerService) Register(req *dto.PlayerDTO) (*dto.PlayerDTO, error) {
 	// TODO: This can be improved because the types of all these fields are same and can cause problems, if ordered incorrectly
-	p, err := domain.NewPlayer(req.User.Name, req.User.Email, req.User.DateOfBirth, req.Weight, req.Height)
+	p, err := domain.NewPlayer(req.User.Name, req.User.Email, req.User.DateOfBirth, req.Weight, req.Height, domain.Preference(req.Preference), req.ZoneID)
 	if err != nil {
 		return &dto.PlayerDTO{}, ports.ErrorCreatePlayerFailed
 	}

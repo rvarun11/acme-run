@@ -60,7 +60,7 @@ type postgresPlayer struct {
 	// Height of the player
 	Height float64 `gorm:"<-"`
 	// GeographicalZone is a group of trails in a region
-	ZoneID string
+	ZoneID uuid.UUID
 	// CreatedAt is the time when the player registered
 	CreatedAt time.Time
 	// UpdatedAt is the time when the player last updated the profile

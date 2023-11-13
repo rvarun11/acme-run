@@ -16,8 +16,10 @@ type PlayerDTO struct {
 	Weight float64 `json:"weight"`
 	// Height of the player
 	Height float64 `json:"height"`
+	// Preference of the player
+	Preference string `json:"preference"`
 	// GeographicalZone is a group of trails in a region
-	ZoneID string `json:"zone_id"`
+	ZoneID uuid.UUID `json:"zone_id"`
 	// CreatedAt is the time when the player registered
 	CreatedAt time.Time `json:"created_at"`
 	// UpdatedAt is the time when the player last updated the profile
