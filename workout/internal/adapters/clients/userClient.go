@@ -16,7 +16,7 @@ func NewUserServiceClient() *UserServiceClientImpl {
 }
 
 func (u *UserServiceClientImpl) GetProfileOfUser(playerID uuid.UUID) (string, error) {
-	// xxsMake the GET request for user profile
+	// Make the GET request for user profile
 	url := "YOUR_UNBIND_ENDPOINT/" // Modify the endpoint as required
 
 	req, err := http.NewRequest("GET", url, nil)

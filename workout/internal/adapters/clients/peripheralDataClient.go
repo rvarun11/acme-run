@@ -46,7 +46,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 	}
 	defer resp.Body.Close()
 
-	return nil
+	return err
 }
 
 func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) error {
@@ -77,7 +77,7 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 	}
 	defer resp.Body.Close()
 
-	return nil
+	return err
 }
 
 func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
