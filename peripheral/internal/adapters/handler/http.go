@@ -45,7 +45,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 	}
 
 	if bindDataInstance.Connect {
-		go handler.rabbitMQHandler.SendLastHR(data.WorkoutID)
+		go handler.rabbitMQHandler.SendLastHR(bindDataInstance.WorkoutID)
 		h.svc.ConnectPeripheral(bindDataInstance.WorkoutId, bindDataInstance.HRMId)
 	} else {
 		h.svc.DisconnectPeripheral(bindDataInstance.WorkoutId)
