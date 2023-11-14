@@ -31,7 +31,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 		return err
 	}
 
-	url := "localhost:8004/api/v1/peripheral"
+	url := "http://localhost:8004/api/v1/peripheral"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bindPayload))
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 		return err
 	}
 
-	url := "localhost:8004/api/v1/peripheral"
+	url := "http://localhost:8004/api/v1/peripheral"
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(unbindPayload))
 	if err != nil {
 		return err
@@ -79,7 +79,7 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 
 func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
 
-	url := "localhost:8004/api/v1/peripheral/hrm/workout_id=" + workoutID.String() + "&type=avg"
+	url := "http://localhost:8004/api/v1/peripheral/hrm/workout_id=" + workoutID.String() + "&type=avg"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return 0, err

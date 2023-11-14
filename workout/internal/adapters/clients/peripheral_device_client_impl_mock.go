@@ -1,4 +1,4 @@
-package mocks
+package clients
 
 import (
 	"github.com/google/uuid"

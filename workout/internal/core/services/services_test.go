@@ -1,4 +1,4 @@
-package tests
+package services_test
 
 import (
 	"math/rand"
@@ -7,10 +7,10 @@ import (
 
 	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
+	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/clients"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
-	"github.com/CAS735-F23/macrun-teamvsl/workout/tests/mocks"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -28,8 +28,8 @@ TestWorkoutService_StartAndStop:
 
 func TestWorkoutService_StartAndStop(t *testing.T) {
 	// Initialize the mocks and the service
-	userClientMock := mocks.NewUserServiceClientMock()
-	peripheralClientMock := mocks.NewPeripheralDeviceClientMock()
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
 	store := postgres.NewRepository(cfg.Postgres)
 
 	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock)
@@ -76,8 +76,8 @@ TestWorkoutService_UpdateDistanceTravelled:
 */
 func TestWorkoutService_UpdateDistanceTravelled(t *testing.T) {
 	// Mock setup
-	userClientMock := mocks.NewUserServiceClientMock()
-	peripheralClientMock := mocks.NewPeripheralDeviceClientMock()
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
 	store := postgres.NewRepository(cfg.Postgres)
 
 	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock)
@@ -141,8 +141,8 @@ TestWorkoutProcess_Shelters:
 */
 func TestWorkoutProcess_Shelters(t *testing.T) {
 	// Initialize the mocks and the service
-	userClientMock := mocks.NewUserServiceClientMock()
-	peripheralClientMock := mocks.NewPeripheralDeviceClientMock()
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
 	store := postgres.NewRepository(cfg.Postgres)
 
 	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock)
@@ -193,8 +193,8 @@ TestWorkoutService_HardcoreMode:
 */
 func TestWorkoutService_HardcoreMode(t *testing.T) {
 	// Initialize the mocks and the service
-	userClientMock := mocks.NewUserServiceClientMock()
-	peripheralClientMock := mocks.NewPeripheralDeviceClientMock()
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
 	store := postgres.NewRepository(cfg.Postgres)
 
 	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock)
@@ -248,8 +248,8 @@ TestWorkoutService_InitialWorkoutOptionsIfCardio:
 */
 func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	// Initialize the mocks and the service
-	userClientMock := mocks.NewUserServiceClientMock()
-	peripheralClientMock := mocks.NewPeripheralDeviceClientMock()
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
 	store := postgres.NewRepository(cfg.Postgres)
 
 	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock)
@@ -317,8 +317,8 @@ TestWorkoutService_InitialWorkoutOptionsIfStrength:
 */
 func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	// Initialize the mocks and the service
-	userClientMock := mocks.NewUserServiceClientMock()
-	peripheralClientMock := mocks.NewPeripheralDeviceClientMock()
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
 	store := postgres.NewRepository(cfg.Postgres)
 
 	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock)

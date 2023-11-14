@@ -37,7 +37,7 @@ func NewUserServiceClient() *UserServiceClientImpl {
 
 func (u *UserServiceClientImpl) GetWorkoutPreferenceOfUser(playerID uuid.UUID) (string, error) {
 
-	url := "localhost:8000/api/v1/players/" + playerID.String()
+	url := "http://localhost:8000/api/v1/players/" + playerID.String()
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -62,7 +62,7 @@ func (u *UserServiceClientImpl) GetWorkoutPreferenceOfUser(playerID uuid.UUID) (
 
 func (u *UserServiceClientImpl) GetUserAge(playerID uuid.UUID) (uint8, error) {
 
-	url := "localhost:8000/api/v1/players/" + playerID.String()
+	url := "http://localhost:8000/api/v1/players/" + playerID.String()
 
 	// Create a new GET request to fetch the user's age.
 	req, err := http.NewRequest("GET", url, nil)
