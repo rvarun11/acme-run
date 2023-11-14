@@ -3,7 +3,7 @@ package http
 import (
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/domain"
 	"github.com/google/uuid"
 )
 
@@ -37,7 +37,6 @@ type playerDTO struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Add ToAggregate
 func (playerDTO *playerDTO) toAggregate() *domain.Player {
 	userDTO := domain.User{
 		ID:          playerDTO.User.ID,
@@ -46,13 +45,14 @@ func (playerDTO *playerDTO) toAggregate() *domain.Player {
 		DateOfBirth: playerDTO.User.DateOfBirth,
 	}
 	return &domain.Player{
-		ID:        playerDTO.ID,
-		User:      &userDTO,
-		Weight:    playerDTO.Weight,
-		Height:    playerDTO.Height,
-		ZoneID:    playerDTO.ZoneID,
-		CreatedAt: playerDTO.CreatedAt,
-		UpdatedAt: playerDTO.UpdatedAt,
+		ID:         playerDTO.ID,
+		User:       &userDTO,
+		Weight:     playerDTO.Weight,
+		Height:     playerDTO.Height,
+		Preference: domain.Preference(playerDTO.Preference),
+		ZoneID:     playerDTO.ZoneID,
+		CreatedAt:  playerDTO.CreatedAt,
+		UpdatedAt:  playerDTO.UpdatedAt,
 	}
 }
 
@@ -65,10 +65,11 @@ func fromAggregate(player *domain.Player) *playerDTO {
 			Name:        player.User.Name,
 			DateOfBirth: player.User.DateOfBirth,
 		},
-		Weight:    player.Weight,
-		Height:    player.Height,
-		ZoneID:    player.ZoneID,
-		CreatedAt: player.CreatedAt,
-		UpdatedAt: player.UpdatedAt,
+		Weight:     player.Weight,
+		Height:     player.Height,
+		Preference: string(player.Preference),
+		ZoneID:     player.ZoneID,
+		CreatedAt:  player.CreatedAt,
+		UpdatedAt:  player.UpdatedAt,
 	}
 }

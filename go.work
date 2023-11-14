@@ -2,6 +2,6 @@ go 1.21.1
 
 use (
 	./challenge_manager
-	./player
+	./user
 	./workout
 )

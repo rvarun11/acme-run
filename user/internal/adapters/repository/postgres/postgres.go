@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/user/config"
+	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/domain"
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,16 +15,15 @@ type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() *Repository {
-	host := conf.host
-	port := conf.port
-	user := conf.user
-	password := conf.password
-	dbname := conf.dbname
-	encoding := conf.encoding
+func NewRepository(cfg *config.Postgres) *Repository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
-		host, port, user, dbname, password, encoding,
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.DB_Name,
+		cfg.Password,
+		cfg.Encoding,
 	)
 
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
@@ -213,11 +213,12 @@ func toAggregate(pu *postgresUser, pp *postgresPlayer) *domain.Player {
 			Name:        pu.Name,
 			DateOfBirth: pu.DateOfBirth,
 		},
-		Weight:    pp.Weight,
-		Height:    pp.Height,
-		ZoneID:    pp.ZoneID,
-		CreatedAt: pp.CreatedAt,
-		UpdatedAt: pp.UpdatedAt,
+		Weight:     pp.Weight,
+		Height:     pp.Height,
+		Preference: domain.Preference(pp.Preference),
+		ZoneID:     pp.ZoneID,
+		CreatedAt:  pp.CreatedAt,
+		UpdatedAt:  pp.UpdatedAt,
 	}
 }
 
