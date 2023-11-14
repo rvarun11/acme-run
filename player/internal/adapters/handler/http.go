@@ -30,7 +30,7 @@ func (h *HTTPHandler) RegisterPlayer(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.svc.Register(&req)
+	_, err := h.svc.Register(dto.ToAggregate(&req))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "unable to register, something occured",
@@ -39,7 +39,6 @@ func (h *HTTPHandler) RegisterPlayer(ctx *gin.Context) {
 	}
 	logger.Info("player registered")
 	ctx.JSON(http.StatusCreated, gin.H{
-		"player":  res,
 		"message": "New player created successfully",
 	})
 }
@@ -59,7 +58,10 @@ func (h *HTTPHandler) GetPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, p)
+	res := dto.FromAggregate(p)
+	ctx.JSON(http.StatusOK, gin.H{
+		"player": res,
+	})
 }
 
 func (h *HTTPHandler) UpdatePlayer(ctx *gin.Context) {
@@ -71,14 +73,14 @@ func (h *HTTPHandler) UpdatePlayer(ctx *gin.Context) {
 		return
 	}
 
-	res, err := h.svc.Update(&req)
+	p, err := h.svc.Update(dto.ToAggregate(&req))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
 		return
 	}
-
+	res := dto.FromAggregate(p)
 	ctx.JSON(http.StatusNoContent, gin.H{
 		// 204 returns no body so this can be changed to 200 if body is needed
 		"player":  res,
