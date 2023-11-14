@@ -1,8 +1,7 @@
 go 1.21.1
 
 use (
-	./challenge_manager
-	./hrm
-	./player
+	./challenge
+	./user
 	./workout
 )

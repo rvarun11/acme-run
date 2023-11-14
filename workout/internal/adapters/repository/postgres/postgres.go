@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 	"github.com/google/uuid"
