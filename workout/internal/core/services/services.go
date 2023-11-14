@@ -31,16 +31,18 @@ type WorkoutService struct {
 	repo                       ports.WorkoutRepository
 	peripheral                 ports.PeripheralDeviceClient
 	user                       ports.UserServiceClient
+	publisher                  ports.AMQPPublisher
 	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
 	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
 }
 
 // Factory for creating a new WorkoutService
-func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralDeviceClient, user ports.UserServiceClient) *WorkoutService {
+func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralDeviceClient, user ports.UserServiceClient, publisher ports.AMQPPublisher) *WorkoutService {
 	return &WorkoutService{
 		repo:                       repo,
 		peripheral:                 peripheral,
 		user:                       user,
+		publisher:                  publisher,
 		activeWorkoutsLastLocation: make(map[uuid.UUID]ActiveWorkoutsLastLocation),
 		activeWorkoutsHeartRate:    make(map[uuid.UUID]ActiveWorkoutsHeartRate),
 	}
@@ -384,6 +386,8 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 		logger.Debug("failed to delete workout options on stop", zap.String("workoutID", tempWorkout.WorkoutID.String()), zap.Error(err))
 		// need not return the error
 	}
+
+	s.publisher.PublishWorkoutStats(tempWorkout)
 
 	// Remove the workout from active workouts tracking
 	delete(s.activeWorkoutsLastLocation, tempWorkout.WorkoutID)
