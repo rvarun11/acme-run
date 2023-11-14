@@ -3,8 +3,7 @@ package ports
 import (
 	"errors"
 
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/dto"
+	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/domain"
 	"github.com/google/uuid"
 )
 
@@ -16,11 +15,11 @@ var (
 )
 
 type PlayerService interface {
-	Register(playerDTO *dto.PlayerDTO) (*dto.PlayerDTO, error)
-	Get(uuid uuid.UUID) (*dto.PlayerDTO, error)
+	Register(player *domain.Player) (*domain.Player, error)
+	Get(uuid uuid.UUID) (*domain.Player, error)
 	// GetByID(email string) (*domain.Player, error)
-	Update(playerDTO *dto.PlayerDTO) (*dto.PlayerDTO, error)
-	List() ([]*dto.PlayerDTO, error)
+	Update(playerDTO *domain.Player) (*domain.Player, error)
+	List() ([]*domain.Player, error)
 }
 
 type PlayerRepository interface {

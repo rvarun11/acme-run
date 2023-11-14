@@ -6,8 +6,8 @@ COPY . .
 
 RUN go get -d -v ./...
 
-RUN go build -o player ./cmd
+RUN go build -o user ./cmd
 
 EXPOSE 8000
 
-CMD ["./player"]
+CMD ["./user"]

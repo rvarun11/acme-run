@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/user/config"
+	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/domain"
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -14,16 +15,15 @@ type Repository struct {
 	db *gorm.DB
 }
 
-func NewRepository() *Repository {
-	host := conf.host
-	port := conf.port
-	user := conf.user
-	password := conf.password
-	dbname := conf.dbname
-	encoding := conf.encoding
+func NewRepository(cfg *config.Postgres) *Repository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
-		host, port, user, dbname, password, encoding,
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.DB_Name,
+		cfg.Password,
+		cfg.Encoding,
 	)
 
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
@@ -59,8 +59,10 @@ type postgresPlayer struct {
 	Weight float64 `gorm:"<-"`
 	// Height of the player
 	Height float64 `gorm:"<-"`
+	// Preference of the player
+	Preference string `gorm:"<-"`
 	// GeographicalZone is a group of trails in a region
-	ZoneID string
+	ZoneID uuid.UUID
 	// CreatedAt is the time when the player registered
 	CreatedAt time.Time
 	// UpdatedAt is the time when the player last updated the profile
@@ -78,13 +80,14 @@ func (r *Repository) Create(player *domain.Player) (*domain.Player, error) {
 	}
 
 	pp := &postgresPlayer{
-		ID:        player.ID,
-		UserID:    player.User.ID,
-		Weight:    player.Weight,
-		Height:    player.Height,
-		ZoneID:    player.ZoneID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:         player.ID,
+		UserID:     player.User.ID,
+		Weight:     player.Weight,
+		Height:     player.Height,
+		Preference: string(player.Preference),
+		ZoneID:     player.ZoneID,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 	// pu, pp := fromAggregate(player)
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -158,6 +161,7 @@ func (r *Repository) Update(player *domain.Player) (*domain.Player, error) {
 	pu.DateOfBirth = player.User.DateOfBirth
 	pp.Weight = player.Weight
 	pp.Height = player.Height
+	pp.Preference = string(player.Preference)
 	pp.ZoneID = player.ZoneID
 	pp.UpdatedAt = time.Now()
 
@@ -209,11 +213,12 @@ func toAggregate(pu *postgresUser, pp *postgresPlayer) *domain.Player {
 			Name:        pu.Name,
 			DateOfBirth: pu.DateOfBirth,
 		},
-		Weight:    pp.Weight,
-		Height:    pp.Height,
-		ZoneID:    pp.ZoneID,
-		CreatedAt: pp.CreatedAt,
-		UpdatedAt: pp.UpdatedAt,
+		Weight:     pp.Weight,
+		Height:     pp.Height,
+		Preference: domain.Preference(pp.Preference),
+		ZoneID:     pp.ZoneID,
+		CreatedAt:  pp.CreatedAt,
+		UpdatedAt:  pp.UpdatedAt,
 	}
 }
 

@@ -1,4 +1,4 @@
-module github.com/CAS735-F23/macrun-teamvsl/player
+module github.com/CAS735-F23/macrun-teamvsl/user
 
 go 1.21.1
 
