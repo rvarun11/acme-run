@@ -49,7 +49,7 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 		return
 	}
 
-	workout, err := domain.NewWorkout(startWorkout.PlayerID, startWorkout.TrailID, startWorkout.HRMId, startWorkout.HRMConnected)
+	workout, err := domain.NewWorkout(startWorkout.PlayerID, startWorkout.TrailID, startWorkout.HRMId, startWorkout.HRMConnected, startWorkout.HardCoreMode)
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{

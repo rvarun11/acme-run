@@ -16,12 +16,13 @@ func NewPeripheralDeviceClient() *PeripheralDeviceClientImpl {
 	return &PeripheralDeviceClientImpl{}
 }
 
-func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error {
+func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
 	// Prepare the data for the POST request
 	bindData := BindPeripheralData{
 		PlayerID:                       playerID,
 		WorkoutID:                      workoutID,
 		HRMId:                          hrmID,
+		HRMConnected:                   hrmConnected,
 		SendLiveLocationToTrailManager: SendLiveLocationToTrailManager,
 	}
 
@@ -30,9 +31,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 		return err
 	}
 
-	// Make the POST request
-	// TODO
-	url := "YOUR_PERIPHERAL_SERVICE_ENDPOINT" // Replace with your actual endpoint
+	url := "http://localhost:8004/api/v1/peripheral"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bindPayload))
 	if err != nil {
 		return err
@@ -61,9 +60,7 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 		return err
 	}
 
-	// Make the PUT request
-	// TODO: Replace with your actual endpoint
-	url := "YOUR_UNBIND_ENDPOINT/" + workoutID.String() // Modify the endpoint as required
+	url := "http://localhost:8004/api/v1/peripheral"
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(unbindPayload))
 	if err != nil {
 		return err
@@ -81,9 +78,8 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 }
 
 func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
-	// Make the GET request
-	// TODO: Replace with your actual endpoint
-	url := "YOUR_AVERAGE_HEARTRATE_ENDPOINT/" + workoutID.String() // Modify the endpoint as required
+
+	url := "http://localhost:8004/api/v1/peripheral/hrm/workout_id=" + workoutID.String() + "&type=avg"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return 0, err
@@ -96,8 +92,6 @@ func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UU
 	}
 	defer resp.Body.Close()
 
-	// Parse the response to retrieve average heart rate
-	// Assuming response body contains the average heart rate as uint8
 	var averageHeartRate uint8
 	err = json.NewDecoder(resp.Body).Decode(&averageHeartRate)
 	if err != nil {

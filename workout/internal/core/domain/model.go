@@ -55,7 +55,7 @@ type WorkoutOptions struct {
 	DistanceToShelter float64 `json:"distance_to_shelter"`
 }
 
-func NewWorkout(PlayerID uuid.UUID, TrailID uuid.UUID, HRMID uuid.UUID, HRMConnected bool) (Workout, error) {
+func NewWorkout(PlayerID uuid.UUID, TrailID uuid.UUID, HRMID uuid.UUID, HRMConnected bool, hardCoreMode bool) (Workout, error) {
 	if PlayerID == uuid.Nil || TrailID == uuid.Nil {
 		return Workout{}, ErrInvalidWorkout
 	}
@@ -66,7 +66,7 @@ func NewWorkout(PlayerID uuid.UUID, TrailID uuid.UUID, HRMID uuid.UUID, HRMConne
 		TrailID:         TrailID,
 		Profile:         "cardio",
 		IsCompleted:     false,
-		HardcoreMode:    false,
+		HardcoreMode:    hardCoreMode,
 		CreatedAt:       time.Now(),
 		EndedAt:         time.Time{},
 		DistanceCovered: 0,
