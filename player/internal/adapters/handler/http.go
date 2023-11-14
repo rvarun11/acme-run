@@ -5,6 +5,7 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/services"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ func (h *HTTPHandler) RegisterPlayer(ctx *gin.Context) {
 	var req dto.PlayerDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Error": err,
+			"error": "invalid request",
 		})
 		return
 	}
@@ -32,11 +33,11 @@ func (h *HTTPHandler) RegisterPlayer(ctx *gin.Context) {
 	res, err := h.svc.Register(&req)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "unable to register, something occured",
 		})
 		return
 	}
-
+	logger.Info("player registered")
 	ctx.JSON(http.StatusCreated, gin.H{
 		"player":  res,
 		"message": "New player created successfully",

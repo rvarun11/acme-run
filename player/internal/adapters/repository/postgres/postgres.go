@@ -59,6 +59,8 @@ type postgresPlayer struct {
 	Weight float64 `gorm:"<-"`
 	// Height of the player
 	Height float64 `gorm:"<-"`
+	// Preference of the player
+	Preference string `gorm:"<-"`
 	// GeographicalZone is a group of trails in a region
 	ZoneID uuid.UUID
 	// CreatedAt is the time when the player registered
@@ -78,13 +80,14 @@ func (r *Repository) Create(player *domain.Player) (*domain.Player, error) {
 	}
 
 	pp := &postgresPlayer{
-		ID:        player.ID,
-		UserID:    player.User.ID,
-		Weight:    player.Weight,
-		Height:    player.Height,
-		ZoneID:    player.ZoneID,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		ID:         player.ID,
+		UserID:     player.User.ID,
+		Weight:     player.Weight,
+		Height:     player.Height,
+		Preference: string(player.Preference),
+		ZoneID:     player.ZoneID,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 	// pu, pp := fromAggregate(player)
 	err := r.db.Transaction(func(tx *gorm.DB) error {
@@ -158,6 +161,7 @@ func (r *Repository) Update(player *domain.Player) (*domain.Player, error) {
 	pu.DateOfBirth = player.User.DateOfBirth
 	pp.Weight = player.Weight
 	pp.Height = player.Height
+	pp.Preference = string(player.Preference)
 	pp.ZoneID = player.ZoneID
 	pp.UpdatedAt = time.Now()
 
