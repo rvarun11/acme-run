@@ -2,14 +2,16 @@ package domain
 
 import (
 	"errors"
-	"net/mail"
 	"time"
 
 	"github.com/google/uuid"
 )
 
 var (
-	ErrInvalidEmail = errors.New("a customer has to have a valid email")
+	ErrInvalidPlayerHeight     = errors.New("a player has to have a valid height")
+	ErrInvalidPlayerWeight     = errors.New("a player has to have a valid weight")
+	ErrInvalidPlayerPreference = errors.New("a player has to have a valid preference")
+	ErrInvalidZoneID           = errors.New("a player must belong to a valid zone")
 )
 
 type Preference string
@@ -41,30 +43,72 @@ type Player struct {
 
 // NewPlayer is a factory to create a new Player aggregate
 func NewPlayer(name string, email string, dob string, weight float64, height float64, pref Preference, zoneID uuid.UUID) (*Player, error) {
-	// Validate that the Email has @, TODO: add more validation
-	_, err := mail.ParseAddress(email)
+
+	user, err := NewUser(name, email, dob)
 	if err != nil {
-		return &Player{}, ErrInvalidEmail
+		return &Player{}, err
 	}
 
-	// Create a new user and generate ID
-	user := User{
-		ID:          uuid.New(),
-		Name:        name,
-		Email:       email,
-		DateOfBirth: dob,
+	err = validateHeight(height)
+	if err != nil {
+		return &Player{}, err
 	}
-	// Create a customer object and initialize all the values to avoid nil pointer exceptions
+
+	err = validateWeight(weight)
+	if err != nil {
+		return &Player{}, err
+	}
+
+	err = validatePreference(pref)
+	if err != nil {
+		return &Player{}, err
+	}
+
+	err = validateZoneID(zoneID)
+	if err != nil {
+		return &Player{}, err
+	}
+
 	player := &Player{
 		ID:         uuid.New(),
-		User:       &user,
+		User:       user,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 		Weight:     weight,
 		Height:     height,
 		Preference: pref,
-		ZoneID:     zoneID, // TODO: This is a temp field
+		ZoneID:     zoneID,
 	}
 
 	return player, nil
+}
+
+func validateHeight(h float64) error {
+	if h == 0.0 {
+		return ErrInvalidPlayerHeight
+	}
+	return nil
+}
+
+func validateWeight(w float64) error {
+	if w == 0.0 {
+		return ErrInvalidPlayerWeight
+	}
+	return nil
+}
+
+func validatePreference(p Preference) error {
+	switch p {
+	case Strength, Cardio:
+		return nil
+	default:
+		return ErrInvalidPlayerPreference
+	}
+}
+
+func validateZoneID(zid uuid.UUID) error {
+	if zid == uuid.Nil {
+		return ErrInvalidZoneID
+	}
+	return nil
 }
