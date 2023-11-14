@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/dto"
 	"github.com/google/uuid"
 )
 
@@ -16,7 +15,7 @@ var (
 )
 
 type PlayerService interface {
-	Register(player *domain.Player) (*dto.PlayerDTO, error)
+	Register(player *domain.Player) (*domain.Player, error)
 	Get(uuid uuid.UUID) (*domain.Player, error)
 	// GetByID(email string) (*domain.Player, error)
 	Update(playerDTO *domain.Player) (*domain.Player, error)

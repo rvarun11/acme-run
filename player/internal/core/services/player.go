@@ -2,7 +2,6 @@ package services
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/ports"
 	"github.com/google/uuid"
 )
@@ -58,17 +57,11 @@ func (s *PlayerService) Update(req *domain.Player) (*domain.Player, error) {
 	return player, nil
 }
 
-func (s *PlayerService) List() ([]*dto.PlayerDTO, error) {
+func (s *PlayerService) List() ([]*domain.Player, error) {
 	players, err := s.repo.List()
 	if err != nil {
-		return []*dto.PlayerDTO{}, err
+		return []*domain.Player{}, err
 	}
 
-	var playerDTOs []*dto.PlayerDTO
-	for _, pp := range players {
-
-		playerDTO := dto.FromAggregate(pp)
-		playerDTOs = append(playerDTOs, playerDTO)
-	}
-	return playerDTOs, nil
+	return players, nil
 }

@@ -1,4 +1,4 @@
-package dto
+package http
 
 import (
 	"time"
@@ -7,11 +7,22 @@ import (
 	"github.com/google/uuid"
 )
 
-type PlayerDTO struct {
+type userDTO struct {
+	// ID is the identifier of the Entity, the ID is shared for all sub domains
+	ID uuid.UUID `json:"id"`
+	// Name of the user
+	Name string `json:"name"`
+	// Email
+	Email string `json:"email"`
+	// DoB
+	DateOfBirth string `json:"dob"`
+}
+
+type playerDTO struct {
 	// ID of the player
 	ID uuid.UUID `json:"id"`
 	// User is the root entity of player
-	User UserDTO `json:"user"`
+	User userDTO `json:"user"`
 	// Weight of the player
 	Weight float64 `json:"weight"`
 	// Height of the player
@@ -27,7 +38,7 @@ type PlayerDTO struct {
 }
 
 // Add ToAggregate
-func ToAggregate(playerDTO *PlayerDTO) *domain.Player {
+func (playerDTO *playerDTO) toAggregate() *domain.Player {
 	userDTO := domain.User{
 		ID:          playerDTO.User.ID,
 		Name:        playerDTO.User.Name,
@@ -45,10 +56,10 @@ func ToAggregate(playerDTO *PlayerDTO) *domain.Player {
 	}
 }
 
-func FromAggregate(player *domain.Player) *PlayerDTO {
-	return &PlayerDTO{
+func fromAggregate(player *domain.Player) *playerDTO {
+	return &playerDTO{
 		ID: player.ID,
-		User: UserDTO{
+		User: userDTO{
 			ID:          player.User.ID,
 			Email:       player.User.Email,
 			Name:        player.User.Name,

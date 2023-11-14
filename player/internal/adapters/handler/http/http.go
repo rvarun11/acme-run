@@ -1,9 +1,8 @@
-package handler
+package http
 
 import (
 	"net/http"
 
-	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/player/internal/core/services"
 	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"github.com/google/uuid"
@@ -22,7 +21,7 @@ func NewHTTPHandler(PlayerService services.PlayerService) *HTTPHandler {
 }
 
 func (h *HTTPHandler) RegisterPlayer(ctx *gin.Context) {
-	var req dto.PlayerDTO
+	var req playerDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -30,7 +29,7 @@ func (h *HTTPHandler) RegisterPlayer(ctx *gin.Context) {
 		return
 	}
 
-	_, err := h.svc.Register(dto.ToAggregate(&req))
+	_, err := h.svc.Register(req.toAggregate())
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "unable to register, something occured",
@@ -58,14 +57,14 @@ func (h *HTTPHandler) GetPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	res := dto.FromAggregate(p)
+	res := fromAggregate(p)
 	ctx.JSON(http.StatusOK, gin.H{
 		"player": res,
 	})
 }
 
 func (h *HTTPHandler) UpdatePlayer(ctx *gin.Context) {
-	var req dto.PlayerDTO
+	var req playerDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"Error": err,
@@ -73,14 +72,14 @@ func (h *HTTPHandler) UpdatePlayer(ctx *gin.Context) {
 		return
 	}
 
-	p, err := h.svc.Update(dto.ToAggregate(&req))
+	p, err := h.svc.Update(req.toAggregate())
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
 		return
 	}
-	res := dto.FromAggregate(p)
+	res := fromAggregate(p)
 	ctx.JSON(http.StatusNoContent, gin.H{
 		// 204 returns no body so this can be changed to 200 if body is needed
 		"player":  res,
