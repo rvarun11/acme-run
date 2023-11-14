@@ -13,7 +13,7 @@ type challengeDTO struct {
 	Description string    `json:"description"`
 	BadgeURL    string    `json:"badge_url"`
 	Criteria    string    `json:"criteria"`
-	Goal        float32   `json:"goal"`
+	Goal        float64   `json:"goal"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
 	CreatedAt   time.Time `json:"created_at"`

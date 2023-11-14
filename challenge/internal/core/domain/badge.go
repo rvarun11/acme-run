@@ -12,7 +12,7 @@ type Badge struct {
 	Challenge   *Challenge
 	CompletedOn time.Time
 	// score is the total score obtained by the player when completing the challenge
-	Score float32
+	Score float64
 }
 
 func NewBadge(cs *ChallengeStats) (*Badge, error) {

@@ -1,6 +1,8 @@
 package services
 
 import (
+	"time"
+
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/ports"
 	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
@@ -99,7 +101,7 @@ func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badg
 	return badges, nil
 }
 
-func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float32, ef uint8, ee uint8) error {
+func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float64, ef uint8, ee uint8, workoutEnd time.Time) error {
 	// TODO: This should be in the context
 	activeChs, err := svc.ListChallenges("active")
 	if err != nil {
@@ -107,7 +109,11 @@ func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float
 	}
 
 	for _, ch := range activeChs {
-		cs := domain.NewChallengeStats(ch, pid, dc, ef, ee)
+		cs, err := domain.NewChallengeStats(ch, pid, dc, ef, ee, workoutEnd)
+		if err != nil {
+			logger.Debug("cannot create challenge stat", zap.Error(err))
+			continue
+		}
 		err = svc.repo.CreateOrUpdateChallengeStats(cs)
 		if err != nil {
 			return err
@@ -144,6 +150,5 @@ func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, e
 	}
 	// 3. Delete all Challenge Stats
 	// TODO: Delete all challenge stats, once the badges are created and the challenge ends.
-
 	return badges, nil
 }

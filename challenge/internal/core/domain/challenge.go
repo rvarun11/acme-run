@@ -46,7 +46,7 @@ type Challenge struct {
 	// Criteria required to complete the challenge
 	Criteria Criteria
 	// The Goal of the challenge
-	Goal float32
+	Goal float64
 	// start time is the time when the challenge starts
 	Start time.Time
 	// end time is the time when the challenge ends
@@ -56,7 +56,7 @@ type Challenge struct {
 }
 
 // NewPlayer is a factory to create a new Player aggregate
-func NewChallenge(name string, desc string, badgeUrl string, criteria Criteria, goal float32, start, end time.Time) (*Challenge, error) {
+func NewChallenge(name string, desc string, badgeUrl string, criteria Criteria, goal float64, start, end time.Time) (*Challenge, error) {
 	err := ValidateCriteria(criteria)
 	if err != nil {
 		return &Challenge{}, err

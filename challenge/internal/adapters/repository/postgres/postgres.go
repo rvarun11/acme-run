@@ -18,7 +18,7 @@ type postgresChallenge struct {
 	Description string    `gorm:"not null"`
 	BadgeURL    string
 	Criteria    string `gorm:"not null"`
-	Goal        float32
+	Goal        float64
 	Start       time.Time
 	End         time.Time
 	CreatedAt   time.Time
@@ -35,7 +35,7 @@ type postgresChallengeStats struct {
 	ID              uuid.UUID `gorm:"type:uuid;primaryKey"`
 	PlayerID        uuid.UUID `gorm:"not null"`
 	ChallengeID     uuid.UUID `gorm:"not null"`
-	DistanceCovered float32
+	DistanceCovered float64
 	EnemiesFought   uint8
 	EnemiesEscaped  uint8
 }
