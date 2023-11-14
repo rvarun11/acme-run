@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/adapters/handler/http"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/adapters/repository/postgres"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/handler/http"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/repository/postgres"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/gin-gonic/gin"
 )
 

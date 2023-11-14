@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

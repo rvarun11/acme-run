@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/config"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )

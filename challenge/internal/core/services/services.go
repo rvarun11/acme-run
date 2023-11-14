@@ -1,9 +1,9 @@
 package services
 
 import (
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/ports"
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/ports"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )

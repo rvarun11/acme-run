@@ -3,8 +3,8 @@ package postgres
 import (
 	"errors"
 
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge_manager/log"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )

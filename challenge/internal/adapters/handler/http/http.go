@@ -3,7 +3,7 @@ package http
 import (
 	"net/http"
 
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )

@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"github.com/CAS735-F23/macrun-teamvsl/challenge_manager/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
 	"github.com/google/uuid"
 )
 

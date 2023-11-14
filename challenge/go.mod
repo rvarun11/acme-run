@@ -1,4 +1,4 @@
-module github.com/CAS735-F23/macrun-teamvsl/challenge_manager
+module github.com/CAS735-F23/macrun-teamvsl/challenge
 
 go 1.21.1
 
