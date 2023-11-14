@@ -15,8 +15,8 @@ func NewUserServiceClientMock() *UserServiceClientMock {
 	return &UserServiceClientMock{}
 }
 
-// GetProfileOfUser provides a mock function with given fields
-func (m *UserServiceClientMock) GetProfileOfUser(playerID uuid.UUID) (string, error) {
+// GetWorkoutPreferenceOfUser provides a mock function with given fields
+func (m *UserServiceClientMock) GetWorkoutPreferenceOfUser(playerID uuid.UUID) (string, error) {
 	args := m.Called(playerID)
 	return args.String(0), args.Error(1)
 }

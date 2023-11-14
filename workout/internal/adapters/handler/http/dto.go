@@ -11,6 +11,8 @@ type StartWorkout struct {
 	HRMConnected bool `json:"hrm_connected"`
 	// If HRM is connected then HRM ID otherwise garbage
 	HRMId uuid.UUID `json:"hrm_id"`
+	// HardCore Mode of User
+	HardCoreMode bool `json:"hardcore_mode"`
 }
 
 type StartWorkoutOption struct {

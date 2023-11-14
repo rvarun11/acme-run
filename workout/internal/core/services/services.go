@@ -61,21 +61,18 @@ func (s *WorkoutService) GetWorkout(id uuid.UUID) (*domain.Workout, error) {
 
 func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConnected bool) (string, error) {
 	// Retrieve user profile details
-	profile, err := s.user.GetProfileOfUser(workout.PlayerID)
+	profile, err := s.user.GetWorkoutPreferenceOfUser(workout.PlayerID)
 	if err != nil {
 		logger.Error("failed to get user profile", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to get profile for user %s: %w", workout.PlayerID, err)
 	}
 
-	// Retrieve user hardcore mode status
-	hardcoreMode, err := s.user.GetHardcoreModeOfUser(workout.PlayerID)
 	if err != nil {
 		logger.Error("failed to get hardcore mode for user", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to get hardcore mode for user %s: %w", workout.PlayerID, err)
 	}
 
-	// Set workout profile and hardcore mode
-	workout.HardcoreMode = hardcoreMode
+	// Set workout profile
 	workout.Profile = profile
 
 	// Update workout details in the repository
@@ -85,7 +82,7 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 		return "", fmt.Errorf("failed to update workout %s: %w", workout.WorkoutID, err)
 	}
 
-	shelterNeeded := !hardcoreMode
+	shelterNeeded := !workout.HardcoreMode
 
 	err = s.peripheral.BindPeripheralData(workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected, shelterNeeded)
 	if err != nil {

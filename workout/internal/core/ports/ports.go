@@ -63,8 +63,7 @@ type WorkoutRepository interface {
 }
 
 type UserServiceClient interface {
-	GetProfileOfUser(playerID uuid.UUID) (string, error)
-	GetHardcoreModeOfUser(playerID uuid.UUID) (bool, error)
+	GetWorkoutPreferenceOfUser(playerID uuid.UUID) (string, error)
 	GetUserAge(playerID uuid.UUID) (uint8, error)
 }
 
