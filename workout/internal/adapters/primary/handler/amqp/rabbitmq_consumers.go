@@ -39,13 +39,13 @@ const (
 
 var cfg *config.RabbitMQ = config.Config.RabbitMQ
 
-// Images Rabbitmq consumer
+// Shelter Rabbitmq consumer
 type ShelterSubscriber struct {
 	amqpConn *amqp.Connection
 	svc      *services.WorkoutService
 }
 
-// Images Rabbitmq consumer
+// Location Rabbitmq consumer
 type LocationSubscriber struct {
 	amqpConn *amqp.Connection
 	svc      *services.WorkoutService
@@ -58,13 +58,19 @@ type WorkoutAMQPHandler struct {
 }
 
 func NewAMQPHandler(workoutSvc *services.WorkoutService) *WorkoutAMQPHandler {
-	amqpConn_shelterSub, _ := NewConnection(cfg)
+	amqpConn_shelterSub, err := NewConnection(cfg)
+	if err != nil {
+		logger.Error("Connection to RabbitMQ Failed")
+	}
 	shelterSubscriber := ShelterSubscriber{
 		amqpConn: amqpConn_shelterSub,
 		svc:      workoutSvc,
 	}
 
-	amqpConn_locationSub, _ := NewConnection(cfg)
+	amqpConn_locationSub, err := NewConnection(cfg)
+	if err != nil {
+		logger.Error("Connection to RabbitMQ Failed")
+	}
 	locationSubscriber := LocationSubscriber{
 		amqpConn: amqpConn_locationSub,
 		svc:      workoutSvc,
@@ -198,8 +204,8 @@ func (c *ShelterSubscriber) StartConsumer(workerPoolSize int, exchange, queueNam
 
 func (c *ShelterSubscriber) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
-		var shelterAvailable *ShelterAvailable
-		logger.Debug("Received a message: %s", zap.Any("delivery", d.Body))
+		shelterAvailable := &ShelterAvailable{}
+		logger.Debug("Received a message: ", zap.String("delivery", string(d.Body)))
 		err := json.Unmarshal(d.Body, shelterAvailable)
 		if err != nil {
 			logger.Debug("failed to unmarshal %s", zap.Error(err))
@@ -314,8 +320,8 @@ func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueNa
 
 func (c *LocationSubscriber) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
-		var lastLocation *LastLocation
-		logger.Debug("Received a message: %s", zap.Any("delivery", d.Body))
+		lastLocation := &LastLocation{}
+		logger.Debug("Received a message: ", zap.String("delivery", string(d.Body)))
 		err := json.Unmarshal(d.Body, lastLocation)
 		if err != nil {
 			logger.Debug("failed to unmarshal %s", zap.Error(err))
@@ -326,10 +332,15 @@ func (c *LocationSubscriber) worker(ctx context.Context, deliveries <-chan amqp.
 
 func (wah *WorkoutAMQPHandler) InitAMQP() error {
 
-	//TODO ERROR HANDLING
 	err := wah.locationSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "LOCATION_PERIPHERAL_WORKOUT", "", "")
+	if err != nil {
+		return err
+	}
 	logger.Debug("Error err", zap.Any("err", err))
 	err = wah.shelterSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "SHELTER_TRAIL_WORKOUT", "", "")
+	if err != nil {
+		return err
+	}
 	logger.Debug("Error err", zap.Any("err", err))
 
 	return nil
