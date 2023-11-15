@@ -16,45 +16,22 @@ type HRM struct {
 type Geo struct {}
 */
 type Peripheral struct {
-	PeripheralId    uuid.UUID `json:"peripheral_id"`
-	PlayerId        uuid.UUID `json:"player_id"`
-	WorkoutId       uuid.UUID `json:"workout_id"`
-	HRMId           uuid.UUID `json:"hrm_id"`
-	HRate           int       `json:"heart_rate"`
-	HRateTime       time.Time `json:"hrate_time"`
-	HRMStatus       bool      `json:"hrm_status"`
-	CreatedAt       time.Time `json:"created_at"`
-	LocationTime    time.Time `json:"locationTime"`
-	GeoId           uuid.UUID `json:"geo_id"`
-	GeoStatus       bool      `json:"geo_status"`
-	GeoBrodacasting bool      `json:"geo_broadcasting"`
-	Longitude       float64   `json:"longitude"`
-	Latitude        float64   `json:"latitude"`
-	HRateCount      int       `json:"heart_rate_count"`
-	AverageHRate    int       `json:"average_heart_rate`
-	LiveData        bool      `json:"live_data_switch"`
-}
-
-// LS-TODO: We don't need getters and setters
-// Getters and Setters for HRM
-func (p *Peripheral) GetHRMID() uuid.UUID {
-	return p.HRMId
-}
-
-func (p *Peripheral) SetHRMID(id uuid.UUID) {
-	p.HRMId = id
-}
-
-func (p *Peripheral) GetWorkoutID() uuid.UUID {
-	return p.WorkoutId
-}
-
-func (p *Peripheral) GetPeripheralID() uuid.UUID {
-	return p.PeripheralId
-}
-
-func (p *Peripheral) GetGeoID() uuid.UUID {
-	return p.GeoId
+	PlayerId        uuid.UUID
+	WorkoutId       uuid.UUID
+	HRMId           uuid.UUID
+	HRate           int
+	HRateTime       time.Time
+	HRMStatus       bool
+	CreatedAt       time.Time
+	LocationTime    time.Time
+	GeoId           uuid.UUID
+	GeoStatus       bool
+	GeoBrodacasting bool
+	Longitude       float64
+	Latitude        float64
+	HRateCount      int
+	AverageHRate    int
+	LiveData        bool
 }
 
 func (p *Peripheral) GetAverageHRate() LastHR {
@@ -89,24 +66,6 @@ func (p *Peripheral) SetHRMStatus(code bool) {
 		p.HRMStatus = false
 	}
 	fmt.Println(p.HRMStatus)
-}
-
-// return the current status of the hrm
-func (p *Peripheral) GetHRMStatus() bool {
-	return p.HRMStatus
-}
-
-// return the current status of the hrm
-func (p *Peripheral) GetGeoStatus() bool {
-	return p.GeoStatus
-}
-
-func (p *Peripheral) SetGeoStatus(code bool) {
-	if code == true {
-		p.GeoStatus = true
-	} else {
-		p.GeoStatus = false
-	}
 }
 
 // function for getting the reading of longitude and lattide

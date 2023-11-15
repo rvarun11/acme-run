@@ -174,12 +174,12 @@ func (s *PeripheralService) SetHeartRateReading(hId uuid.UUID, reading int) {
 
 func (s *PeripheralService) GetHRMDevStatus(wId uuid.UUID) bool {
 	pInstance, _ := s.repo.Get(wId)
-	return pInstance.GetHRMStatus()
+	return pInstance.HRMStatus
 }
 
 func (s *PeripheralService) GetHRMDevStatusByHRMId(hId uuid.UUID) bool {
 	pInstance, _ := s.repo.GetByHRMId(hId)
-	return pInstance.GetHRMStatus()
+	return pInstance.HRMStatus
 }
 
 func (s *PeripheralService) SetHRMDevStatusByHRMId(hId uuid.UUID, code bool) {
@@ -202,12 +202,12 @@ func (s *PeripheralService) SetGeoLocation(wId uuid.UUID, longitude float64, lat
 
 func (s *PeripheralService) GetGeoDevStatus(wId uuid.UUID) bool {
 	pInstance, _ := s.repo.Get(wId)
-	return pInstance.GetGeoStatus()
+	return pInstance.GeoStatus()
 }
 
 func (s *PeripheralService) SetGeoDevStatus(wId uuid.UUID, code bool) {
 	pInstance, _ := s.repo.Get(wId)
-	pInstance.SetGeoStatus(code)
+	pInstance.GeoStatus = code
 	pInstance.LiveData = false
 	pInstance.GeoBrodacasting = false
 	s.repo.Update(*pInstance)
