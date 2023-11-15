@@ -2,6 +2,7 @@ package services_test
 
 import (
 	"math/rand"
+	"strconv"
 	"testing"
 	"time"
 
@@ -273,7 +274,7 @@ func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	HRMID := uuid.New()
 	trailID := uuid.New()
 
-	workout, _ := domain.NewWorkout(playerID, trailID, HRMID, false, false)
+	workout, _ := domain.NewWorkout(playerID, trailID, HRMID, false, true)
 
 	// Mocked responses for user service calls
 	userClientMock.On("GetWorkoutPreferenceOfUser", playerID).Return("cardio", nil)
@@ -281,7 +282,7 @@ func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	userClientMock.On("GetUserAge", playerID).Return(30, nil)              // Age or Player is 30
 
 	// Mock the peripheral client to assert that the shelter request is set to false
-	peripheralClientMock.On("BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, true).Return(nil)
+	peripheralClientMock.On("BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, false).Return(nil)
 	peripheralClientMock.On("UnbindPeripheralData", mock.Anything).Return(nil)
 
 	// First call, return a value less than 133
@@ -296,7 +297,7 @@ func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	assert.NoError(t, startErr)
 
 	// Assert that the BindPeripheralData was called with shelterNeeded as false
-	peripheralClientMock.AssertCalled(t, "BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, true)
+	peripheralClientMock.AssertCalled(t, "BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, false)
 
 	// Get workout options and assert shelter is not an option
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
@@ -339,7 +340,7 @@ func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	HRMID := uuid.New()
 	trailID := uuid.New()
 
-	workout, _ := domain.NewWorkout(playerID, trailID, HRMID, false, false)
+	workout, _ := domain.NewWorkout(playerID, trailID, HRMID, false, true)
 
 	// Mocked responses for user service calls
 	userClientMock.On("GetWorkoutPreferenceOfUser", playerID).Return("strength", nil)
@@ -347,6 +348,60 @@ func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	userClientMock.On("GetUserAge", playerID).Return(30, nil)              // Age or Player is 30
 
 	// Mock the peripheral client to assert that the shelter request is set to false
+	peripheralClientMock.On("BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, false).Return(nil)
+	peripheralClientMock.On("UnbindPeripheralData", mock.Anything).Return(nil)
+
+	randomHeartRate := uint8(rand.Intn(87) + 134)
+	peripheralClientMock.On("GetAverageHeartRateOfUser", mock.Anything).Return(randomHeartRate, nil)
+
+	_, startErr := service.Start(&workout, HRMID, true)
+	assert.NoError(t, startErr)
+
+	// Assert that the BindPeripheralData was called with shelterNeeded as false
+	peripheralClientMock.AssertCalled(t, "BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, false)
+
+	// Get workout options and assert shelter is not an option
+	links, err := service.GetWorkoutOptions(workout.WorkoutID)
+	assert.NoError(t, err)
+
+	// In hardcore mode, shelter should not be present, verify it
+	assert.Contains(t, links[0].URL, "option=1", "Fight must be at a higher rank")
+	assert.Contains(t, links[1].URL, "option=2", "Escape must go down")
+
+	// Stop the workout using the service
+	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)
+	assert.NoError(t, stopErr)
+	assert.NotNil(t, stoppedWorkout, "stopped workout should not be nil")
+	assert.True(t, stoppedWorkout.IsCompleted, "stopped workout should be marked as completed")
+}
+
+/*
+TestWorkoutService_DistanceToShelterUpdatesTest:
+
+	Test to check that the incoming distance to shelter is updated in the workout options query
+*/
+func TestWorkoutService_DistanceToShelterUpdatesTest(t *testing.T) {
+	// Initialize the mocks and the service
+	userClientMock := clients.NewUserServiceClientMock()
+	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
+	amqpPublisherMock := amqpsecondaryadapter.NewMockAMQPPublisher()
+	store := postgres.NewRepository(cfg.Postgres)
+
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, amqpPublisherMock)
+
+	// Setup test data
+	playerID := uuid.New()
+	HRMID := uuid.New()
+	trailID := uuid.New()
+
+	workout, _ := domain.NewWorkout(playerID, trailID, HRMID, false, false)
+
+	// Mocked responses for user service calls
+	userClientMock.On("GetWorkoutPreferenceOfUser", playerID).Return("strength", nil)
+	userClientMock.On("GetHardcoreModeOfUser", playerID).Return(false, nil) // Hardcore mode is off
+	userClientMock.On("GetUserAge", playerID).Return(30, nil)               // Age or Player is 30
+
+	// Mock the peripheral client to assert that the shelter request is set to true
 	peripheralClientMock.On("BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, true).Return(nil)
 	peripheralClientMock.On("UnbindPeripheralData", mock.Anything).Return(nil)
 
@@ -359,13 +414,27 @@ func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	// Assert that the BindPeripheralData was called with shelterNeeded as false
 	peripheralClientMock.AssertCalled(t, "BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, true)
 
+	// Mocking the Trail Manager
+	distance := 10.0
+	service.UpdateShelter(workout.WorkoutID, distance)
+
 	// Get workout options and assert shelter is not an option
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
 	// In hardcore mode, shelter should not be present, verify it
-	assert.Contains(t, links[0].URL, "option=1", "Fight must be at a higher rank")
-	assert.Contains(t, links[1].URL, "option=2", "Escape must go down")
+	assert.Contains(t, links[0].Name, "Distance to Shelter = "+strconv.FormatFloat(distance, 'f', -1, 64)+" : ", "Distance Not Updated for Shelter")
+
+	// Mocking the Trail Manager
+	distance = 15.0
+	service.UpdateShelter(workout.WorkoutID, distance)
+
+	// Get workout options and assert shelter is not an option
+	links, err = service.GetWorkoutOptions(workout.WorkoutID)
+	assert.NoError(t, err)
+
+	// In hardcore mode, shelter should not be present, verify it
+	assert.Contains(t, links[0].Name, "Distance to Shelter = "+strconv.FormatFloat(distance, 'f', -1, 64)+" : ", "Distance Not Updated for Shelter")
 
 	// Stop the workout using the service
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)

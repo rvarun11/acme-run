@@ -125,6 +125,7 @@ func toWorkoutOptionsAggregate(pworkoutOptions *postgresWorkoutOptions) *domain.
 		CurrentWorkoutOption:  pworkoutOptions.CurrentWorkoutOption,
 		FightsPushDown:        pworkoutOptions.FightsPushDown,
 		IsWorkoutOptionActive: pworkoutOptions.IsWorkoutOptionActive,
+		DistanceToShelter:     pworkoutOptions.DistanceToShelter,
 	}
 }
 
