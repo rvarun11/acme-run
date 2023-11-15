@@ -11,11 +11,6 @@ import (
 ChallengeService:
 IMPORTANT FOR REPORT:
 - For now, the assumption is that there is only one criteria per challenge.
-
-This service is supposed to be called by:
-1. By the client when they want to see their badges and on going challenges.
-2. By the workout session, so that the challenge manager can send a live notification when they complete a challenge:
-	i) When workout sessions starts, it should send the total stats of the player, enemies fought
 */
 
 var (

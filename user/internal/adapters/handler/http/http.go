@@ -70,10 +70,8 @@ func (h *PlayerHandler) getPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	res := fromAggregate(p)
-	ctx.JSON(http.StatusOK, gin.H{
-		"player": res,
-	})
+	player := fromAggregate(p)
+	ctx.JSON(http.StatusOK, player)
 }
 
 func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {

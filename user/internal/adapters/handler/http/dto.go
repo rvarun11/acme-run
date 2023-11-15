@@ -30,7 +30,7 @@ type playerDTO struct {
 	// Preference of the player
 	Preference string `json:"preference"`
 	// GeographicalZone is a group of trails in a region
-	ZoneID uuid.UUID `json:"zone_id"`
+	ZoneID string `json:"zone_id"`
 	// CreatedAt is the time when the player registered
 	CreatedAt time.Time `json:"created_at"`
 	// UpdatedAt is the time when the player last updated the profile
@@ -50,7 +50,7 @@ func (playerDTO *playerDTO) toAggregate() *domain.Player {
 		Weight:     playerDTO.Weight,
 		Height:     playerDTO.Height,
 		Preference: domain.Preference(playerDTO.Preference),
-		ZoneID:     playerDTO.ZoneID,
+		ZoneID:     uuid.MustParse(playerDTO.ZoneID),
 		CreatedAt:  playerDTO.CreatedAt,
 		UpdatedAt:  playerDTO.UpdatedAt,
 	}
@@ -68,7 +68,7 @@ func fromAggregate(player *domain.Player) *playerDTO {
 		Weight:     player.Weight,
 		Height:     player.Height,
 		Preference: string(player.Preference),
-		ZoneID:     player.ZoneID,
+		ZoneID:     player.ZoneID.String(),
 		CreatedAt:  player.CreatedAt,
 		UpdatedAt:  player.UpdatedAt,
 	}

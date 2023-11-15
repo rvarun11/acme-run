@@ -105,6 +105,7 @@ func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float
 	// TODO: This should be in the context
 	activeChs, err := svc.ListChallenges("active")
 	if err != nil {
+		logger.Debug("no active challenge present")
 		return err
 	}
 
@@ -151,4 +152,35 @@ func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, e
 	// 3. Delete all Challenge Stats
 	// TODO: Delete all challenge stats, once the badges are created and the challenge ends.
 	return badges, nil
+}
+
+// func (svc *ChallengeService) GetBadgesDummy() ([]*domain.Badge, error) {
+// 	// 1. This function first updates the active challenge end time to Now.
+
+// 	// 2. Then
+// }
+
+// This function is runs to monitor active challenges
+func (svc *ChallengeService) MonitorChallenges() {
+	// Check every 1min
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for range ticker.C {
+		activeChs, _ := svc.ListChallenges("active")
+
+		for _, ch := range activeChs {
+			logger.Debug("found an active challenge, starting monitor")
+			go func(ch *domain.Challenge) {
+				// Calculate the duration until the end time
+				duration := time.Until(ch.End)
+
+				// Sleep until the challenge end time
+				time.Sleep(duration)
+
+				// Call HelloWorld when the challenge ends
+				svc.ActeFinal(ch)
+			}(ch)
+		}
+	}
 }
