@@ -51,13 +51,19 @@ func NewPeripheralServiceHTTPHandler(gin *gin.Engine, PeripheralService *service
 func (handler *HTTPHandler) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
+
+	// VR TODO: Fix API endpoints
 	router.POST("/peripheral", handler.CreatePeripheralDevice)
 	router.POST("/peripheral_bind", handler.BindPeripheralToData)
 	router.POST("/peripheral_unbind", handler.UnbindPeripheralToData)
 	router.PUT("/hrm_status", handler.SetHRMStatus)
-	router.POST("/hrm_connect", handler.ConnectHRM)
+
+	// HRM
+	router.POST("/peripheral/hrm", handler.connectHRM)
+	router.PUT("/peripheral/hrm", handler.disconnectHRM)
+	router.GET("/peripheral/hrm", handler.getHRMReading)
+
 	router.GET("/hrm_status", handler.GetHRMStatus)
-	router.GET("/hrm_reading", handler.GetHRMReading)
 	router.PUT("/hrm_reading", handler.SetHRMReading)
 	router.PUT("/geo_status", handler.SetGeoStatus)
 	router.GET("/geo_status", handler.GetGeoStatus)
@@ -66,45 +72,35 @@ func (handler *HTTPHandler) InitRouter() {
 
 }
 
-func (h *HTTPHandler) ConnectHRM(ctx *gin.Context) {
-
-	hId, err1 := parseUUID(ctx, "hrm_id")
-	code := ctx.Query("code")
-	if err1 != nil {
+// TODO: Remove bool connect
+func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
+	var req HRMDTO
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"failed to connect to hrm device failed, error 1": err1,
+			"error": "invalid request",
 		})
 		return
 	}
 
-	boolValue, boolErr := strconv.ParseBool(code)
-	if boolErr != nil {
-		fmt.Println(boolErr)
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": boolErr.Error()})
+	if !h.svc.CheckStatusByHRMId(req.HRMID) {
+		h.svc.CreatePeripheral(req.PlayerID, req.HRMID)
+	}
+
+	h.svc.SetHRMDevStatusByHRMId(req.HRMID, req.Connect)
+	ctx.JSON(http.StatusOK, gin.H{"connect to hrm success": true})
+}
+
+func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
+	var req HRMDTO
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request",
+		})
 		return
-	} else {
-		fmt.Println("Boolean value:", boolValue)
 	}
 
-	if h.svc.CheckStatusByHRMId(hId) {
-
-	} else {
-		pId, err1 := parseUUID(ctx, "player_id")
-		if err1 != nil {
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"failed to connect to hrm device failed, error 1": err1,
-			})
-			return
-		}
-		h.svc.CreatePeripheral(pId, hId)
-	}
-
-	h.svc.SetHRMDevStatusByHRMId(hId, boolValue)
-	if boolValue == true {
-		ctx.JSON(http.StatusOK, gin.H{"connect to hrm success": true})
-	} else {
-		ctx.JSON(http.StatusOK, gin.H{"disconnect to hrm success": true})
-	}
+	h.svc.SetHRMDevStatusByHRMId(req.HRMID, req.Connect)
+	ctx.JSON(http.StatusOK, gin.H{"disconnect to hrm success": true})
 }
 
 func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
@@ -218,19 +214,20 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 		"unbind": true})
 }
 
-func (h *HTTPHandler) GetHRMReading(ctx *gin.Context) {
-	hId, err := parseUUID(ctx, "hrm_id")
-	// wId := ctx.Query("workout_id")
+func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
+	wid, err := parseUUID(ctx, "workout_id")
 	if err != nil {
-
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
 	}
-	ReadingType := ctx.Query("type")
-	if ReadingType == "avg" {
-		ctx.JSON(http.StatusOK, gin.H{"reading": h.svc.GetHRMAvgReading(hId)})
-	} else if ReadingType == "normal" {
-		ctx.JSON(http.StatusOK, h.svc.GetHRMReading(hId))
+
+	hrType := ctx.Query("type")
+	if hrType == "avg" {
+		// TODO: This should be returning as per workout
+		ctx.JSON(http.StatusOK, gin.H{"reading": h.svc.GetHRMAvgReading(wid)})
 	} else {
-		ctx.JSON(http.StatusBadRequest, gin.H{"reading from device success": false})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "reading from device failure",
+		})
 	}
 }
 

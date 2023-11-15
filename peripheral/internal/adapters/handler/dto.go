@@ -42,3 +42,9 @@ type UnbindPeripheralData struct {
 	// WorkoutID for the workout to be stopped
 	WorkoutID uuid.UUID `json:"workout_id"`
 }
+
+type HRMDTO struct {
+	PlayerID uuid.UUID `json:"player_id"`
+	HRMID    uuid.UUID `json:"hrm_id"`
+	Connect  bool      `json:"connect"`
+}
