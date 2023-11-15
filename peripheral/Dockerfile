@@ -11,4 +11,4 @@ RUN go build -o hrm ./cmd
 # TODO: See if you need to expose the port or not
 EXPOSE 8004
 
-CMD ["./hrm"]
+CMD ["./peripheral"]
