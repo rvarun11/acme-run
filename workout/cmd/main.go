@@ -35,8 +35,8 @@ func main() {
 	workoutHTTPHandler.InitRouter()
 
 	workoutAMQPHandler := amqphandler.NewAMQPHandler(workoutSvc)
-	workoutAMQPHandler.InitAMQP()
 
+	go workoutAMQPHandler.InitAMQP()
 	// Start Server
 	router.Run(":" + cfg.Port)
 }

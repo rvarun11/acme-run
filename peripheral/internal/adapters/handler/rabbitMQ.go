@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	lastLocationQueueName = "Peripheral-Location-Queue-001"
+	lastLocationQueueName = "LOCATION_PERIPHERAL_WORKOUT"
 	lastHRQueueName       = "Peripheral-HRM-Queue-001"
 )
 
@@ -176,7 +176,7 @@ func failOnError(err error, msg string) {
 // )
 
 // const (
-// 	lastLocationQueueName = "Peripheral-Location-Queue-001"
+// 	lastLocationQueueName = "LOCATION_PERIPHERAL_WORKOUT"
 // 	lastHRQueueName       = "Peripheral-HRM-Queue-001"
 // )
 
