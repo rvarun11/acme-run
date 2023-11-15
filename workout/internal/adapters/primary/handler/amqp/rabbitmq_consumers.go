@@ -14,11 +14,11 @@ import (
 )
 
 const (
-	exchangeKind       = "direct"
-	exchangeDurable    = true
-	exchangeAutoDelete = false
-	exchangeInternal   = false
-	exchangeNoWait     = false
+	// exchangeKind       = "direct"
+	// exchangeDurable    = true
+	// exchangeAutoDelete = false
+	// exchangeInternal   = false
+	// exchangeNoWait     = false
 
 	queueDurable    = true
 	queueAutoDelete = false
