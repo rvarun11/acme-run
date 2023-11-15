@@ -198,20 +198,22 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 }
 
 func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
-
-	wId, err := parseUUID(ctx, "workout_id")
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"unbind": false})
+	var req UnbindPeripheralData
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request",
+		})
 		return
 	}
-	h.svc.SetLiveSw(wId, false)
+
+	h.svc.SetLiveSw(req.WorkoutID, false)
 	h.hLiveCount -= 1
 	if h.hLiveCount == 0 {
 		h.cancelF()
 	}
-	h.svc.SetHRMDevStatus(wId, false)
-	h.svc.SetGeoDevStatus(wId, false)
-	h.svc.DisconnectPeripheral(wId)
+	h.svc.SetHRMDevStatus(req.WorkoutID, false)
+	h.svc.SetGeoDevStatus(req.WorkoutID, false)
+	h.svc.DisconnectPeripheral(req.WorkoutID)
 	ctx.JSON(http.StatusOK, gin.H{
 		"unbind": true})
 }
