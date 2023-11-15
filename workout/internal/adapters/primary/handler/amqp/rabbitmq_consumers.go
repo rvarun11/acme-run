@@ -32,7 +32,7 @@ const (
 	prefetchSize   = 0
 	prefetchGlobal = false
 
-	consumeAutoAck   = false
+	consumeAutoAck   = true
 	consumeExclusive = false
 	consumeNoLocal   = false
 	consumeNoWait    = false
@@ -287,7 +287,6 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 
 // Start new rabbitmq consumer
 func (c *LocationSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
-	defer wg.Done()
 	logger.Info("HelloStart")
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -312,7 +311,6 @@ func (c *LocationSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize in
 		return fmt.Errorf("consume error %w", err)
 	}
 
-	var forever chan struct{}
 	for i := 0; i < workerPoolSize; i++ {
 		/// Do something with the deliveriesFind
 		logger.Info("HelloStart")
@@ -322,7 +320,6 @@ func (c *LocationSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize in
 	// TODO Fix blocking error handling
 	chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
 	logger.Debug("ch.NotifyClose", zap.Error(chanErr))
-	<-forever
 	return nil
 }
 
