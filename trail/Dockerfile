@@ -8,6 +8,6 @@ RUN go get -d -v ./...
 
 RUN go build -o workout ./cmd
 
-EXPOSE 8001
+EXPOSE 8005
 
-CMD ["./workout"]
+CMD ["./trail"]

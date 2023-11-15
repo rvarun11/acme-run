@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
-
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -101,6 +101,7 @@ func (s *NewTrailManagerServiceHTTPHandler) CreateTrail(c *gin.Context) {
 
 	tid : = c.Query("id")
 	name := c.Query("name")
+	zone:= c.Query("zone_id")
 	startLongitude := c.Query("start_longitude")
 	startLatitude := c.Query("start_latitude")
 	endLongitude := c.Query("end_longitude")

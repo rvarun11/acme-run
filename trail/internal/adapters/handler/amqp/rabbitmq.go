@@ -1,4 +1,4 @@
-package amqphandler
+package amqp
 
 import (
 	"context"
@@ -27,12 +27,12 @@ func PeripheralSubscriber(svc services.TrailManagerService, url string) {
 	defer ch.Close()
 
 	q, err := ch.QueueDeclare(
-		"HR-Queue-001", // name
-		false,          // durable
-		false,          // delete when unused
-		false,          // exclusive
-		false,          // no-wait
-		nil,            // arguments
+		"TRAIL-Queue-001", // name
+		false,             // durable
+		false,             // delete when unused
+		false,             // exclusive
+		false,             // no-wait
+		nil,               // arguments
 	)
 	failOnError(err, "Failed to declare a queue")
 
