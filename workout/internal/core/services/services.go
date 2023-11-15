@@ -127,6 +127,10 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 }
 
 func (s *WorkoutService) GetWorkoutOptions(workoutID uuid.UUID) ([]domain.WorkoutOptionLink, error) {
+
+	// Compute Workout Options
+	s.ComputeWorkoutOptionsOrder(workoutID)
+
 	// Retrieve workout options from the repository
 	pworkoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
@@ -433,23 +437,6 @@ func (s *WorkoutService) GetSheltersTakenById(workoutID uuid.UUID) (uint16, erro
 
 func (s *WorkoutService) GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error) {
 	return s.repo.GetSheltersTakenBetweenDates(playerID, startDate, endDate)
-}
-
-// Function to run periodically
-func (s *WorkoutService) RunPeriodicTask() {
-	for {
-		// Iterate through active workouts in locationMap
-		for workoutID := range s.activeWorkoutsLastLocation {
-			_ = s.ComputeWorkoutOptionsOrder(workoutID)
-			// TODO
-			//if err != nil {
-			// Handle the error (e.g., log it)
-			//}
-		}
-
-		// Sleep for 4 seconds before the next iteration
-		time.Sleep(4 * time.Second)
-	}
 }
 
 // ComputeWorkoutOptionsOrder is modified to take profile directly

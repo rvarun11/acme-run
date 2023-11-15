@@ -220,10 +220,13 @@ func TestWorkoutService_HardcoreMode(t *testing.T) {
 	// Mocked responses for user service calls
 	userClientMock.On("GetWorkoutPreferenceOfUser", playerID).Return("cardio", nil)
 	userClientMock.On("GetHardcoreModeOfUser", playerID).Return(true, nil) // Hardcore mode is on
+	userClientMock.On("GetUserAge", playerID).Return(30, nil)              // Age or Player is 30
 
 	// Mock the peripheral client to assert that the shelter request is set to false
 	peripheralClientMock.On("BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, false).Return(nil)
 	peripheralClientMock.On("UnbindPeripheralData", mock.Anything).Return(nil)
+	randomHeartRate := uint8(rand.Intn(87) + 134)
+	peripheralClientMock.On("GetAverageHeartRateOfUser", mock.Anything).Return(randomHeartRate, nil)
 
 	_, startErr := service.Start(&workout, HRMID, true)
 	assert.NoError(t, startErr)
@@ -295,16 +298,12 @@ func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	// Assert that the BindPeripheralData was called with shelterNeeded as false
 	peripheralClientMock.AssertCalled(t, "BindPeripheralData", playerID, workout.WorkoutID, HRMID, true, true)
 
-	service.ComputeWorkoutOptionsOrder(workout.WorkoutID)
-
 	// Get workout options and assert shelter is not an option
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
 	assert.Contains(t, links[0].URL, "option=2", "Escape must be at a higher rank")
 	assert.Contains(t, links[1].URL, "option=1", "Fight must go down")
-
-	service.ComputeWorkoutOptionsOrder(workout.WorkoutID)
 
 	// Get workout options and assert shelter is not an option
 	links, err = service.GetWorkoutOptions(workout.WorkoutID)
