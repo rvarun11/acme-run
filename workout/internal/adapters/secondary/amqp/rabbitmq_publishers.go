@@ -50,7 +50,15 @@ func (pub *AMQPPublisher) PublishWorkoutStats(workoutStats *domain.Workout) erro
 	}
 	defer ch.Close()
 
-	body, err := json.Marshal(workoutStats)
+	var challengeStatsDTO = challengeStatsDTO{
+		PlayerID:        workoutStats.PlayerID,
+		WorkoutEnd:      workoutStats.EndedAt,
+		EnemiesFought:   workoutStats.Fights,
+		EnemiesEscaped:  workoutStats.Escapes,
+		DistanceCovered: workoutStats.DistanceCovered,
+	}
+
+	body, err := json.Marshal(challengeStatsDTO)
 	if err != nil {
 		return fmt.Errorf("failed to serialize workoutStats: %w", err)
 	}
