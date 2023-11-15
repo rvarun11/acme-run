@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
@@ -127,6 +128,10 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 }
 
 func (s *WorkoutService) GetWorkoutOptions(workoutID uuid.UUID) ([]domain.WorkoutOptionLink, error) {
+
+	// Compute Workout Options
+	s.ComputeWorkoutOptionsOrder(workoutID)
+
 	// Retrieve workout options from the repository
 	pworkoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
@@ -144,8 +149,7 @@ func (s *WorkoutService) GetWorkoutOptions(workoutID uuid.UUID) ([]domain.Workou
 	optionsOrder := computeOptionsOrder(pworkoutOptions)
 
 	// Generating HATEOAS links for StartWorkoutOption based on the computed order
-	links := generateStartWorkoutOptionLinks(workoutID, optionsOrder)
-
+	links := generateStartWorkoutOptionLinks(workoutID, optionsOrder, pworkoutOptions.DistanceToShelter)
 	return links, nil
 }
 
@@ -170,7 +174,7 @@ func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
 	order := []uint8{}
 
 	// Add Shelter to the order only if the bit is set for the current workout option
-	if pworkoutOptions.CurrentWorkoutOption&ShelterBit != 0 {
+	if pworkoutOptions.CurrentWorkoutOption&1 != 0 {
 		order = append(order, ShelterBit)
 	}
 
@@ -184,14 +188,14 @@ func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
 	return order
 }
 
-func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8) []domain.WorkoutOptionLink {
+func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, distance_to_shleter float64) []domain.WorkoutOptionLink {
 	var links []domain.WorkoutOptionLink // A slice to hold ordered links
 
 	for _, option := range optionsOrder {
 		var optionName string
 		switch option {
 		case ShelterBit:
-			optionName = "Shelter"
+			optionName = "Distance to Shelter = " + strconv.FormatFloat(distance_to_shleter, 'f', -1, 64) + " : "
 		case FightBit:
 			optionName = "Fight"
 		case EscapeBit:
@@ -268,7 +272,6 @@ func (s *WorkoutService) UpdateShelter(workoutID uuid.UUID, DistanceToShelter fl
 	if err != nil {
 		return err // Propagate the error from the repository
 	}
-
 	workoutOptions.DistanceToShelter = DistanceToShelter
 
 	s.repo.UpdateWorkoutOptions(workoutOptions)
@@ -433,23 +436,6 @@ func (s *WorkoutService) GetSheltersTakenById(workoutID uuid.UUID) (uint16, erro
 
 func (s *WorkoutService) GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error) {
 	return s.repo.GetSheltersTakenBetweenDates(playerID, startDate, endDate)
-}
-
-// Function to run periodically
-func (s *WorkoutService) RunPeriodicTask() {
-	for {
-		// Iterate through active workouts in locationMap
-		for workoutID := range s.activeWorkoutsLastLocation {
-			_ = s.ComputeWorkoutOptionsOrder(workoutID)
-			// TODO
-			//if err != nil {
-			// Handle the error (e.g., log it)
-			//}
-		}
-
-		// Sleep for 4 seconds before the next iteration
-		time.Sleep(4 * time.Second)
-	}
 }
 
 // ComputeWorkoutOptionsOrder is modified to take profile directly
