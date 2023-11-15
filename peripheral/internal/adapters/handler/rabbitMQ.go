@@ -6,6 +6,7 @@ import (
 
 	// "log"
 
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -108,7 +109,7 @@ func (handler *RabbitMQHandler) Close() {
 	}
 }
 
-func (handler *RabbitMQHandler) SendLastLocation(tLoc LastLocation) {
+func (handler *RabbitMQHandler) SendLastLocation(tLoc dto.LastLocation) {
 	// location := handler.peripheralService.GetGeoLocation(wId)
 	body, err := json.Marshal(tLoc)
 	if err != nil {

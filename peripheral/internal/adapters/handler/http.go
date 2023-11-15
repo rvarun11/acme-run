@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/google/uuid"
@@ -76,7 +77,7 @@ func (handler *HTTPHandler) InitRouter() {
 // LS-TODO: Remove bool connect
 // LS-TODO: Update all the handler functions to be private, for example:
 func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
-	var req HRMDTO
+	var req dto.BindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -84,16 +85,29 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 		return
 	}
 
-	if !h.svc.CheckStatusByHRMId(req.HRMID) {
-		h.svc.CreatePeripheral(req.PlayerID, req.HRMID)
+	if !h.svc.CheckStatusByHRMId(req.HRMId) {
+		err1 := h.svc.CreatePeripheral(req.PlayerID, req.HRMId)
+		if err1 != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "cannot connect to hrm",
+			})
+			return
+		}
 	}
 
-	h.svc.SetHRMDevStatusByHRMId(req.HRMID, req.Connect)
+	err2 := h.svc.SetHRMDevStatusByHRMId(req.HRMId, true)
+	if err2 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "cannot connect to hrm",
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{"connect to hrm success": true})
 }
 
 func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
-	var req HRMDTO
+
+	var req dto.BindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -101,21 +115,19 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 		return
 	}
 
-	h.svc.SetHRMDevStatusByHRMId(req.HRMID, req.Connect)
+	err2 := h.svc.SetHRMDevStatusByHRMId(req.HRMId, false)
+	if err2 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "cannot disconnect to hrm",
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{"disconnect to hrm success": true})
 }
 
 func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
-	// pId, err1 := parseUUID(ctx, "player_id")
-	// hId, err2 := parseUUID(ctx, "hrm_id")
-	// if err2 != nil || err1 != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"creating a new peripheral device failed, error 1": err1, "error 2": err2,
-	// 	})
-	// 	return
-	// }
 
-	var cDataInstance BindPeripheralData
+	var cDataInstance dto.BindPeripheralData
 	if err := ctx.ShouldBindJSON(&cDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -127,76 +139,36 @@ func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
 
 func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
-	// pId, err := parseUUID(ctx, "player_id")
-	// if err != nil {
-
-	// }
-	// wId, err := parseUUID(ctx, "workout_id")
-	// if err != nil {
-
-	// }
-	// hId, err := parseUUID(ctx, "hrm_id")
-	// if err != nil {
-
-	// }
-	// tConnected := ctx.Query("hrm_connected")
-	// connected, boolErr := strconv.ParseBool(tConnected)
-	// if boolErr != nil {
-	// 	fmt.Println(boolErr)
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": boolErr.Error()})
-	// 	return
-	// } else {
-	// 	fmt.Println("Boolean value:", connected)
-	// }
-
-	// tBroadcast := ctx.Query("send_live_location_to_trail_manager")
-	// broadcast, boolErr := strconv.ParseBool(tBroadcast)
-	// if boolErr != nil {
-	// 	fmt.Println(boolErr)
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": boolErr.Error()})
-	// 	return
-	// } else {
-	// 	fmt.Println("Boolean value:", broadcast)
-	// }
-
-	var bindDataInstance BindPeripheralData
+	var bindDataInstance dto.BindPeripheralData
 	if err := ctx.ShouldBindJSON(&bindDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	h.svc.BindPeripheral(bindDataInstance.PlayerID, bindDataInstance.WorkoutID, bindDataInstance.HRMId, bindDataInstance.HRMConnected, bindDataInstance.SendLiveLocationToTrailManager)
-	// h.svc.BindPeripheral(pId, wId, hId, connected, broadcast)
-	h.hLiveCount += 1
+	err := h.svc.BindPeripheral(bindDataInstance.PlayerID, bindDataInstance.WorkoutID, bindDataInstance.HRMId, bindDataInstance.HRMConnected, bindDataInstance.SendLiveLocationToTrailManager)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Failed to Bind workout",
+		})
+		return
+	} else {
 
-	// if connected {
-	// go h.rabbitMQHandler.SendLastHR(wId)
-	ctx.JSON(http.StatusBadRequest, gin.H{
-		"binding successful": true,
-	})
-	// } else {
-	// 	h.svc.DisconnectPeripheral(bindDataInstance.WorkoutID)
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"binding successful": false,
-	// 	})
-	// }
-
-	// Create a context that can be cancelled
-	h.bCtx, h.cancelF = context.WithCancel(context.Background())
-
-	longitudeStart := 40.0
-	latitudeStart := 40.0
-	longitudeEnd := 50.0
-	latitudeEnd := 50.0
-	// liveDataSw := true
-	h.svc.SetLiveSw(bindDataInstance.WorkoutID, true)
-	// Start the background printing
-	h.StartBackgroundMockTesting(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
-
+		ctx.JSON(http.StatusOK, gin.H{
+			"success": "Binding workout done",
+		})
+		h.hLiveCount += 1
+		h.bCtx, h.cancelF = context.WithCancel(context.Background())
+		longitudeStart := 40.0
+		latitudeStart := 40.0
+		longitudeEnd := 50.0
+		latitudeEnd := 50.0
+		h.svc.SetLiveSw(bindDataInstance.WorkoutID, true)
+		h.StartBackgroundMockTesting(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
+	}
 }
 
 func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
-	var req UnbindPeripheralData
+	var req dto.UnbindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -204,28 +176,72 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 		return
 	}
 
-	h.svc.SetLiveSw(req.WorkoutID, false)
+	err1 := h.svc.SetLiveSw(req.WorkoutID, false)
+	if err1 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "failed to unbind",
+		})
+		return
+	}
+
 	h.hLiveCount -= 1
 	if h.hLiveCount == 0 {
 		h.cancelF()
 	}
-	h.svc.SetHRMDevStatus(req.WorkoutID, false)
-	h.svc.SetGeoDevStatus(req.WorkoutID, false)
-	h.svc.DisconnectPeripheral(req.WorkoutID)
+
+	err1 = h.svc.SetHRMDevStatus(req.WorkoutID, false)
+	if err1 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "failed to unbind",
+		})
+		return
+	}
+
+	err1 = h.svc.SetGeoDevStatus(req.WorkoutID, false)
+	if err1 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "failed to unbind",
+		})
+		return
+	}
+
+	err1 = h.svc.DisconnectPeripheral(req.WorkoutID)
+	if err1 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "failed to unbind",
+		})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"unbind": true})
+		"success": "Unbind the data"})
 }
 
 func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
-	wid, err := parseUUID(ctx, "workout_id")
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+	wId, err1 := parseUUID(ctx, "workout_id")
+	if err1 != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "get hr invalid request"})
 	}
 
 	hrType := ctx.Query("type")
 	if hrType == "avg" {
 		// TODO: This should be returning as per workout
-		ctx.JSON(http.StatusOK, gin.H{"reading": h.svc.GetHRMAvgReading(wid)})
+		tLoc, err := h.svc.GetHRMAvgReading(wId)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "reading from device failure",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"reading": tLoc})
+	} else if hrType == "normal" {
+		tLoc, err := h.svc.GetHRMAvgReading(wId)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"error": "reading from device failure",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"reading": tLoc})
 	} else {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "reading from device failure",
@@ -235,12 +251,18 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 
 func (h *HTTPHandler) GetHRMStatus(ctx *gin.Context) {
 
-	// wId, err := parseUUID(ctx, "workout_id")
-	wId, err := parseUUID(ctx, "hrm_id")
+	wId, err := parseUUID(ctx, "workout_id")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"fail to get hrm status": false})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Fail to get hrm status"})
+		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"hrm status value": h.svc.GetHRMDevStatusByHRMId(wId)})
+
+	tStatus, err := h.svc.GetHRMDevStatus(wId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Fail to get hrm status"})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"hrm running": tStatus})
 
 }
 
@@ -259,7 +281,11 @@ func (h *HTTPHandler) SetHRMStatus(ctx *gin.Context) {
 	} else {
 		fmt.Println("Boolean value:", boolValue)
 	}
-	h.svc.SetHRMDevStatus(wId, boolValue)
+	err = h.svc.SetHRMDevStatus(wId, boolValue)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	ctx.JSON(http.StatusOK, gin.H{"success": true})
 
 }
@@ -277,21 +303,35 @@ func (h *HTTPHandler) SetHRMReading(ctx *gin.Context) {
 		fmt.Println(intErr)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": intErr.Error()})
 		return
-	} else {
-		log.Debug("HRM Smart Watch Reading", zap.Int("reading", intValue))
 	}
-	h.svc.SetHeartRateReading(hId, intValue)
-	ctx.JSON(http.StatusOK, gin.H{"success": true})
+
+	if !h.svc.CheckStatusByHRMId(hId) {
+		ctx.JSON(http.StatusOK, gin.H{"error": "hrm no such device "})
+		return
+	}
+
+	err = h.svc.SetHeartRateReading(hId, intValue)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "hrm cannot read from smart watch"})
+		return
+	}
+	log.Debug("HRM Smart Watch Reading", zap.Int("reading", intValue))
+	ctx.JSON(http.StatusOK, gin.H{"success": "hrm read data from smart watch"})
 }
 
 func (h *HTTPHandler) GetGeoStatus(ctx *gin.Context) {
 
 	wId, err := parseUUID(ctx, "workout_id")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"cannot get geo status ": false})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot get geo status "})
 		return
 	}
-	ctx.JSON(http.StatusOK, h.svc.GetGeoDevStatus(wId))
+	geoStatus, err := h.svc.GetGeoDevStatus(wId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot get geo status "})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"geo running": geoStatus})
 }
 
 func (h *HTTPHandler) SetGeoStatus(ctx *gin.Context) {
@@ -320,44 +360,49 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 	longitude := ctx.Query("longitude")
 	wId, err := parseUUID(ctx, "workout_id")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error read geo status from device, success": false})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "error read geo status from device"})
+		return
 	}
-	var tempLastLoc LastLocation
+	var tempLastLoc dto.LastLocation
 	tempLastLoc.WorkoutID = wId
 	tempLastLoc.TimeOfLocation = time.Now()
 
 	flongitude, longFloatErr := strconv.ParseFloat(longitude, 64) // convert to float64, for float32 use '32'
 	if longFloatErr != nil {
-		fmt.Println(longFloatErr)
-	} else {
-		// fmt.Println("Float value:", flongitude)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "error read geo status from device"})
+		return
 	}
 
 	flatitude, latFloatErr := strconv.ParseFloat(latitude, 64) // convert to float64, for float32 use '32'
 	if latFloatErr != nil {
-		fmt.Println(latFloatErr)
-	} else {
-		// fmt.Println("Float value:", flatitude)
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "error read geo status from device"})
+		return
 	}
+
 	tempLastLoc.Latitude = flatitude
 	tempLastLoc.Longitude = flongitude
-	h.svc.SetGeoLocation(wId, flongitude, flatitude)
-	// Now trigger the RabbitMQHandler to send the updated location
+	err = h.svc.SetGeoLocation(wId, flongitude, flatitude)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "error read geo status from device"})
+		return
+	}
 	log.Info("sending location to queue now")
 	go h.rabbitMQHandler.SendLastLocation(tempLastLoc)
-	log.Info("sent location to queue now")
-	fmt.Println(h.svc.GetGeoLocation(wId))
 	ctx.JSON(http.StatusOK, gin.H{"message": "Geo reading set and location sent"})
-
-	// ctx.JSON(http.StatusOK, h.svc.SetGeoLocation(wId, longitude, latitude))
 }
 
 func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
 	wId, err := parseUUID(ctx, "workout_id")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error read geo location, success": false})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get geo device"})
+		return
 	}
-	ctx.JSON(http.StatusOK, h.svc.GetGeoLocation(wId))
+	tLoc, err := h.svc.GetGeoLocation(wId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get geo device"})
+		return
+	}
+	ctx.JSON(http.StatusOK, tLoc)
 }
 
 func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 context.Context, wId uuid.UUID, hId uuid.UUID, longitudeStart float64, latitudeStart float64, longitudeEnd float64, latitudeEnd float64) {
@@ -380,7 +425,13 @@ func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 conte
 				return
 			default:
 				// Fetch the peripheral instance to check if live_data is true
-				if h.svc.GetLiveSw(wId) {
+				res, err := h.svc.GetLiveSw(wId)
+
+				if err != nil {
+					h.cancelF()
+				}
+
+				if res {
 
 					fmt.Println("hello")
 					if startLat <= latitudeEnd {
@@ -393,13 +444,17 @@ func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 conte
 						startLong += (0.05 + randomNumber2)
 					}
 
-					var tLoc LastLocation
+					var tLoc dto.LastLocation
 					tLoc.Longitude = startLong
 					tLoc.Latitude = startLat
 					tLoc.TimeOfLocation = time.Now()
 					tLoc.WorkoutID = wId
 
 					go h.rabbitMQHandler.SendLastLocation(tLoc)
+					err2 := h.svc.SetGeoLocation(wId, tLoc.Longitude, tLoc.Latitude)
+					if err2 != nil {
+
+					}
 
 					randomInteger := rand.Intn(maxHR-minHR+1) + minHR
 					currentReadingStr := fmt.Sprintf("%d", randomInteger)

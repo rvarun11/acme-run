@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/google/uuid"
 )
 
@@ -19,25 +20,29 @@ var (
 
 // LS-TODO: The sergvices should return the domain object with error
 type PeripheralService interface {
-	ConnectPeripheral(pId uuid.UUID) error
-	DisconnectPeripheral(pId uuid.UUID) error
-	BindPeripheralToWorkout(pId uuid.UUID, workout uuid.UUID)
-	Get(pId uuid.UUID) (*domain.Peripheral, error)
-	SetHRMReading(wId uuid.UUID, reading int)
-	// SendPeripheralId()
-	GetHRMReading(wId uuid.UUID) *domain.LastHR
-	GetGeoLocation(wId uuid.UUID) *domain.LastLocation
-	SendPeripheralLocation()
-
-	ReadPeripheralLocation(Longitude float64, Latitude float64)
-	ReadPeripheralHeartRate(pId uuid.UUID, rate int)
+	CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error
+	CheckStatusByHRMId(hId uuid.UUID) bool
+	BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uuid.UUID, connected bool, sendToTrail bool) error
+	DisconnectPeripheral(wId uuid.UUID) error
+	GetHRMAvgReading(hId uuid.UUID) (dto.LastHR, error)
+	GetHRMReading(hId uuid.UUID) (dto.LastHR, error)
+	SetHeartRateReading(hId uuid.UUID, reading int) error
+	GetHRMDevStatus(wId uuid.UUID) (bool, error)
+	SetHRMDevStatusByHRMId(hId uuid.UUID, code bool) error
+	SetHRMDevStatus(wId uuid.UUID, code bool) error
+	SetGeoLocation(wId uuid.UUID, longitude float64, latitude float64) error
+	GetGeoDevStatus(wId uuid.UUID) (bool, error)
+	SetGeoDevStatus(wId uuid.UUID, code bool) error
+	GetGeoLocation(wId uuid.UUID) (dto.LastLocation, error)
+	GetLiveSw(wId uuid.UUID) (bool, error)
+	SetLiveSw(wId uuid.UUID, code bool) error
 }
 
 type PeripheralRepository interface {
 	AddPeripheralIntance(p domain.Peripheral) error
 	DeletePeripheralInstance(pId uuid.UUID) error
 	DeletePeripheralInstanceByHRMId(hId uuid.UUID) error
-	Get(wID uuid.UUID) (*domain.Peripheral, error)
+	GetByWorkoutId(wID uuid.UUID) (*domain.Peripheral, error)
 	GetByPlayerId(pID uuid.UUID) (*domain.Peripheral, error)
 	GetByHRMId(hID uuid.UUID) (*domain.Peripheral, error)
 	Update(p domain.Peripheral) error
