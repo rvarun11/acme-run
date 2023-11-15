@@ -34,6 +34,7 @@ func (s *PeripheralService) CreatePeripheral(pId uuid.UUID, hId uuid.UUID) {
 	var h domain.Peripheral
 	h.HRMId = hId
 	h.PlayerId = pId
+	h.LiveData = false
 	p, _ := domain.NewPeripheral(h)
 	s.repo.AddPeripheralIntance(p)
 }
@@ -56,8 +57,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hrmId u
 		var h domain.Peripheral
 		h.HRMId = hrmId
 		h.WorkoutId = wId
-		h.LiveData = true
-		h.GeoBrodacasting = sendToTrail
+		h.LiveData = sendToTrail
 		h.HRMStatus = connected
 		h.PlayerId = pId
 		p, _ := domain.NewPeripheral(h)

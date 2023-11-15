@@ -108,15 +108,6 @@ func (h *HTTPHandler) ConnectHRM(ctx *gin.Context) {
 }
 
 func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
-	// pId, err1 := parseUUID(ctx, "player_id")
-	// hId, err2 := parseUUID(ctx, "hrm_id")
-	// if err2 != nil || err1 != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"creating a new peripheral device failed, error 1": err1, "error 2": err2,
-	// 	})
-	// 	return
-	// }
-
 	var cDataInstance BindPeripheralData
 	if err := ctx.ShouldBindJSON(&cDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -129,46 +120,14 @@ func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
 
 func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
-	// pId, err := parseUUID(ctx, "player_id")
-	// if err != nil {
-
-	// }
-	// wId, err := parseUUID(ctx, "workout_id")
-	// if err != nil {
-
-	// }
-	// hId, err := parseUUID(ctx, "hrm_id")
-	// if err != nil {
-
-	// }
-	// tConnected := ctx.Query("hrm_connected")
-	// connected, boolErr := strconv.ParseBool(tConnected)
-	// if boolErr != nil {
-	// 	fmt.Println(boolErr)
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": boolErr.Error()})
-	// 	return
-	// } else {
-	// 	fmt.Println("Boolean value:", connected)
-	// }
-
-	// tBroadcast := ctx.Query("send_live_location_to_trail_manager")
-	// broadcast, boolErr := strconv.ParseBool(tBroadcast)
-	// if boolErr != nil {
-	// 	fmt.Println(boolErr)
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{"error": boolErr.Error()})
-	// 	return
-	// } else {
-	// 	fmt.Println("Boolean value:", broadcast)
-	// }
-
 	var bindDataInstance BindPeripheralData
 	if err := ctx.ShouldBindJSON(&bindDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
 	h.svc.BindPeripheral(bindDataInstance.PlayerID, bindDataInstance.WorkoutID, bindDataInstance.HRMId, bindDataInstance.HRMConnected, bindDataInstance.SendLiveLocationToTrailManager)
 	// h.svc.BindPeripheral(pId, wId, hId, connected, broadcast)
+
 	h.hLiveCount += 1
 
 	// if connected {
@@ -176,13 +135,6 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 	ctx.JSON(http.StatusBadRequest, gin.H{
 		"binding successful": true,
 	})
-	// } else {
-	// 	h.svc.DisconnectPeripheral(bindDataInstance.WorkoutID)
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"binding successful": false,
-	// 	})
-	// }
-
 	// Create a context that can be cancelled
 	h.bCtx, h.cancelF = context.WithCancel(context.Background())
 
@@ -190,8 +142,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 	latitudeStart := 40.0
 	longitudeEnd := 50.0
 	latitudeEnd := 50.0
-	// liveDataSw := true
-	h.svc.SetLiveSw(bindDataInstance.WorkoutID, true)
+
 	// Start the background printing
 	h.StartBackgroundMockTesting(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
 
@@ -199,11 +150,12 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
 func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 
-	wId, err := parseUUID(ctx, "workout_id")
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"unbind": false})
+	var bindDataInstance BindPeripheralData
+	if err := ctx.ShouldBindJSON(&bindDataInstance); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+	wId := bindDataInstance.WorkoutID
 	h.svc.SetLiveSw(wId, false)
 	h.hLiveCount -= 1
 	if h.hLiveCount == 0 {
@@ -381,7 +333,6 @@ func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 conte
 				// Fetch the peripheral instance to check if live_data is true
 				if h.svc.GetLiveSw(wId) {
 
-					fmt.Println("hello")
 					if startLat <= latitudeEnd {
 						randomNumber1 := randomFloat64(min, max)
 						startLat += (0.05 + randomNumber1)
