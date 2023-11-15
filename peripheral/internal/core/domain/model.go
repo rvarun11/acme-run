@@ -7,6 +7,14 @@ import (
 	"github.com/google/uuid"
 )
 
+/*
+LS-TODO: Remove json parsing information & remove un-needed fields
+LS-TODO Move the entities like HRM and Geo to separate structs, for example:
+type HRM struct {
+
+}
+type Geo struct {}
+*/
 type Peripheral struct {
 	PeripheralId    uuid.UUID `json:"peripheral_id"`
 	PlayerId        uuid.UUID `json:"player_id"`
@@ -27,6 +35,7 @@ type Peripheral struct {
 	LiveData        bool      `json:"live_data_switch"`
 }
 
+// LS-TODO: We don't need getters and setters
 // Getters and Setters for HRM
 func (p *Peripheral) GetHRMID() uuid.UUID {
 	return p.HRMId
@@ -120,10 +129,11 @@ func (p *Peripheral) GetGeoLocation() LastLocation {
 
 }
 
-// NewPlayer is a factory to create a new Player aggregate
-
+// LS-TODO: The function should take the values as parameters. See User.go for example
+// NewPeripheral is a factory to create a new Peripheral aggregate
 func NewPeripheral(p Peripheral) (Peripheral, error) {
 
+	// LS-TODO: Add validation for different fields.
 	// Create a hrm object and initialize all the values to avoid nil pointer exceptions
 	pN := Peripheral{
 		PeripheralId:    uuid.New(),

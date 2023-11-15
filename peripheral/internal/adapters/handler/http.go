@@ -31,6 +31,7 @@ func randomFloat64(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
+// LS-TODO: An adapter cannot talk to another adapter, rabbitMQ handler cannot be here
 type HTTPHandler struct {
 	gin             *gin.Engine
 	svc             *services.PeripheralService
@@ -72,7 +73,8 @@ func (handler *HTTPHandler) InitRouter() {
 
 }
 
-// TODO: Remove bool connect
+// LS-TODO: Remove bool connect
+// LS-TODO: Update all the handler functions to be private, for example:
 func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 	var req HRMDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {

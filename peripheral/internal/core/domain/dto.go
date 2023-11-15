@@ -1,5 +1,6 @@
 package domain
 
+// LS-TODO: Remove this file as this does not belong in the domain.
 import (
 	"time"
 

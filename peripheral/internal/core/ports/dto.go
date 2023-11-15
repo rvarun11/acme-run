@@ -1,5 +1,7 @@
 package ports
 
+// LS-TODO: Remove this file as this DTOs should be in adapters.
+
 import (
 	"time"
 

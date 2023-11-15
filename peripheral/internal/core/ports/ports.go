@@ -15,6 +15,9 @@ var (
 	ErrorListPeripheralFailed   = errors.New("failed to list Peripheral")
 )
 
+// LS-TODO: Remove or comment out the unused functions
+
+// LS-TODO: The sergvices should return the domain object with error
 type PeripheralService interface {
 	ConnectPeripheral(pId uuid.UUID) error
 	DisconnectPeripheral(pId uuid.UUID) error

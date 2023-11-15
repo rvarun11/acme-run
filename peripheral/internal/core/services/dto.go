@@ -6,6 +6,8 @@ import (
 	"github.com/google/uuid"
 )
 
+// LS-TODO: This file is not needed. Remove this
+
 type LastLocation struct {
 	// WorkoutID for which the Shelter Availability is there or not
 	WorkoutID uuid.UUID `json:"workout_id"`

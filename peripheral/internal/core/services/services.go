@@ -26,6 +26,7 @@ func NewPeripheralService(repo ports.PeripheralRepository) *PeripheralService {
 	}
 }
 
+// LS-TODO: Remove this function from here
 func randomFloat64(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
@@ -35,6 +36,11 @@ func (s *PeripheralService) CreatePeripheral(pId uuid.UUID, hId uuid.UUID) {
 	h.HRMId = hId
 	h.PlayerId = pId
 	p, _ := domain.NewPeripheral(h)
+	// LS-TODO: Do error handling here and in other places, keeping this for reference
+	// p, err := domain.NewPeripheral(h)
+	// if err != nil {
+	// 	return &domain.Peripheral{}, err
+	// }
 	s.repo.AddPeripheralIntance(p)
 }
 
@@ -78,6 +84,7 @@ func (s *PeripheralService) DisconnectPeripheral(wId uuid.UUID) {
 	s.repo.DeletePeripheralInstance(wId)
 }
 
+// LS-TODO: Remove this
 func (s *PeripheralService) SendPeripheralId(wg *sync.WaitGroup) {
 	defer wg.Done()
 
@@ -228,3 +235,5 @@ func (s *PeripheralService) SetLiveSw(wId uuid.UUID, code bool) {
 	pInstance.LiveData = code
 	s.repo.Update(*pInstance)
 }
+
+// LS-TODO: Add helper function here or create a helper file (if there are a lot of helpers)

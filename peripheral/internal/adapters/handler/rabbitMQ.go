@@ -17,6 +17,8 @@ const (
 	lastHRQueueName       = "Peripheral-HRM-Queue-001"
 )
 
+// LS-TODO: Remove warnings
+
 const (
 	exchangeKind       = "direct"
 	exchangeDurable    = true
@@ -42,6 +44,7 @@ const (
 	consumeNoWait    = false
 )
 
+// LS-TODO: Please look at challenge service Rabbit MQ handler and see how it's being done.
 type RabbitMQHandler struct {
 	peripheralService *services.PeripheralService
 	amqpURL           string
