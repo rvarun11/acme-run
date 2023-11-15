@@ -16,6 +16,7 @@ IMPORTANT FOR REPORT:
 var (
 	ErrorInvalidCriteria   = errors.New("criteria can only be DistanceCovered, Escape, Fight, FightMoreThanEscape or EscapeMoreThanFight")
 	ErrorChallengeInactive = errors.New("cannot create a badge as challenge is inactive")
+	ErrInvalidTime         = errors.New("end time exceeds start time")
 )
 
 type Criteria string
@@ -52,11 +53,15 @@ type Challenge struct {
 
 // NewPlayer is a factory to create a new Player aggregate
 func NewChallenge(name string, desc string, badgeUrl string, criteria Criteria, goal float64, start, end time.Time) (*Challenge, error) {
-	err := ValidateCriteria(criteria)
+	err := validateCriteria(criteria)
 	if err != nil {
 		return &Challenge{}, err
 	}
 
+	err = validateTime(start, end)
+	if err != nil {
+		return &Challenge{}, err
+	}
 	challenge := &Challenge{
 		ID:          uuid.New(),
 		Name:        name,
@@ -79,11 +84,18 @@ func (ch *Challenge) IsActive() bool {
 
 // func GetActiveCriterion()
 
-func ValidateCriteria(c Criteria) error {
+func validateCriteria(c Criteria) error {
 	switch c {
 	case DistanceCovered, EscapeEnemy, FightEnemy, FightMoreThanEscape, EscapeMoreThanFight:
 		return nil
 	default:
 		return ErrorInvalidCriteria
 	}
+}
+
+func validateTime(start, end time.Time) error {
+	if end.Before(start) {
+		return ErrInvalidTime
+	}
+	return nil
 }

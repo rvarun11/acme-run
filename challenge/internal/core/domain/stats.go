@@ -1,14 +1,11 @@
 package domain
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
-
-var ErrInvalidChallengeStatEndTime = errors.New("workout end time exceeds challenge end time")
 
 type ChallengeStats struct {
 	ID              uuid.UUID
@@ -21,7 +18,7 @@ type ChallengeStats struct {
 }
 
 func NewChallengeStats(ch *Challenge, pid uuid.UUID, dc float64, ef uint8, ee uint8, workoutEnd time.Time) (*ChallengeStats, error) {
-	err := validateTime(ch, workoutEnd)
+	err := validateTime(ch.End, workoutEnd)
 	if err != nil {
 		return &ChallengeStats{}, err
 	}
@@ -66,13 +63,6 @@ func (cs *ChallengeStats) GetValidatedScore() (float64, error) {
 	default:
 		return 0.0, fmt.Errorf("cannot validate score for invalid criteria")
 	}
-}
-
-func validateTime(ch *Challenge, end time.Time) error {
-	if end.Before(ch.End) {
-		return ErrInvalidChallengeStatEndTime
-	}
-	return nil
 }
 
 // Specific Stats may be needed later
