@@ -28,7 +28,6 @@ func (svc *ChallengeService) CreateChallenge(req *domain.Challenge) (*domain.Cha
 	if err != nil {
 		return &domain.Challenge{}, ports.ErrorCreateChallengeFailed
 	}
-
 	challenge, err := svc.repo.CreateChallenge(ch)
 	if err != nil {
 		return &domain.Challenge{}, ports.ErrorCreateChallengeFailed
@@ -81,6 +80,7 @@ func (svc *ChallengeService) ListChallenges(status string) ([]*domain.Challenge,
 
 // Badge Services
 
+// CreateBadge takes a total challenge stats for a player and creates a badge if criteria is met
 func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Badge, error) {
 	b, err := domain.NewBadge(cs)
 	if err != nil {
@@ -133,34 +133,31 @@ func (svc *ChallengeService) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*dom
 	return csArr, nil
 }
 
-// This function runs when a challenge ends, TODO: Rename once you have more clarity
+// ActeFinal runs when a challenge ends and creates badges for all the players who met the critera for the challenge
 func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, error) {
-	// 1. Fetch Challenge Stats: NOTE: This should be further be improved by fetching eligible stats directly at repo level
+	// 1. Fetch Player Challenge Stats
 	csArr, err := svc.repo.ListChallengeStatsByChallengeID(ch.ID)
 	if err != nil {
-		logger.Fatal("error occured while fetching challenge stats for challenge", zap.String("name", ch.Name))
+		logger.Fatal("error occured while fetching challenge stats for player of a challenge", zap.Any("challenge", ch))
 		return []*domain.Badge{}, err
 	}
-	// 2. Create Badge
+
+	// 2. Create Badges, if critera is met
 	var badges []*domain.Badge
 	for _, cs := range csArr {
 		badge, err := domain.NewBadge(cs)
+		// badge, err := svc.CreateBadge(cs)
 		if err != nil {
-			logger.Debug("unable to create badge for challenge stat")
-			return []*domain.Badge{}, err
+			logger.Debug("unable to create badge for challenge stat", zap.Error(err))
+			continue
 		}
 		badges = append(badges, badge)
 	}
-	// 3. Delete all Challenge Stats
-	// TODO: Delete all challenge stats, once the badges are created and the challenge ends.
+
+	// 3. (optional) Delete challenges stats for the challenge as it has ended
+
 	return badges, nil
 }
-
-// func (svc *ChallengeService) GetBadgesDummy() ([]*domain.Badge, error) {
-// 	// 1. This function first updates the active challenge end time to Now.
-
-// 	// 2. Then
-// }
 
 // This function is runs to monitor active challenges
 func (svc *ChallengeService) MonitorChallenges() {

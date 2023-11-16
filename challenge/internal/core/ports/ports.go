@@ -16,6 +16,8 @@ var (
 	ErrorUpdateChallengeFailed  = errors.New("failed to update challenge")
 	// Challenge Stats
 	ErrorChallengeStatsNotFound = errors.New("unable to find challenge stats")
+	// Badge
+	ErrBadgeNotFound = errors.New("badge not found")
 )
 
 // Service Interfaces
