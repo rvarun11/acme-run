@@ -162,7 +162,7 @@ func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, e
 
 // This function is runs to monitor active challenges
 func (svc *ChallengeService) MonitorChallenges() {
-	// Check every 1min
+	// Check every 10seconds
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
