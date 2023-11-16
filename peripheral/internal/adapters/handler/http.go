@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/google/uuid"
