@@ -11,7 +11,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// TODO: unique constraint not working here
 type postgresChallenge struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name        string    `gorm:"unique;not null"`
@@ -28,6 +27,7 @@ type postgresBadge struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	PlayerID    uuid.UUID `gorm:"not null"`
 	ChallengeID uuid.UUID `gorm:"not null"`
+	Score       float64
 	CompletedOn time.Time
 }
 

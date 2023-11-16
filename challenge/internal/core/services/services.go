@@ -94,7 +94,6 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 	return badge, nil
 }
 
-// TODO: This should be part of the Badge Service
 func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error) {
 	badges, err := svc.repo.ListBadgesByPlayerID(pid)
 	if err != nil {
@@ -105,7 +104,6 @@ func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badg
 }
 
 func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float64, ef uint8, ee uint8, workoutEnd time.Time) error {
-	// TODO: This should be in the context
 	activeChs, err := svc.ListChallenges("active")
 	if err != nil {
 		return err
@@ -145,8 +143,7 @@ func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, e
 	// 2. Create Badges, if critera is met
 	var badges []*domain.Badge
 	for _, cs := range csArr {
-		badge, err := domain.NewBadge(cs)
-		// badge, err := svc.CreateBadge(cs)
+		badge, err := svc.CreateBadge(cs)
 		if err != nil {
 			logger.Debug("unable to create badge for challenge stat", zap.Error(err))
 			continue

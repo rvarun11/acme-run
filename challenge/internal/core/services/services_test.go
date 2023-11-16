@@ -17,15 +17,6 @@ import (
 
 var cfg *config.AppConfiguration = config.Config
 
-// Test Case 1: For Marathon Rush
-// Test Setup to create challenge service
-// Add Marathon Challenge
-// Create Dummy CS DTOs - atleast 4 DTOs - two will get the badge, two won't
-// Mock SubscribeTOACTIVeChs call with the above DTOs and give some delay (delay should be enough so that monitor challenge gets called)
-// Get List of Badge and assert against the above players
-
-// Test Case 2: Halloweek
-
 type testChallenge struct {
 	// Challenge Details
 	name     string
@@ -50,6 +41,12 @@ type testCase struct {
 	stats       []*testStats
 }
 
+/*
+This function checks subscribes the incoming challenges stats to active challenges,
+and calculcates whether a badge should be given to the player when the challenge ends.
+
+Two types of challenges (DistancedCovered & EnemiesFoughtMoreThanEscape) are used for testing.
+*/
 func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 	// 1. Test Setup
 	store := postgres.NewRepository(cfg.Postgres)
@@ -57,6 +54,7 @@ func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 
 	// 2. Test Scenario
 	testCases := initTestCases()
+
 	// 3. Run Tests
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
@@ -119,7 +117,7 @@ func initTestCases() []*testCase {
 		name:     "HalloweeK",
 		desc:     "",
 		badgeURL: "",
-		criteria: "DistanceCovered",
+		criteria: "FightMoreThanEscape",
 		goal:     0.0,
 	}
 
@@ -180,7 +178,7 @@ func initTestCases() []*testCase {
 		},
 		{
 			test:        "Failed more enemies fought than escaped challenge",
-			expectedErr: nil,
+			expectedErr: ports.ErrBadgeNotFound,
 			playerID:    uuid.New(),
 			challenge:   moreEnemiesFoughtCh,
 			stats: []*testStats{

@@ -2,7 +2,9 @@ package postgres
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -12,8 +14,9 @@ func (r *Repository) CreateBadge(b *domain.Badge) (*domain.Badge, error) {
 		PlayerID:    b.PlayerID,
 		ChallengeID: b.Challenge.ID,
 		CompletedOn: b.CompletedOn,
+		Score:       b.Score,
 	}
-
+	logger.Info("HEY THE SCORE IN DB IS ", zap.Float64("score", b.Score))
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Create(&pb).Error; err != nil {
 			return err
