@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/dto"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/google/uuid"
 )
 

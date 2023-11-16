@@ -3,8 +3,8 @@ package ports
 import (
 	"errors"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/google/uuid"
 )
 

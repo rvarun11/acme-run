@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/dto"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/google/uuid"
@@ -77,7 +76,7 @@ func (handler *HTTPHandler) InitRouter() {
 // LS-TODO: Remove bool connect
 // LS-TODO: Update all the handler functions to be private, for example:
 func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
-	var req dto.BindPeripheralData
+	var req BindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -107,7 +106,7 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 
 func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 
-	var req dto.BindPeripheralData
+	var req BindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -127,7 +126,7 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 
 func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
 
-	var cDataInstance dto.BindPeripheralData
+	var cDataInstance BindPeripheralData
 	if err := ctx.ShouldBindJSON(&cDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -139,7 +138,7 @@ func (h *HTTPHandler) CreatePeripheralDevice(ctx *gin.Context) {
 
 func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
-	var bindDataInstance dto.BindPeripheralData
+	var bindDataInstance BindPeripheralData
 	if err := ctx.ShouldBindJSON(&bindDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -168,7 +167,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 }
 
 func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
-	var req dto.UnbindPeripheralData
+	var req UnbindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
@@ -363,7 +362,7 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "error read geo status from device"})
 		return
 	}
-	var tempLastLoc dto.LastLocation
+	var tempLastLoc LastLocation
 	tempLastLoc.WorkoutID = wId
 	tempLastLoc.TimeOfLocation = time.Now()
 
@@ -444,7 +443,7 @@ func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 conte
 						startLong += (0.05 + randomNumber2)
 					}
 
-					var tLoc dto.LastLocation
+					var tLoc LastLocation
 					tLoc.Longitude = startLong
 					tLoc.Latitude = startLat
 					tLoc.TimeOfLocation = time.Now()
