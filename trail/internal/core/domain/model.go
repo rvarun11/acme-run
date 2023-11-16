@@ -7,7 +7,6 @@ import (
 	"math"
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/ports"
 	"github.com/google/uuid"
 	_ "github.com/lib/pq"
 )
@@ -117,7 +116,7 @@ type TrailManager struct {
 // function to get shelter by ID
 func (tM *TrailManager) GetShelterByID(shelterID uuid.UUID) (*Shelter, error) {
 	if shelterID == uuid.Nil {
-		return nil, ports.ErrInvalidShelter
+		return nil, nil
 	}
 	// TODO
 	db, err := sql.Open("postgres", "your-postgres-connection-string-for-shelters")
@@ -133,7 +132,7 @@ func (tM *TrailManager) GetShelterByID(shelterID uuid.UUID) (*Shelter, error) {
 	err = row.Scan(&shelter.ShelterID, &shelter.ShelterAvailability, &shelter.ShelterName, &shelter.Longitude, &shelter.Latitude)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, ports.ErrInvalidShelter
+			return nil, err
 		}
 		return nil, err
 	}

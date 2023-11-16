@@ -50,7 +50,7 @@ func (r *RabbitMQService) ListenForLocationUpdates(queueName string) {
 
 	go func() {
 		for d := range msgs {
-			var location amqphandler.LocationDTO
+			var location LocationDTO
 			if err := json.Unmarshal(d.Body, &location); err != nil {
 				log.Printf("Error decoding JSON: %s", err)
 				continue

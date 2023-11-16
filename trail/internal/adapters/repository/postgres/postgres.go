@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -16,11 +15,11 @@ type TrailRepository struct {
 	db *gorm.DB
 }
 
-type ShelterRepo struct {
+type ShelterRepository struct {
 	db *gorm.DB
 }
 
-func NewTrailRepository(cfg *config.Postgres1) *Repository {
+func NewTrailRepository(cfg *config.Postgres) *TrailRepository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
 		cfg.Host,
@@ -35,14 +34,11 @@ func NewTrailRepository(cfg *config.Postgres1) *Repository {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&postgresWorkout{}, &postgresWorkoutOptions{})
-
-	return &Repository{
-		db: db,
-	}
+	db.AutoMigrate(&postgresTrail{})
+	return &TrailRepository{db: db}
 }
 
-func NewShelterRepository(cfg *config.Postgres2) *Repository {
+func NewShelterRepository(cfg *config.Postgres) *ShelterRepository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
 		cfg.Host,
@@ -57,26 +53,23 @@ func NewShelterRepository(cfg *config.Postgres2) *Repository {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&postgresWorkout{}, &postgresWorkoutOptions{})
-
-	return &Repository{
-		db: db,
-	}
+	db.AutoMigrate(&postgresShelter{})
+	return &ShelterRepository{db: db}
 }
 
 // Repository Types
 
 // Structs for GORM
 type postgresTrail struct {
-	TrailID         uuid.UUID `gorm:"type:uuid;primaryKey"`
-	TrailName       string    `gorm:"type:string;not null"`
-	ZoneId          int       `gorm:"not null"`
-	StartLongitude  float64
-	StartLatitude   float64
-	EndLongitude    float64
-	EndLatitude     float64
-	CloestShelterId uuid.UUID
-	CreatedAt       time.Time `gorm:"type:timestamp"`
+	TrailID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	TrailName      string    `gorm:"type:string;not null"`
+	ZoneId         int       `gorm:"not null"`
+	StartLongitude float64
+	StartLatitude  float64
+	EndLongitude   float64
+	EndLatitude    float64
+	ShelterId      uuid.UUID
+	CreatedAt      time.Time `gorm:"type:timestamp"`
 }
 
 type postgresShelter struct {
@@ -91,14 +84,14 @@ type postgresShelter struct {
 func toTrailAggregate(ptrail *postgresTrail) *domain.Trail {
 
 	return &domain.Trail{
-		TrailID:         ptrail.TrailID,
-		TrailName:       ptrail.TrailName,
-		StartLongitude:  ptrail.StartLongitude,
-		StartLatitude:   ptrail.StartLatitude,
-		EndLongitude:    ptrail.EndLongitude,
-		EndLatitude:     ptrail.EndLatitude,
-		CloestShelterId: ptrail.CloestShelterId,
-		CreatedAt:       ptrail.CreatedAt,
+		TrailID:        ptrail.TrailID,
+		TrailName:      ptrail.TrailName,
+		StartLongitude: ptrail.StartLongitude,
+		StartLatitude:  ptrail.StartLatitude,
+		EndLongitude:   ptrail.EndLongitude,
+		EndLatitude:    ptrail.EndLatitude,
+		ShelterID:      ptrail.ShelterId,
+		CreatedAt:      ptrail.CreatedAt,
 	}
 }
 
@@ -116,20 +109,20 @@ func toShelterAggregate(pshelter *postgresShelter) *domain.Shelter {
 func toTrailPostgres(trail *domain.Trail) *postgresTrail {
 
 	return &postgresTrail{
-		TrailID:         trail.TrailID,
-		TrailName:       trail.TrailName,
-		StartLongitude:  trail.StartLongitude,
-		StartLatitude:   trail.StartLatitude,
-		EndLongitude:    trail.EndLongitude,
-		EndLatitude:     trail.EndLatitude,
-		CloestShelterId: trail.CloestShelterId,
-		CreatedAt:       trail.CreatedAt,
+		TrailID:        trail.TrailID,
+		TrailName:      trail.TrailName,
+		StartLongitude: trail.StartLongitude,
+		StartLatitude:  trail.StartLatitude,
+		EndLongitude:   trail.EndLongitude,
+		EndLatitude:    trail.EndLatitude,
+		ShelterId:      trail.ShelterID,
+		CreatedAt:      trail.CreatedAt,
 	}
 }
 
 func toShelterPostgres(shelter *domain.Shelter) *postgresShelter {
 
-	return &postgresShelters{
+	return &postgresShelter{
 		ShelterID:           shelter.ShelterID,
 		ShelterName:         shelter.ShelterName,
 		ShelterAvailability: shelter.ShelterAvailability,
@@ -140,45 +133,36 @@ func toShelterPostgres(shelter *domain.Shelter) *postgresShelter {
 
 // Repository Functions
 
-func (repo *TrailRepository) CreateTrail(id uuid.UUID, name string, startLat, startLong, endLat, endLong float64, closestShelterID uuid.UUID) (uuid.UUID, error) {
+func (repo *TrailRepository) CreateTrail(id uuid.UUID, name string, startLat, startLong, endLat, endLong float64, ShelterID uuid.UUID) (uuid.UUID, error) {
 	trail := postgresTrail{
-		TrailID:          id,
-		TrailName:        name,
-		StartLatitude:    startLat,
-		StartLongitude:   startLong,
-		EndLatitude:      endLat,
-		EndLongitude:     endLong,
-		ClosestShelterId: closestShelterID,
-		CreatedAt:        time.Now(),
+		TrailID:        id,
+		TrailName:      name,
+		StartLatitude:  startLat,
+		StartLongitude: startLong,
+		EndLatitude:    endLat,
+		EndLongitude:   endLong,
+		ShelterId:      ShelterID,
+		CreatedAt:      time.Now(),
 	}
-	if err := repo.DB.Create(&trail).Error; err != nil {
+	if err := repo.db.Create(&trail).Error; err != nil {
 		return uuid.Nil, err
 	}
 	return id, nil
 }
 
-func (repo *TrailRepository) UpdateTrailByID(id uuid.UUID, name string, startLat, startLong, endLat, endLong float64, closestShelterID uuid.UUID) error {
-	return repo.DB.Model(&postgresTrail{}).Where("trail_id = ?", id).Updates(postgresTrail{
-		TrailName:        name,
-		StartLatitude:    startLat,
-		StartLongitude:   startLong,
-		EndLatitude:      endLat,
-		EndLongitude:     endLong,
-		ClosestShelterId: closestShelterID,
+func (repo *TrailRepository) UpdateTrailByID(id uuid.UUID, name string, startLat, startLong, endLat, endLong float64, ShelterID uuid.UUID) error {
+	return repo.db.Model(&postgresTrail{}).Where("trail_id = ?", id).Updates(postgresTrail{
+		TrailName:      name,
+		StartLatitude:  startLat,
+		StartLongitude: startLong,
+		EndLatitude:    endLat,
+		EndLongitude:   endLong,
+		ShelterId:      ShelterID,
 	}).Error
 }
 
 func (repo *TrailRepository) DeleteTrailByID(id uuid.UUID) error {
-	return repo.DB.Delete(&postgresTrail{}, "trail_id = ?", id).Error
-}
-
-func (repo *TrailRepository) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
-	var trail postgresTrail
-	if err := repo.DB.Where("trail_id = ?", id).First(&trail).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		return &domain.Trail, err
-	}
-	t := toTrailAggregate(trail)
-	return t, nil
+	return repo.db.Delete(&postgresTrail{}, "trail_id = ?", id).Error
 }
 
 func (repo *ShelterRepository) CreateShelter(sid uuid.UUID, name string, availability bool, lat, long float64) (uuid.UUID, error) {
@@ -189,14 +173,14 @@ func (repo *ShelterRepository) CreateShelter(sid uuid.UUID, name string, availab
 		Latitude:            lat,
 		Longitude:           long,
 	}
-	if err := repo.DB.Create(&shelter).Error; err != nil {
+	if err := repo.db.Create(&shelter).Error; err != nil {
 		return uuid.Nil, err
 	}
 	return shelter.ShelterID, nil
 }
 
 func (repo *ShelterRepository) UpdateShelterByID(id uuid.UUID, name string, availability bool, lat, long float64) error {
-	return repo.DB.Model(&postgresShelter{}).Where("shelter_id = ?", id).Updates(postgresShelter{
+	return repo.db.Model(&postgresShelter{}).Where("shelter_id = ?", id).Updates(postgresShelter{
 		ShelterName:         name,
 		ShelterAvailability: availability,
 		Latitude:            lat,
@@ -205,20 +189,27 @@ func (repo *ShelterRepository) UpdateShelterByID(id uuid.UUID, name string, avai
 }
 
 func (repo *ShelterRepository) DeleteShelterByID(id uuid.UUID) error {
-	return repo.DB.Delete(&postgresShelter{}, "shelter_id = ?", id).Error
+	return repo.db.Delete(&postgresShelter{}, "shelter_id = ?", id).Error
+}
+
+func (repo *TrailRepository) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
+	var trail postgresTrail
+	if err := repo.db.Where("trail_id = ?", id).First(&trail).Error; err != nil {
+		return nil, err // remove the domain.Trail type
+	}
+	return toTrailAggregate(&trail), nil
 }
 
 func (repo *ShelterRepository) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
 	var shelter postgresShelter
-	if err := repo.DB.Where("shelter_id = ?", id).First(&shelter).Error; errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, err
+	if err := repo.db.Where("shelter_id = ?", id).First(&shelter).Error; err != nil {
+		return nil, err // remove the domain.Shelter type
 	}
-	s := toShelterAggregate(&shelter)
-	return s, nil
+	return toShelterAggregate(&shelter), nil
 }
 
 // GetAllShelters retrieves all shelter records from the database.
-func (repo *ShelterRepo) GetAllShelters() ([]*domain.Shelter, error) {
+func (repo *ShelterRepository) GetAllShelters() ([]*domain.Shelter, error) {
 	var postgresShelters []postgresShelter
 	if err := repo.db.Find(&postgresShelters).Error; err != nil {
 		return nil, err

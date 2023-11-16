@@ -32,7 +32,7 @@ func (r *MemoryRepository) AddTrailManagerIntance(t domain.TrailManager) error {
 		return fmt.Errorf("peripheral already connected: %w", ports.ErrorCreateTrailManagerFailed)
 	}
 	r.Lock()
-	r.ts[t.t.CurrentWorkoutID] = t
+	r.ts[t.CurrentWorkoutID] = t
 	r.Unlock()
 	return nil
 
@@ -85,7 +85,7 @@ func (r *MemoryRepository) List() ([]*domain.TrailManager, error) {
 
 func (r *MemoryRepository) GetByWorkoutId(wId uuid.UUID) (*domain.TrailManager, error) {
 	for _, t := range r.ts {
-		if t.WorkoutId == wId {
+		if t.CurrentWorkoutID == wId {
 			return &t, nil // Found the peripheral with the matching WorkoutId
 		}
 	}

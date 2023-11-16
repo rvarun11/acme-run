@@ -16,7 +16,7 @@ type TrailManagerServiceHTTPHandler struct {
 	tvc *services.TrailManagerService
 }
 
-func NewTrailManagerServiceHTTPHandler(gin *gin.Engine, tmSvc *services.TrailManagerService) *WorkoutHTTPHandler {
+func NewTrailManagerServiceHTTPHandler(gin *gin.Engine, tmSvc *services.TrailManagerService) *TrailManagerServiceHTTPHandler {
 	return &TrailManagerServiceHTTPHandler{
 		gin: gin,
 		tvc: tmSvc,
@@ -60,7 +60,7 @@ func (h *TrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
 	var distance float64
 
 	if err == nil {
-		distance, err = h.svc.GetDistance()
+		distance, err = h.tvc.GetDistance()
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err,
@@ -92,7 +92,7 @@ func (h *TrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
 			return
 		}
 
-		distance, err = h.svc.GetDistanceCoveredBetweenDates(playerID, startDate, endDate)
+		distance, err = h.tvc.GetDistanceCoveredBetweenDates(playerID, startDate, endDate)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err,
@@ -107,7 +107,7 @@ func (h *TrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
 	})
 }
 
-func (s *NewTrailManagerServiceHTTPHandler) CreateTrail(c *gin.Context) {
+func (s *TrailManagerServiceHTTPHandler) CreateTrail(c *gin.Context) {
 
 	tid := c.Query("id")
 	name := c.Query("name")
@@ -201,7 +201,7 @@ func (s *TrailManagerServiceHTTPHandler) GetClosestTrailHandler(c *gin.Context) 
 	c.JSON(http.StatusOK, gin.H{"closestTrailID": closestTrail})
 }
 
-func (s *NewTrailManagerServiceHTTPHandler) CreateShelter(c *gin.Context) {
+func (s *TrailManagerServiceHTTPHandler) CreateShelter(c *gin.Context) {
 
 	sid := c.Query("id")
 	name := c.Query("name")

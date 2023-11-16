@@ -9,12 +9,15 @@ import (
 )
 
 var (
-	ErrorListWorkoutsFailed      = errors.New("failed to list workout")
-	ErrorWorkoutNotFound         = errors.New("workout not found in repository")
-	ErrorCreateWorkoutFailed     = errors.New("failed to create the workout")
-	ErrorUpdateWorkoutFailed     = errors.New("failed to update workout")
-	ErrorTrailManagerInvalidArgs = errors.New("invalid arguments in trail manager")
-	ErrorInvalidTrail            = errors.New("invalid trail in creation")
+	ErrorListWorkoutsFailed       = errors.New("failed to list workout")
+	ErrorWorkoutNotFound          = errors.New("workout not found in repository")
+	ErrorCreateTrailManagerFailed = errors.New("failed to create the trail manager in repo")
+	ErrorUpdateTrailManagerFailed = errors.New("failed to update trail manager in repo")
+	ErrorTrailManagerInvalidArgs  = errors.New("invalid arguments in trail manager in repo")
+	ErrorInvalidTrail             = errors.New("invalid trail")
+	ErrorInvalidShelter           = errors.New("invalid shelter")
+	ErrorTrailManagerlNotFound    = errors.New("trail manager not found")
+	ErrorListTrailManagerFailed   = errors.New("listing trails manager failed")
 )
 
 type TrailManagerService interface {
@@ -37,6 +40,7 @@ type TrailManagerService interface {
 	GetTrailDistance(wId uuid.UUID, tId uuid.UUID, sId uuid.UUID) (float64, error)
 	GetClosestShelter(currentLongitude, currentLatitude float64) (uuid.UUID, error)
 	GetClosestTrail(currentLongitude float64, currentLatitude float64) (uuid.UUID, error)
+	SetCurrentLocation(longitude float64, latitude float64)
 }
 
 type TrailRepository interface {

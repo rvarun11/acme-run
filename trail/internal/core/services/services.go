@@ -16,12 +16,12 @@ type TrailManagerService struct {
 
 // Factory for creating a new TrailManager
 
-func NewTrailManagerService(rTM ports.MemoryRepository, rT ports.TrailRepository, rS ports.ShelterRepository) (*TrailManagerService, error) {
-	return &NewTrailManagerService{
+func NewTrailManagerService(rTM ports.TrailManagerRepository, rT ports.TrailRepository, rS ports.ShelterRepository) (*TrailManagerService, error) {
+	return &TrailManagerService{
 		repoTM: rTM,
 		repoT:  rT,
 		repoS:  rS,
-	}
+	}, nil
 }
 
 func (t *TrailManagerService) CreateTrailManager(wId uuid.UUID) error {
@@ -29,7 +29,7 @@ func (t *TrailManagerService) CreateTrailManager(wId uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	t.repoTM.AddPeripheralIntance(tm)
+	t.repoTM.AddTrailManagerIntance(tm)
 	return nil
 }
 

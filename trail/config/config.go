@@ -28,21 +28,12 @@ type RabbitMQ struct {
 }
 
 func init() {
-	postgres := &Postgres1{
+	postgres := &Postgres{
 		Host:     getEnv("POSTGRES_HOSTNAME", "localhost"),
-		Port:     getEnv("POSTGRES_PORT", "5900"),
-		User:     getEnv("POSTGRES_USER", "postgres"),
-		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
-		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
-		Encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
-	}
-
-	postgres := &Postgres2{
-		Host:     getEnv("POSTGRES_HOSTNAME", "localhost"),
-		Port:     getEnv("POSTGRES_PORT", "5901"),
-		User:     getEnv("POSTGRES_USER", "postgres"),
-		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
-		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
+		Port:     getEnv("POSTGRES_PORT", "5432"),
+		User:     getEnv("POSTGRES_USER", "guest"),
+		Password: getEnv("POSTGRES_PASSWORD", "guest"),
+		DB_Name:  getEnv("POSTGRES_DB", "traildb"),
 		Encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
 	}
 
