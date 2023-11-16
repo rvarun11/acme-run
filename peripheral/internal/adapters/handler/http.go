@@ -161,7 +161,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 		latitudeStart := 40.0
 		longitudeEnd := 50.0
 		latitudeEnd := 50.0
-		h.svc.SetLiveSw(bindDataInstance.WorkoutID, true)
+		h.svc.SetLiveStatus(bindDataInstance.WorkoutID, true)
 		h.StartBackgroundMockTesting(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
 	}
 }
@@ -175,7 +175,7 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 		return
 	}
 
-	err1 := h.svc.SetLiveSw(req.WorkoutID, false)
+	err1 := h.svc.SetLiveStatus(req.WorkoutID, false)
 	if err1 != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "failed to unbind",
@@ -224,7 +224,9 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 	hrType := ctx.Query("type")
 	if hrType == "avg" {
 		// TODO: This should be returning as per workout
-		tLoc, err := h.svc.GetHRMAvgReading(wId)
+		var tLoc LastHR
+		var err error
+		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMAvgReading(wId)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "reading from device failure",
@@ -233,7 +235,9 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		}
 		ctx.JSON(http.StatusOK, gin.H{"reading": tLoc})
 	} else if hrType == "normal" {
-		tLoc, err := h.svc.GetHRMAvgReading(wId)
+		var tLoc LastHR
+		var err error
+		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMAvgReading(wId)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "reading from device failure",
@@ -396,7 +400,8 @@ func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get geo device"})
 		return
 	}
-	tLoc, err := h.svc.GetGeoLocation(wId)
+	var tLoc LastLocation
+	tLoc.TimeOfLocation, tLoc.Longitude, tLoc.Latitude, tLoc.WorkoutID, err = h.svc.GetGeoLocation(wId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Failed to get geo device"})
 		return
@@ -424,7 +429,7 @@ func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 conte
 				return
 			default:
 				// Fetch the peripheral instance to check if live_data is true
-				res, err := h.svc.GetLiveSw(wId)
+				res, err := h.svc.GetLiveStatus(wId)
 
 				if err != nil {
 					h.cancelF()

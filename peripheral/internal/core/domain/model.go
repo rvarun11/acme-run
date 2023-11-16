@@ -3,7 +3,6 @@ package domain
 import (
 	"time"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/google/uuid"
 )
 
@@ -40,20 +39,12 @@ type Peripheral struct {
 	LiveStatus bool
 }
 
-func (p *Peripheral) GetAverageHRate() dto.LastHR {
-	var tempHRDTO dto.LastHR
-	tempHRDTO.HRMID = p.HRMId
-	tempHRDTO.TimeOfLocation = p.HRMDev.HRateTime
-	tempHRDTO.HeartRate = p.HRMDev.AverageHRate
-	return tempHRDTO
+func (p *Peripheral) GetAverageHRate() (uuid.UUID, time.Time, int) {
+	return p.HRMId, p.HRMDev.HRateTime, p.HRMDev.AverageHRate
 }
 
-func (p *Peripheral) GetHRate() dto.LastHR {
-	var tempHRDTO dto.LastHR
-	tempHRDTO.HRMID = p.HRMId
-	tempHRDTO.TimeOfLocation = p.HRMDev.HRateTime
-	tempHRDTO.HeartRate = p.HRMDev.HRate
-	return tempHRDTO
+func (p *Peripheral) GetHRate() (uuid.UUID, time.Time, int) {
+	return p.HRMId, p.HRMDev.HRateTime, p.HRMDev.HRate
 }
 
 func (p *Peripheral) SetHRate(reading int) {
@@ -75,13 +66,9 @@ func (p *Peripheral) SetLocation(longitude float64, latitude float64) {
 }
 
 // NOTES: ONLY read location if the peripheral status is on, otherwise it is off, so
-func (p *Peripheral) GetGeoLocation() dto.LastLocation {
-	var tempLocationDTO dto.LastLocation
-	tempLocationDTO.TimeOfLocation = p.GeoDev.LocationTime
-	tempLocationDTO.Longitude = p.GeoDev.Longitude
-	tempLocationDTO.Latitude = p.GeoDev.Latitude
-	tempLocationDTO.WorkoutID = p.WorkoutId
-	return tempLocationDTO
+func (p *Peripheral) GetGeoLocation() (time.Time, float64, float64, uuid.UUID) {
+
+	return p.GeoDev.LocationTime, p.GeoDev.Longitude, p.GeoDev.Latitude, p.WorkoutId
 
 }
 

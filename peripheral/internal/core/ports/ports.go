@@ -2,9 +2,9 @@ package ports
 
 import (
 	"errors"
+	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/dto"
 	"github.com/google/uuid"
 )
 
@@ -24,8 +24,8 @@ type PeripheralService interface {
 	CheckStatusByHRMId(hId uuid.UUID) bool
 	BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uuid.UUID, connected bool, sendToTrail bool) error
 	DisconnectPeripheral(wId uuid.UUID) error
-	GetHRMAvgReading(hId uuid.UUID) (dto.LastHR, error)
-	GetHRMReading(hId uuid.UUID) (dto.LastHR, error)
+	GetHRMAvgReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error)
+	GetHRMReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error)
 	SetHeartRateReading(hId uuid.UUID, reading int) error
 	GetHRMDevStatus(wId uuid.UUID) (bool, error)
 	SetHRMDevStatusByHRMId(hId uuid.UUID, code bool) error
@@ -33,9 +33,9 @@ type PeripheralService interface {
 	SetGeoLocation(wId uuid.UUID, longitude float64, latitude float64) error
 	GetGeoDevStatus(wId uuid.UUID) (bool, error)
 	SetGeoDevStatus(wId uuid.UUID, code bool) error
-	GetGeoLocation(wId uuid.UUID) (dto.LastLocation, error)
-	GetLiveSw(wId uuid.UUID) (bool, error)
-	SetLiveSw(wId uuid.UUID, code bool) error
+	GetGeoLocation(wId uuid.UUID) (time.Time, float64, float64, uuid.UUID, error)
+	GetLiveStatus(wId uuid.UUID) (bool, error)
+	SetLiveStatus(wId uuid.UUID, code bool) error
 }
 
 type PeripheralRepository interface {
