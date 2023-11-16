@@ -48,14 +48,14 @@ func init() {
 
 	rabbitmq := &RabbitMQ{
 		Host:     getEnv("RABBITMQ_HOSTNAME", "localhost"),
-		Port:     getEnv("RABBITMQ_PORT", "5673"),
+		Port:     getEnv("RABBITMQ_PORT", "5672"),
 		User:     getEnv("RABBITMQ_USER", "guest"),
 		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
 	}
 
 	Config = &AppConfiguration{
 		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8001"),
+		Port:     getEnv("PORT", "8005"),
 		Postgres: postgres,
 		RabbitMQ: rabbitmq,
 	}

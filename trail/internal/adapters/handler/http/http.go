@@ -2,9 +2,11 @@ package httphandler
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
+	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
@@ -44,7 +46,16 @@ func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
 	return uuidValue, nil
 }
 
-func (h *NewTrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
+func (h *TrailManagerServiceHTTPHandler) ConnectToTrailManager(ctx *gin.Context) {
+	var userDataInstance UserData
+	if err := ctx.ShouldBindJSON(&userDataInstance); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+}
+
+func (h *TrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
 	workoutID, err := parseUUID(ctx, "workoutID")
 	var distance float64
 
@@ -96,10 +107,9 @@ func (h *NewTrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
 	})
 }
 
-
 func (s *NewTrailManagerServiceHTTPHandler) CreateTrail(c *gin.Context) {
 
-	tid : = c.Query("id")
+	tid := c.Query("id")
 	name := c.Query("name")
 	startLongitude := c.Query("start_longitude")
 	startLatitude := c.Query("start_latitude")
@@ -191,16 +201,14 @@ func (s *TrailManagerServiceHTTPHandler) GetClosestTrailHandler(c *gin.Context) 
 	c.JSON(http.StatusOK, gin.H{"closestTrailID": closestTrail})
 }
 
-
-
 func (s *NewTrailManagerServiceHTTPHandler) CreateShelter(c *gin.Context) {
 
-	sid : = c.Query("id")
+	sid := c.Query("id")
 	name := c.Query("name")
 	Longitude := c.Query("longitude")
 	Latitude := c.Query("latitude")
 
-	err = s.tvc.repoS.CreateShelter(sid, name, Latitude, Longitude)
+	err := s.tvc.repoS.CreateShelter(sid, name, Latitude, Longitude)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create trail"})
 		return
@@ -228,7 +236,6 @@ func (s *TrailManagerServiceHTTPHandler) UpdateShelter(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude format"})
 		return
 	}
-	
 
 	// Call the UpdateTrailByID method from TrailRepository
 	err = s.tvc.repoS.UpdateShelterByID(shelterID, name, Latitude, Longitude)
@@ -239,7 +246,6 @@ func (s *TrailManagerServiceHTTPHandler) UpdateShelter(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Shelter updated successfully"})
 }
-
 
 func (s *TrailManagerServiceHTTPHandler) GetClosestShelterHandler(c *gin.Context) {
 	longitudeStr := c.Query("longitude")
@@ -269,5 +275,3 @@ func (s *TrailManagerServiceHTTPHandler) GetClosestShelterHandler(c *gin.Context
 	// Respond with the ID of the closest trail
 	c.JSON(http.StatusOK, gin.H{"closestShelterID": closestShelterId})
 }
-
-

@@ -1,4 +1,4 @@
-package amqphandler
+package amqp
 
 import (
 	"time"
@@ -15,7 +15,7 @@ type ShelterAvailable struct {
 	DistanceToShelter float64 `json:"distance_to_shelter"`
 }
 
-type LastLocation struct {
+type LocationDTO struct {
 	// WorkoutID for which the Shelter Availability is there or not
 	WorkoutID uuid.UUID `json:"workout_id"`
 	// Latitude of the Player
@@ -24,4 +24,9 @@ type LastLocation struct {
 	Longitude float64 `json:"longitude"`
 	// Time of location
 	TimeOfLocation time.Time `json:"time_of_location"`
+}
+
+type UserData struct {
+	WorkoutID uuid.UUID `json:"workout_id"`
+	TrailID   uuid.UUID `json:"trail_id"`
 }

@@ -4,65 +4,90 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
-	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/domain"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/ports"
 
 	"github.com/google/uuid"
 )
 
 type MemoryRepository struct {
-	workouts map[uuid.UUID]domain.Workout
+	ts map[uuid.UUID]domain.TrailManager
 	sync.Mutex
 }
 
 func NewMemoryRepository() *MemoryRepository {
 	return &MemoryRepository{
-		workouts: make(map[uuid.UUID]domain.Workout),
+		ts: make(map[uuid.UUID]domain.TrailManager),
 	}
 }
 
-func (r *MemoryRepository) List() ([]*domain.Workout, error) {
-	if r.workouts == nil {
-		// If r.workouts is nil, return an error or handle the case accordingly
-		return nil, fmt.Errorf("workouts map doesn't exit %w", ports.ErrorListWorkoutsFailed)
-	}
-	workouts := make([]*domain.Workout, 0, len(r.workouts))
-
-	for _, workout := range r.workouts {
-		workouts = append(workouts, &workout)
-	}
-	return workouts, nil
-}
-
-func (r *MemoryRepository) Create(workout domain.Workout) error {
-	if r.workouts == nil {
+func (r *MemoryRepository) AddTrailManagerIntance(t domain.TrailManager) error {
+	if r.ts == nil {
 		r.Lock()
-		r.workouts = make(map[uuid.UUID]domain.Workout)
+		r.ts = make(map[uuid.UUID]domain.TrailManager)
 		r.Unlock()
 	}
 
-	if _, ok := r.workouts[workout.GetID()]; ok {
-		return fmt.Errorf("workout already exist: %w", ports.ErrorCreateWorkoutFailed)
+	if _, ok := r.ts[t.CurrentWorkoutID]; ok {
+		return fmt.Errorf("peripheral already connected: %w", ports.ErrorCreateTrailManagerFailed)
 	}
 	r.Lock()
-	r.workouts[workout.GetID()] = workout
+	r.ts[t.t.CurrentWorkoutID] = t
+	r.Unlock()
+	return nil
+
+}
+
+func (r *MemoryRepository) DeleteTrailManagerInstance(wId uuid.UUID) error {
+	var keyToDelete uuid.UUID
+	found := false
+
+	r.Lock()
+	defer r.Unlock()
+
+	for key, t := range r.ts {
+		if t.CurrentWorkoutID == wId {
+			keyToDelete = key
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		return fmt.Errorf("peripheral with workout ID %v not found: %w", wId, ports.ErrorTrailManagerlNotFound)
+	}
+
+	delete(r.ts, keyToDelete)
+	return nil
+}
+
+func (r *MemoryRepository) Update(t domain.TrailManager) error {
+	if _, ok := r.ts[t.CurrentWorkoutID]; !ok {
+		return fmt.Errorf("peripheral does not exist: %w", ports.ErrorUpdateTrailManagerFailed)
+	}
+	r.Lock()
+	r.ts[t.CurrentWorkoutID] = t
 	r.Unlock()
 	return nil
 }
 
-func (mr *MemoryRepository) Get(pid uuid.UUID) (*domain.Workout, error) {
-	if workout, ok := mr.workouts[pid]; ok {
-		return &workout, nil
+func (r *MemoryRepository) List() ([]*domain.TrailManager, error) {
+	if r.ts == nil {
+		// If r.workouts is nil, return an error or handle the case accordingly
+		return nil, fmt.Errorf("ps map doesn't exit %w", ports.ErrorListTrailManagerFailed)
 	}
-	return &domain.Workout{}, ports.ErrorWorkoutNotFound
+	ps := make([]*domain.TrailManager, 0, len(r.ts))
+	for _, t := range r.ts {
+		ps = append(ps, &t)
+	}
+	return ps, nil
 }
 
-func (r *MemoryRepository) Update(workout domain.Workout) error {
-	if _, ok := r.workouts[workout.GetID()]; !ok {
-		return fmt.Errorf("workout does not exist: %w", ports.ErrorUpdateWorkoutFailed)
+func (r *MemoryRepository) GetByWorkoutId(wId uuid.UUID) (*domain.TrailManager, error) {
+	for _, t := range r.ts {
+		if t.WorkoutId == wId {
+			return &t, nil // Found the peripheral with the matching WorkoutId
+		}
 	}
-	r.Lock()
-	r.workouts[workout.GetID()] = workout
-	r.Unlock()
-	return nil
+	return nil, ports.ErrorTrailManagerlNotFound // No peripheral found with the given WorkoutId
 }
