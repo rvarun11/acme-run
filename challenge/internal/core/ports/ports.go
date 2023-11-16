@@ -9,10 +9,11 @@ import (
 
 var (
 	// Challenge
-	ErrorListChallengesFailed  = errors.New("failed to list challenges")
-	ErrorChallengeNotFound     = errors.New("the challenge not found in repository")
-	ErrorCreateChallengeFailed = errors.New("failed to add the challenge")
-	ErrorUpdateChallengeFailed = errors.New("failed to update challenge")
+	ErrorListChallengesFailed   = errors.New("failed to list challenges")
+	ErrNoActiveChallengePresent = errors.New("no active challenges present")
+	ErrorChallengeNotFound      = errors.New("the challenge not found in repository")
+	ErrorCreateChallengeFailed  = errors.New("failed to add the challenge")
+	ErrorUpdateChallengeFailed  = errors.New("failed to update challenge")
 	// Challenge Stats
 	ErrorChallengeStatsNotFound = errors.New("unable to find challenge stats")
 )

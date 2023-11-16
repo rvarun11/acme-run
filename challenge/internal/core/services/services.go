@@ -70,6 +70,9 @@ func (svc *ChallengeService) ListChallenges(status string) ([]*domain.Challenge,
 				activeChs = append(activeChs, ch)
 			}
 		}
+		if len(activeChs) == 0 {
+			return []*domain.Challenge{}, ports.ErrNoActiveChallengePresent
+		}
 		return activeChs, nil
 	}
 
@@ -105,7 +108,6 @@ func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float
 	// TODO: This should be in the context
 	activeChs, err := svc.ListChallenges("active")
 	if err != nil {
-		logger.Debug("no active challenge present")
 		return err
 	}
 

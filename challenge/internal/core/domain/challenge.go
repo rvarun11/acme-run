@@ -79,7 +79,8 @@ func NewChallenge(name string, desc string, badgeUrl string, criteria Criteria, 
 
 func (ch *Challenge) IsActive() bool {
 	currentTime := time.Now()
-	return currentTime.After(ch.Start) && currentTime.Before(ch.End)
+	isActive := currentTime.After(ch.Start) && currentTime.Before(ch.End)
+	return isActive
 }
 
 // func GetActiveCriterion()

@@ -37,11 +37,10 @@ type testStat struct {
 func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 	store := postgres.NewRepository(cfg.Postgres)
 	service := services.NewChallengeService(store)
-
 	// 1. 	Create Challenge
 	chName := "Marathon Rush 2023" + uuid.NewString()
-	marathonChallenge, _ := domain.NewChallenge(chName, "", "", "DistanceCovered", 26.2, time.Now(), time.Now().Add(time.Second*10))
-	_, err := service.CreateChallenge(marathonChallenge)
+	ch, _ := domain.NewChallenge(chName, "", "", "DistanceCovered", 26.2, time.Now(), time.Now().Add(time.Second*30))
+	ch, err := service.CreateChallenge(ch)
 	if err != nil {
 		logger.Error("something happened here", zap.Error(err))
 	}
@@ -63,18 +62,23 @@ func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 	}
 
 	// 3. Subscribe to Challenge
-	service.SubscribeToActiveChallenges(one.playerID, one.distanceCovered, one.fought, one.escaped, one.end)
-	service.SubscribeToActiveChallenges(two.playerID, two.distanceCovered, two.fought, two.escaped, two.end)
-
+	err = service.SubscribeToActiveChallenges(one.playerID, one.distanceCovered, one.fought, one.escaped, one.end)
+	if err != nil {
+		logger.Debug("unable to subscribe to challenge", zap.Error(err))
+	}
+	err = service.SubscribeToActiveChallenges(two.playerID, two.distanceCovered, two.fought, two.escaped, two.end)
+	if err != nil {
+		logger.Debug("unable to subscribe to challenge", zap.Error(err))
+	}
 	// Add delay here
 	time.Sleep(15 * time.Second)
 
 	// 3.  Get Badges
-	badges, _ := service.ActeFinal(marathonChallenge)
-
+	badges, _ := service.ActeFinal(ch)
+	logger.Debug("Badges List", zap.Any("badges", badges))
 	// 4. Asert if the player received the badge or not
 	t.Run("Badge Validation", func(t *testing.T) {
-		if !badgeExists(badges, marathonChallenge.ID, player1ID) {
+		if !badgeExists(badges, ch.ID, player1ID) {
 			t.Errorf("badge not found")
 		}
 	})

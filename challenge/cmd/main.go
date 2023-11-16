@@ -26,7 +26,7 @@ func main() {
 	challengeHandler := http.NewChallengeHandler(router, challengeSvc)
 	challengeHandler.InitRouter()
 
-	challengeSvc.MonitorChallenges()
+	go challengeSvc.MonitorChallenges()
 
 	// Initialize badge service
 	// badgeSvc := services.NewBadgeService(store)
