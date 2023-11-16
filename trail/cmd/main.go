@@ -210,7 +210,7 @@ func initializeDB() {
 	// Check the connection
 	err = db.Ping()
 	if err != nil {
-		log.Fatal("jkjk", zap.Error(err))
+		log.Fatal("database cant be connected", zap.Error(err))
 	}
 	fmt.Println("Successfully connected!")
 
@@ -224,7 +224,7 @@ func initializeDB() {
 	// Grant all privileges on the schema to the user
 	_, err = db.Exec("GRANT ALL PRIVILEGES ON SCHEMA traildb TO guest")
 	if err != nil {
-		log.Fatal("jkjk", zap.Error(err))
+		log.Fatal("database access cant be granted", zap.Error(err))
 	}
 	fmt.Println("Privileges granted to user 'guest'.")
 
@@ -244,15 +244,64 @@ func initializeDB() {
 	if err != nil {
 		log.Fatal("jkjk", zap.Error(err))
 	}
-	fmt.Println("Table created.")
+
 	_, err = db.Exec(`
-        INSERT INTO traildb.trail (trail_id, trail_name, zone_id, start_longitude, start_latitude, end_longitude, end_latitude, shelter_id, created_at)
-        VALUES
-            ('123e4567-e89b-12d3-a456-426614174000', 'Appalachian Trail', 1, -81.564, 36.132, -81.811, 36.273, '123e4567-e89b-12d3-a456-426614174001', $1),
-            ('123e4567-e89b-12d3-a456-426614174002', 'Pacific Crest Trail', 2, -121.236, 36.578, -121.489, 36.845, '123e4567-e89b-12d3-a456-426614174003', $1)
-        ON CONFLICT (trail_id) DO NOTHING`, time.Now())
+    CREATE TABLE IF NOT EXISTS traildb.shelter (
+        shelter_id UUID PRIMARY KEY,
+        shelter_name TEXT NOT NULL,
+        zone_id INT NOT NULL,
+        shelter_availability BOOLEAN NOT NULL,
+        longitude FLOAT,
+        latitude FLOAT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )`)
 	if err != nil {
-		log.Fatal("jkjk", zap.Error(err))
+		log.Fatal("Error creating shelter table", zap.Error(err))
+	}
+	fmt.Println("Table created.")
+	// Insert two shelters with distinct names and locations
+	shelters := []struct {
+		ID   uuid.UUID
+		Name string
+		Lon  float64
+		Lat  float64
+	}{
+		{uuid.New(), "Maplewood Shelter", 45.0, 45.0},
+		{uuid.New(), "Riverside Shelter", 46.0, 46.0},
+	}
+
+	for _, shelter := range shelters {
+		_, err := db.Exec(`
+            INSERT INTO traildb.shelter (shelter_id, shelter_name, zone_id, shelter_availability, longitude, latitude)
+            VALUES ($1, $2, $3, $4, $5, $6)`,
+			shelter.ID, shelter.Name, 1, true, shelter.Lon, shelter.Lat)
+		if err != nil {
+			log.Fatal("error inserting shelter", zap.Error(err))
+		}
+	}
+
+	// Insert four trails with distinct names and start/end longitudes
+	trails := []struct {
+		Name      string
+		StartLon  float64
+		StartLat  float64
+		EndLon    float64
+		EndLat    float64
+		ShelterID uuid.UUID
+	}{
+		{"Cedar Pass Trail", 40.1, 45.0, 42.3, 45.0, uuid.Nil},
+		{"Blue Ridge Path", 42.5, 45.0, 44.7, 45.0, uuid.Nil},
+		{"Redwood Walk", 45.2, 45.0, 47.8, 45.0, shelters[0].ID},
+		{"Willow Way", 48.3, 45.0, 49.9, 45.0, shelters[1].ID},
+	}
+	for _, trail := range trails {
+		_, err := db.Exec(`
+            INSERT INTO traildb.trail (trail_id, trail_name, zone_id, start_longitude, start_latitude, end_longitude, end_latitude, shelter_id, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+			uuid.New(), trail.Name, 1, trail.StartLon, trail.StartLat, trail.EndLon, trail.EndLat, trail.ShelterID, time.Now())
+		if err != nil {
+			log.Fatal("error inserting trail: %v", zap.Error(err))
+		}
 	}
 
 	printTableData(db, "shelter")
