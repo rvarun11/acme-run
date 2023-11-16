@@ -72,6 +72,8 @@ type postgresWorkout struct {
 type postgresWorkoutOptions struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
 	WorkoutID uuid.UUID `gorm:"type:uuid;primary_key"`
+	// WorkoutOptionsAvailable
+	WorkoutOptionsAvailable int8
 	// WorkoutOptions a uint8 integer, uses bit representation for available workout options
 	CurrentWorkoutOption int8
 	// FightsPushDown Ranking bool
@@ -121,29 +123,30 @@ func toWorkoutPostgres(workout *domain.Workout) *postgresWorkout {
 func toWorkoutOptionsAggregate(pworkoutOptions *postgresWorkoutOptions) *domain.WorkoutOptions {
 
 	return &domain.WorkoutOptions{
-		WorkoutID:             pworkoutOptions.WorkoutID,
-		CurrentWorkoutOption:  pworkoutOptions.CurrentWorkoutOption,
-		FightsPushDown:        pworkoutOptions.FightsPushDown,
-		IsWorkoutOptionActive: pworkoutOptions.IsWorkoutOptionActive,
-		DistanceToShelter:     pworkoutOptions.DistanceToShelter,
+		WorkoutID:               pworkoutOptions.WorkoutID,
+		CurrentWorkoutOption:    pworkoutOptions.CurrentWorkoutOption,
+		WorkoutOptionsAvailable: pworkoutOptions.WorkoutOptionsAvailable,
+		FightsPushDown:          pworkoutOptions.FightsPushDown,
+		IsWorkoutOptionActive:   pworkoutOptions.IsWorkoutOptionActive,
+		DistanceToShelter:       pworkoutOptions.DistanceToShelter,
 	}
 }
 
 func toWorkoutOptionsPostgres(workoutOptions *domain.WorkoutOptions) *postgresWorkoutOptions {
 
 	return &postgresWorkoutOptions{
-		WorkoutID:             workoutOptions.WorkoutID,
-		CurrentWorkoutOption:  workoutOptions.CurrentWorkoutOption,
-		FightsPushDown:        workoutOptions.FightsPushDown,
-		IsWorkoutOptionActive: workoutOptions.IsWorkoutOptionActive,
-		DistanceToShelter:     workoutOptions.DistanceToShelter,
+		WorkoutID:               workoutOptions.WorkoutID,
+		CurrentWorkoutOption:    workoutOptions.CurrentWorkoutOption,
+		WorkoutOptionsAvailable: workoutOptions.WorkoutOptionsAvailable,
+		FightsPushDown:          workoutOptions.FightsPushDown,
+		IsWorkoutOptionActive:   workoutOptions.IsWorkoutOptionActive,
+		DistanceToShelter:       workoutOptions.DistanceToShelter,
 	}
 }
 
 // Repository Functions
 
 func (r *Repository) Create(workout *domain.Workout, workoutOptions *domain.WorkoutOptions) error {
-	logger.Info("DEBUG-----CREATE ROW IN REPO")
 
 	pworkout := &postgresWorkout{
 		WorkoutID:       workout.WorkoutID,
@@ -161,11 +164,12 @@ func (r *Repository) Create(workout *domain.Workout, workoutOptions *domain.Work
 	}
 
 	pworkoutOptions := &postgresWorkoutOptions{
-		WorkoutID:             workoutOptions.WorkoutID,
-		IsWorkoutOptionActive: workoutOptions.IsWorkoutOptionActive,
-		CurrentWorkoutOption:  workoutOptions.CurrentWorkoutOption,
-		FightsPushDown:        workoutOptions.FightsPushDown,
-		DistanceToShelter:     workoutOptions.DistanceToShelter,
+		WorkoutID:               workoutOptions.WorkoutID,
+		WorkoutOptionsAvailable: workoutOptions.WorkoutOptionsAvailable,
+		IsWorkoutOptionActive:   workoutOptions.IsWorkoutOptionActive,
+		CurrentWorkoutOption:    workoutOptions.CurrentWorkoutOption,
+		FightsPushDown:          workoutOptions.FightsPushDown,
+		DistanceToShelter:       workoutOptions.DistanceToShelter,
 	}
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {

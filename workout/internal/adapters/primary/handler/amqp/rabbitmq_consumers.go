@@ -287,7 +287,6 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 
 // Start new rabbitmq consumer
 func (c *LocationSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
-	logger.Info("HelloStart")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -313,7 +312,6 @@ func (c *LocationSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize in
 
 	for i := 0; i < workerPoolSize; i++ {
 		/// Do something with the deliveriesFind
-		logger.Info("HelloStart")
 		go c.worker(ctx, deliveries)
 	}
 

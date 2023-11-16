@@ -46,6 +46,8 @@ type WorkoutOptions struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
 	WorkoutID uuid.UUID `json:"workout_id"`
 	// 1,2,3 for valid current Workout Options, negative for no current workoutOption
+	WorkoutOptionsAvailable int8 `json:"workout_options"`
+	// 1,2,3 for valid current Workout Options, negative for no current workoutOption
 	CurrentWorkoutOption int8 `json:"current_workout_option"`
 	// FightsPushDown Ranking bool
 	FightsPushDown bool `json:"fights_push_down"`
