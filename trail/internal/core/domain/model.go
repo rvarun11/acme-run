@@ -113,8 +113,9 @@ type TrailManager struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+// TODO fix actual implementation
 // function to get shelter by ID
-func (t *Trail) GetShelterByID(shelterID uuid.UUID) (*Shelter, error) {
+func (tM *TrailManager) GetShelterByID(shelterID uuid.UUID) (*Shelter, error) {
 	if shelterID == uuid.Nil {
 		return nil, ports.ErrInvalidShelter
 	}
@@ -139,12 +140,13 @@ func (t *Trail) GetShelterByID(shelterID uuid.UUID) (*Shelter, error) {
 	return &shelter, nil
 }
 
+// TODO fix actual implementation
 // function for getting trail by ID
 func (t *TrailManager) GetTrailByID(trailID uuid.UUID) (*Trail, error) {
 	if trailID == uuid.Nil {
 		return nil, ErrInvalidTrail
 	}
-	// TODO
+
 	db, err := sql.Open("postgres", "your-postgres-connection-string")
 	if err != nil {
 		return nil, err
@@ -180,7 +182,7 @@ func (tM *TrailManager) getCurrentShelterDistance(shelterID uuid.UUID) (float64,
 		return -1.0, errors.New("current location of trail manager is not set")
 	}
 
-	shelter, err := tM.getShelterByID(shelterID)
+	shelter, err := tM.GetShelterByID(shelterID)
 	if err != nil {
 		return -1.0, err
 	}

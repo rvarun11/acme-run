@@ -1,11 +1,10 @@
-package amqp
+package amqphandler
 
 import (
 	"encoding/json"
 	"log"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/ports"
-	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -34,7 +33,7 @@ func NewRabbitMQService(amqpURL string, repoTM ports.TrailManagerRepository) (*R
 	}, nil
 }
 
-func (r *RabbitMQService) ListenForLocationUpdates(queueName string, wId uuid.UUID) {
+func (r *RabbitMQService) ListenForLocationUpdates(queueName string) {
 	msgs, err := r.channel.Consume(
 		queueName,
 		"",
@@ -51,7 +50,7 @@ func (r *RabbitMQService) ListenForLocationUpdates(queueName string, wId uuid.UU
 
 	go func() {
 		for d := range msgs {
-			var location LocationDTO
+			var location amqphandler.LocationDTO
 			if err := json.Unmarshal(d.Body, &location); err != nil {
 				log.Printf("Error decoding JSON: %s", err)
 				continue
