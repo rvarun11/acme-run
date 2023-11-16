@@ -7,6 +7,10 @@ import (
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/config"
+	httphandler "github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/handler/http"
+	repository "github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/repository/memory"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/repository/postgres"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/trail/log"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -228,7 +232,6 @@ func initializeDB() {
 	}
 	fmt.Println("Privileges granted to user 'guest'.")
 
-	// Create a table within the schema
 	_, err = db.Exec(`
 			CREATE TABLE IF NOT EXISTS traildb.trail (
 				trail_id UUID PRIMARY KEY,
@@ -242,7 +245,7 @@ func initializeDB() {
 				created_at TIMESTAMP
 			)`)
 	if err != nil {
-		log.Fatal("jkjk", zap.Error(err))
+		log.Fatal("cannot inser to the trail table", zap.Error(err))
 	}
 
 	_, err = db.Exec(`
@@ -258,6 +261,7 @@ func initializeDB() {
 	if err != nil {
 		log.Fatal("Error creating shelter table", zap.Error(err))
 	}
+
 	fmt.Println("Table created.")
 	// Insert two shelters with distinct names and locations
 	shelters := []struct {
@@ -270,13 +274,21 @@ func initializeDB() {
 		{uuid.New(), "Riverside Shelter", 46.0, 46.0},
 	}
 
-	for _, shelter := range shelters {
-		_, err := db.Exec(`
+	var shelterCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM traildb.shelter").Scan(&shelterCount)
+	if err != nil {
+		log.Fatal("error counting shelters: %v", zap.Error(err))
+	}
+	if shelterCount < 2 {
+
+		for _, shelter := range shelters {
+			_, err := db.Exec(`
             INSERT INTO traildb.shelter (shelter_id, shelter_name, zone_id, shelter_availability, longitude, latitude)
             VALUES ($1, $2, $3, $4, $5, $6)`,
-			shelter.ID, shelter.Name, 1, true, shelter.Lon, shelter.Lat)
-		if err != nil {
-			log.Fatal("error inserting shelter", zap.Error(err))
+				shelter.ID, shelter.Name, 1, true, shelter.Lon, shelter.Lat)
+			if err != nil {
+				log.Fatal("error inserting shelter", zap.Error(err))
+			}
 		}
 	}
 
@@ -294,13 +306,23 @@ func initializeDB() {
 		{"Redwood Walk", 45.2, 45.0, 47.8, 45.0, shelters[0].ID},
 		{"Willow Way", 48.3, 45.0, 49.9, 45.0, shelters[1].ID},
 	}
-	for _, trail := range trails {
-		_, err := db.Exec(`
+
+	var trailCount int
+	err = db.QueryRow("SELECT COUNT(*) FROM traildb.trail").Scan(&trailCount)
+	if err != nil {
+		log.Fatal("error counting trails: %v", zap.Error(err))
+	}
+
+	// Create a table within the schema
+	if trailCount < 4 {
+		for _, trail := range trails {
+			_, err := db.Exec(`
             INSERT INTO traildb.trail (trail_id, trail_name, zone_id, start_longitude, start_latitude, end_longitude, end_latitude, shelter_id, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-			uuid.New(), trail.Name, 1, trail.StartLon, trail.StartLat, trail.EndLon, trail.EndLat, trail.ShelterID, time.Now())
-		if err != nil {
-			log.Fatal("error inserting trail: %v", zap.Error(err))
+				uuid.New(), trail.Name, 1, trail.StartLon, trail.StartLat, trail.EndLon, trail.EndLat, trail.ShelterID, time.Now())
+			if err != nil {
+				log.Fatal("error inserting trail: %v", zap.Error(err))
+			}
 		}
 	}
 
@@ -319,10 +341,12 @@ func main() {
 	initializeDB()
 
 	// Initialize the repository
-	// repo := repository.NewMemoryRepository()
+	repo := repository.NewMemoryRepository()
+	repoS := postgres.NewShelterRepository(cfg.Postgres)
+	repoT := postgres.NewTrailRepository(cfg.Postgres)
 
 	// Initialize the trailManager service
-	// trailManagerService := services.NewTrailManagerService(repo)
+	trailManagerService, _ := services.NewTrailManagerService(repo, repoT, repoS)
 	// trailManagerService.
 
 	// Connect to the default database to perform administrative tasks
@@ -339,15 +363,15 @@ func main() {
 	// }
 	// defer peripheralAMQPHandler.Close()
 
-	// // Initialize the HTTP handler with the Peripheral service and the RabbitMQ handler
-	// peripheralHTTPHandler := handler.NewPeripheralServiceHTTPHandler(router, peripheralService, peripheralAMQPHandler) // Adjusted for package
+	// Initialize the HTTP handler with the trail manager service and the RabbitMQ handler
+	trailManagerHTTPHandler := httphandler.NewTrailManagerServiceHTTPHandler(router, trailManagerService) // Adjusted for package
 
-	// // Set up the HTTP routes
-	// peripheralHTTPHandler.InitRouter()
+	// Set up the HTTP routes
+	trailManagerHTTPHandler.InitRouter()
 
-	// // Start the HTTP server
-	// err := router.Run(":" + cfg.Port)
-	// if err != nil {
-	// 	// log.Fatal("Failed to run the server: %v", err)
-	// }
+	// Start the HTTP server
+	err := router.Run(":" + cfg.Port)
+	if err != nil {
+		// log.Fatal("Failed to run the server: %v", err)
+	}
 }

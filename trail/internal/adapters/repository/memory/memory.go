@@ -29,7 +29,7 @@ func (r *MemoryRepository) AddTrailManagerIntance(t domain.TrailManager) error {
 	}
 
 	if _, ok := r.ts[t.CurrentWorkoutID]; ok {
-		return fmt.Errorf("peripheral already connected: %w", ports.ErrorCreateTrailManagerFailed)
+		return fmt.Errorf("trail manager already connected: %w", ports.ErrorCreateTrailManagerFailed)
 	}
 	r.Lock()
 	r.ts[t.CurrentWorkoutID] = t

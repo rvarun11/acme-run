@@ -9,9 +9,9 @@ import (
 )
 
 type TrailManagerService struct {
-	repoTM ports.TrailManagerRepository
 	repoT  ports.TrailRepository
 	repoS  ports.ShelterRepository
+	repoTM ports.TrailManagerRepository
 }
 
 // Factory for creating a new TrailManager
@@ -24,13 +24,30 @@ func NewTrailManagerService(rTM ports.TrailManagerRepository, rT ports.TrailRepo
 	}, nil
 }
 
-func (t *TrailManagerService) CreateTrailManager(wId uuid.UUID) error {
+func (t *TrailManagerService) CreateTrailManager(wId uuid.UUID) (uuid.UUID, error) {
 	tm, err := domain.NewTrailManager(wId)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	t.repoTM.AddTrailManagerIntance(tm)
-	return nil
+	return tm.TrailManagerID, nil
+}
+
+func (t *TrailManagerService) CloseTrailManager(wId uuid.UUID) error {
+	return t.repoTM.DeleteTrailManagerInstance(wId)
+}
+
+func (t *TrailManagerService) GetTrailManagerByWorkoutId(id uuid.UUID) (*domain.TrailManager, error) {
+	tm, err := t.repoTM.GetByWorkoutId(id)
+	return tm, err
+}
+
+func (t *TrailManagerService) CreateTrail(tid uuid.UUID, name string, startLatitude float64, startLongitude float64, endLatitude float64, endLongitude float64, shelterId uuid.UUID) (uuid.UUID, error) {
+	res, err := t.repoT.CreateTrail(tid, name, startLatitude, startLongitude, endLatitude, endLongitude, shelterId)
+	if err != nil {
+		return uuid.Nil, err
+	}
+	return res, nil
 }
 
 func (t *TrailManagerService) DisconnectTrailManager(wId uuid.UUID) error {
@@ -38,12 +55,25 @@ func (t *TrailManagerService) DisconnectTrailManager(wId uuid.UUID) error {
 	return err
 }
 
+func (t *TrailManagerService) SetCurrentLocation(wId uuid.UUID, longitude float64, latitude float64) error {
+	tmInstance, err := t.repoTM.GetByWorkoutId(wId)
+	if err != nil {
+		return err
+	}
+	tmInstance.CurrentLongitude = longitude
+	tmInstance.CurrentLatitude = latitude
+	t.repoTM.Update(*tmInstance)
+	return nil
+}
+
 func (t *TrailManagerService) GetShelter(id uuid.UUID) (*domain.Shelter, error) {
-	return t.repoS.GetShelterByID(id), nil
+	shelter, err := t.repoS.GetShelterByID(id)
+	return shelter, err
 }
 
 func (t *TrailManagerService) GetTrail(id uuid.UUID) (*domain.Trail, error) {
-	return t.repoT.GetTrailByID(id), nil
+	trail, err := t.repoT.GetTrailByID(id)
+	return trail, err
 }
 
 func (t *TrailManagerService) calculateDistance(Longitude1 float64, Latitude1, Longitude2 float64, Latitude2 float64) (float64, error) {
@@ -120,7 +150,7 @@ func (t *TrailManagerService) GetTrailDistance(wId uuid.UUID, tId uuid.UUID, sId
 }
 
 func (t *TrailManagerService) GetClosestShelter(currentLongitude, currentLatitude float64) (uuid.UUID, error) {
-	shelters, err := t.repoS.GetAllShelters()
+	shelters, err := t.repoS.List()
 	if err != nil {
 		return uuid.Nil, err // Handle the error, possibly no shelters available or DB error
 	}
@@ -145,7 +175,7 @@ func (t *TrailManagerService) GetClosestShelter(currentLongitude, currentLatitud
 
 func (s *TrailManagerService) GetClosestTrail(currentLongitude float64, currentLatitude float64) (uuid.UUID, error) {
 
-	trails, err := s.repoT.GetAllTrails()
+	trails, err := s.repoT.List()
 	if err != nil {
 		return uuid.Nil, nil // Handle the error, possibly no trails available or DB error
 	}

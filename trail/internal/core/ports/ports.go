@@ -21,15 +21,6 @@ var (
 )
 
 type TrailManagerService interface {
-	// retrieveLocation()
-	// getCloestShelter()
-	// GetShelterDistance() (float64, error)
-	// GetTrail(id uuid.UUID) (*domain.Trail, error)
-	// GetShelter(id uuid.UUID) (*domain.Shelter, error)
-	// GetClosestShelter(currentLongitude, currentLatitude float64) (uuid.UUID, error)
-	// GetClosestTrail(currentLongitude float64, currentLatitude float64) (uuid.UUID, error)
-	// SelectTrail(wId uuid.UUID, tId uuid.UUID, option string) error
-	// NewTrailManagerService(rTM MemoryRepository, rT TrailRepository, rS ShelterRepository) (*TrailManagerService, error)
 	CreateTrailManager(wId uuid.UUID) error
 	DisconnectTrailManager(wId uuid.UUID) error
 	GetShelter(id uuid.UUID) (*domain.Shelter, error)
@@ -40,27 +31,31 @@ type TrailManagerService interface {
 	GetTrailDistance(wId uuid.UUID, tId uuid.UUID, sId uuid.UUID) (float64, error)
 	GetClosestShelter(currentLongitude, currentLatitude float64) (uuid.UUID, error)
 	GetClosestTrail(currentLongitude float64, currentLatitude float64) (uuid.UUID, error)
-	SetCurrentLocation(longitude float64, latitude float64)
+	SetCurrentLocation(wId uuid.UUID, longitude float64, latitude float64)
+	CreateTrail(tid uuid.UUID, name string, startLatitude float64, startLongitude float64, endLatitude float64, endLongitude float64, shelterId uuid.UUID) (uuid.UUID, error)
 }
 
 type TrailRepository interface {
-	CreateTrail(name string, startLat, startLong, endLat, endLong float64, closestShelterID uuid.UUID) (uuid.UUID, error)
+	CreateTrail(tId uuid.UUID, name string, startLat, startLong, endLat, endLong float64, closestShelterID uuid.UUID) (uuid.UUID, error)
 	UpdateTrailByID(id uuid.UUID, name string, startLat, startLong, endLat, endLong float64, closestShelterID uuid.UUID) error
 	DeleteTrailByID(id uuid.UUID) error
-	GetTrailByID(id uuid.UUID) (domain.Trail, error)
+	GetTrailByID(id uuid.UUID) (*domain.Trail, error)
+	List() ([]*domain.Trail, error)
 }
 
 type ShelterRepository interface {
-	CreateShelter(name string, availability bool, lat, long float64) (uuid.UUID, error)
+	// CreateShelter(name string, availability bool, lat, long float64) (uuid.UUID, error)
 	UpdateShelterByID(id uuid.UUID, name string, availability bool, lat, long float64) error
 	DeleteShelterByID(id uuid.UUID) error
 	GetShelterByID(id uuid.UUID) (*domain.Shelter, error)
+	List() ([]*domain.Shelter, error)
 }
 
 type TrailManagerRepository interface {
 	GetByWorkoutId(wId uuid.UUID) (*domain.TrailManager, error)
-	List() ([]*domain.TrailManager, error)
 	Update(t domain.TrailManager) error
 	DeleteTrailManagerInstance(wId uuid.UUID) error
 	AddTrailManagerIntance(t domain.TrailManager) error
+	// Get(wID uuid.UUID) (*domain.TrailManager, error)
+	// List() ([]*domain.TrailManager, error)
 }

@@ -5,6 +5,8 @@ import (
 	"log"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
+	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -29,11 +31,10 @@ func NewRabbitMQService(amqpURL string, repoTM ports.TrailManagerRepository) (*R
 	return &RabbitMQService{
 		conn:    conn,
 		channel: channel,
-		repoTM:  repoTM,
 	}, nil
 }
 
-func (r *RabbitMQService) ListenForLocationUpdates(queueName string) {
+func (r *RabbitMQService) ListenForLocationUpdates(trailManager *services.TrailManagerService, wId uuid.UUID, queueName string) {
 	msgs, err := r.channel.Consume(
 		queueName,
 		"",
@@ -57,9 +58,10 @@ func (r *RabbitMQService) ListenForLocationUpdates(queueName string) {
 			}
 
 			// Assume UpdateLocation is a method that updates the TrailManager's location
-			if err := r.repoTM.UpdateLocation(location.WorkoutID, location.Longitude, location.Latitude); err != nil {
-				log.Printf("Failed to update location: %s", err)
-			}
+			// if err := r.repoTM.UpdateLocation(location.WorkoutID, location.Longitude, location.Latitude); err != nil {
+			// 	log.Printf("Failed to update location: %s", err)
+			// }
+			err = trailManager.SetCurrentLocation(wId, location.Longitude, location.Latitude)
 		}
 	}()
 
