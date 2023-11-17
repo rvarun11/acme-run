@@ -10,9 +10,7 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/ports"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 var cfg *config.AppConfiguration = config.Config
@@ -42,12 +40,11 @@ type testCase struct {
 }
 
 /*
-This function checks subscribes the incoming challenges stats to active challenges,
-and calculcates whether a badge should be given to the player when the challenge ends.
-
+This function checks subscribes the incoming challenges stats to active challenges.
+Once the challenge ends, badge
 Two types of challenges (DistancedCovered & EnemiesFoughtMoreThanEscape) are used for testing.
 */
-func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
+func TestChallengeService_CreateOrUpdateChallengeStats(t *testing.T) {
 	// 1. Test Setup
 	store := postgres.NewRepository(cfg.Postgres)
 	service := services.NewChallengeService(store)
@@ -58,7 +55,7 @@ func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 	// 3. Run Tests
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
-			logger.Debug("Running new test case", zap.String("test", tc.test))
+			// logger.Debug("Running new test case", zap.String("test", tc.test))
 			// 2.1 Create a Challenge
 			ch, err := domain.NewChallenge(tc.challenge.name+uuid.NewString(), tc.challenge.desc, tc.challenge.badgeURL, domain.Criteria(tc.challenge.criteria), tc.challenge.goal, time.Now(), time.Now().Add(time.Second*30))
 			if err != nil {
@@ -71,7 +68,7 @@ func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 
 			// 2.2 Subscribe the Player to an active challenge with their stats
 			for i, s := range tc.stats {
-				err = service.SubscribeToActiveChallenges(tc.playerID, s.distanceCovered, s.fought, s.escaped, time.Now().Add(time.Second*time.Duration(i)))
+				err = service.CreateOrUpdateChallengeStats(tc.playerID, s.distanceCovered, s.fought, s.escaped, time.Now().Add(time.Second*time.Duration(i)))
 				if err != nil {
 					t.Errorf("unable to subscribe to active challenge, got %v", err)
 				}
@@ -84,7 +81,7 @@ func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 			if err != nil {
 				t.Errorf("unable to fetch badges, got %v", err)
 			}
-			logger.Debug("Badges List", zap.Any("badges", badges))
+			// logger.Debug("Badges List", zap.Any("badges", badges))
 
 			err = badgeExists(badges, ch.ID, tc.playerID)
 			if !errors.Is(err, tc.expectedErr) {

@@ -169,6 +169,6 @@ func (c *WorkoutStatsConsumer) worker(ctx context.Context, deliveries <-chan amq
 		if err != nil {
 			logger.Info("failed to unmarshal %s", zap.Error(err))
 		}
-		c.svc.SubscribeToActiveChallenges(csDTO.PlayerID, csDTO.DistanceCovered, csDTO.EnemiesFought, csDTO.EnemiesEscaped, csDTO.WorkoutEnd)
+		c.svc.CreateOrUpdateChallengeStats(csDTO.PlayerID, csDTO.DistanceCovered, csDTO.EnemiesFought, csDTO.EnemiesEscaped, csDTO.WorkoutEnd)
 	}
 }

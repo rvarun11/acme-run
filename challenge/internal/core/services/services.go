@@ -118,7 +118,7 @@ func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badg
 	return badges, nil
 }
 
-func (svc *ChallengeService) SubscribeToActiveChallenges(pid uuid.UUID, dc float64, ef uint8, ee uint8, workoutEnd time.Time) error {
+func (svc *ChallengeService) CreateOrUpdateChallengeStats(pid uuid.UUID, dc float64, ef uint8, ee uint8, workoutEnd time.Time) error {
 	activeChs, err := svc.ListChallenges("active")
 	if err != nil {
 		return err
@@ -147,7 +147,7 @@ func (svc *ChallengeService) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*dom
 }
 
 // ActeFinal runs when a challenge ends and creates badges for all the players who met the critera for the challenge
-func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) {
+func (svc *ChallengeService) DispatchBadges(ch *domain.Challenge) {
 	// 1. Fetch Player Challenge Stats
 	csArr, err := svc.repo.ListChallengeStatsByChallengeID(ch.ID)
 	if err != nil {
@@ -168,7 +168,9 @@ func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) {
 
 }
 
-// This func
+/*
+This is a function to monitor active challenges and create badges
+*/
 func (svc *ChallengeService) MonitorChallenges() {
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
@@ -193,7 +195,7 @@ func (svc *ChallengeService) MonitorChallenges() {
 					time.Sleep(duration)
 
 					// Run ActeFinal
-					svc.ActeFinal(ch)
+					svc.DispatchBadges(ch)
 
 					// Remove the challenge from the monitoring in progress map
 					svc.monitor.Delete(ch.ID)

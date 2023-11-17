@@ -32,9 +32,7 @@ type ChallengeService interface {
 	// Badges
 	CreateBadge(cid uuid.UUID, pid uuid.UUID) error
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
-
-	// StatsTracker
-	// Register a player id with the active challenges
+	DispatchBadges(ch *domain.Challenge)
 	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
 	ListChallengeStatsByPlayerID(pid uuid.UUID) error
 
