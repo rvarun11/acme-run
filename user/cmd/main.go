@@ -12,8 +12,7 @@ import (
 var cfg *config.AppConfiguration = config.Config
 
 func main() {
-	logger.Info("Challenge Manager is starting")
-
+	logger.Info("User Manager is starting...")
 	// Initialize router
 	router := gin.Default()
 	router.Use(gin.Recovery())

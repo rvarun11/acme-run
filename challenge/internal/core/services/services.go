@@ -38,7 +38,7 @@ func (svc *ChallengeService) CreateChallenge(req *domain.Challenge) (*domain.Cha
 	if err != nil {
 		return &domain.Challenge{}, ports.ErrorCreateChallengeFailed
 	}
-	logger.Info("created new challenge", zap.String("challenge", challenge.Name))
+	logger.Info("New challenge created successfully", zap.String("challenge", challenge.Name))
 
 	return challenge, nil
 

@@ -6,6 +6,6 @@ COPY . .
 
 RUN go get -d -v ./...
 
-RUN go build -o user ./cmd
+RUN go build -o challenge ./cmd
 
-CMD ["./user"]
+CMD ["./challenge"]
