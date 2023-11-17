@@ -77,12 +77,12 @@ func TestChallengeService_SubscribeToActiveChallenges(t *testing.T) {
 				}
 			}
 			// added a delay for the challenge to end
-			time.Sleep(15 * time.Second)
+			time.Sleep(40 * time.Second)
 
 			// 2.3 Check for Badges
-			badges, err := service.ActeFinal(ch)
+			badges, err := service.ListBadgesByPlayerID(tc.playerID)
 			if err != nil {
-				t.Errorf("expected err %v, got %v", tc.expectedErr, err)
+				t.Errorf("unable to fetch badges, got %v", err)
 			}
 			logger.Debug("Badges List", zap.Any("badges", badges))
 
@@ -198,56 +198,3 @@ func initTestCases() []*testCase {
 
 	return testCases
 }
-
-// // OLD
-// func TestChallengeService_SubscribeToActiveChallenges_old(t *testing.T) {
-// 	// 1. Test Setup
-// 	store := postgres.NewRepository(cfg.Postgres)
-// 	service := services.NewChallengeService(store)
-
-// 	chName := "Marathon Rush 2023" + uuid.NewString()
-// 	ch, _ := domain.NewChallenge(chName, "", "", "DistanceCovered", 26.2, time.Now(), time.Now().Add(time.Second*30))
-// 	ch, err := service.CreateChallenge(ch)
-// 	if err != nil {
-// 		logger.Error("something happened here", zap.Error(err))
-// 	}
-
-// 	// 2. Add Dummy DTOs
-// 	one := testStat{
-// 		playerID:        player1ID,
-// 		distanceCovered: 10,
-// 		fought:          2,
-// 		escaped:         3,
-// 		end:             time.Now().Add(time.Second),
-// 	}
-// 	two := testStat{
-// 		playerID:        player1ID,
-// 		distanceCovered: 20,
-// 		fought:          2,
-// 		escaped:         3,
-// 		end:             time.Now().Add(time.Second * 2),
-// 	}
-
-// 	// 3. Subscribe to Challenge
-// 	err = service.SubscribeToActiveChallenges(one.playerID, one.distanceCovered, one.fought, one.escaped, one.end)
-// 	if err != nil {
-// 		logger.Debug("unable to subscribe to challenge", zap.Error(err))
-// 	}
-// 	err = service.SubscribeToActiveChallenges(two.playerID, two.distanceCovered, two.fought, two.escaped, two.end)
-// 	if err != nil {
-// 		logger.Debug("unable to subscribe to challenge", zap.Error(err))
-// 	}
-// 	// Add delay here
-// 	time.Sleep(15 * time.Second)
-
-// 	// 3.  Get Badges
-// 	badges, _ := service.ActeFinal(ch)
-
-// 	// 4. Asert if the player received the badge or not
-// 	t.Run("Badge Validation", func(t *testing.T) {
-// 		if !badgeExists(badges, ch.ID, player1ID) {
-// 			t.Errorf("badge not found")
-// 		}
-// 	})
-
-// }

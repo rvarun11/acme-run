@@ -32,6 +32,25 @@ func (r *Repository) CreateBadge(b *domain.Badge) (*domain.Badge, error) {
 	return badge, nil
 }
 
+func (r *Repository) ListBadges() ([]*domain.Badge, error) {
+	var badgesFromDB []postgresBadge
+	if err := r.db.Find(&badgesFromDB).Error; err != nil {
+		return nil, err
+	}
+
+	var badges []*domain.Badge
+	for _, pb := range badgesFromDB {
+		ch, err := r.GetChallengeByID(pb.ChallengeID)
+		if err != nil {
+			continue
+		}
+		badge := pb.toAggregate(ch)
+		badges = append(badges, badge)
+	}
+
+	return badges, nil
+}
+
 func (r *Repository) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error) {
 	var badgesFromDB []postgresBadge
 	// TODO: THIS MAY NOT WORK

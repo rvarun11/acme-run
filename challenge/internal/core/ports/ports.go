@@ -59,6 +59,7 @@ type ChallengeRepository interface {
 	ListChallenges() ([]*domain.Challenge, error)
 	// Badges
 	CreateBadge(b *domain.Badge) (*domain.Badge, error)
+	ListBadges() ([]*domain.Badge, error)
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
 	// ChallengeStats
 	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error

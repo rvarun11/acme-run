@@ -1,6 +1,7 @@
 package services
 
 import (
+	"sync"
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
@@ -11,14 +12,19 @@ import (
 )
 
 type ChallengeService struct {
-	repo ports.ChallengeRepository
+	monitor sync.Map
+	repo    ports.ChallengeRepository
 }
 
 // Factory for creating a new ChallengeService
 func NewChallengeService(repo ports.ChallengeRepository) *ChallengeService {
-	return &ChallengeService{
+	svc := &ChallengeService{
 		repo: repo,
 	}
+
+	go svc.MonitorChallenges()
+
+	return svc
 }
 
 // Challenge Services
@@ -94,6 +100,15 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 	return badge, nil
 }
 
+func (svc *ChallengeService) ListBadges() ([]*domain.Badge, error) {
+	badges, err := svc.repo.ListBadges()
+	if err != nil {
+		return []*domain.Badge{}, err
+	}
+
+	return badges, nil
+}
+
 func (svc *ChallengeService) ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error) {
 	badges, err := svc.repo.ListBadgesByPlayerID(pid)
 	if err != nil {
@@ -132,33 +147,29 @@ func (svc *ChallengeService) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*dom
 }
 
 // ActeFinal runs when a challenge ends and creates badges for all the players who met the critera for the challenge
-func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) ([]*domain.Badge, error) {
+func (svc *ChallengeService) ActeFinal(ch *domain.Challenge) {
 	// 1. Fetch Player Challenge Stats
 	csArr, err := svc.repo.ListChallengeStatsByChallengeID(ch.ID)
 	if err != nil {
 		logger.Fatal("error occured while fetching challenge stats for player of a challenge", zap.Any("challenge", ch))
-		return []*domain.Badge{}, err
 	}
 
 	// 2. Create Badges, if critera is met
-	var badges []*domain.Badge
+	// var badges []*domain.Badge
 	for _, cs := range csArr {
-		badge, err := svc.CreateBadge(cs)
+		_, err := svc.CreateBadge(cs)
 		if err != nil {
 			logger.Debug("unable to create badge for challenge stat", zap.Error(err))
 			continue
 		}
-		badges = append(badges, badge)
 	}
 
 	// 3. (optional) Delete challenges stats for the challenge as it has ended
 
-	return badges, nil
 }
 
-// This function is runs to monitor active challenges
+// This func
 func (svc *ChallengeService) MonitorChallenges() {
-	// Check every 10seconds
 	ticker := time.NewTicker(10 * time.Second)
 	defer ticker.Stop()
 
@@ -166,17 +177,28 @@ func (svc *ChallengeService) MonitorChallenges() {
 		activeChs, _ := svc.ListChallenges("active")
 
 		for _, ch := range activeChs {
-			logger.Debug("found an active challenge, starting monitor")
-			go func(ch *domain.Challenge) {
-				// Calculate the duration until the end time
-				duration := time.Until(ch.End)
+			// Check if the challenge is already being monitored
+			if _, alreadyMonitoring := svc.monitor.Load(ch.ID); !alreadyMonitoring {
+				logger.Debug("found an active challenge, starting monitor")
 
-				// Sleep until the challenge end time
-				time.Sleep(duration)
+				// Mark the challenge as being monitored
+				svc.monitor.Store(ch.ID, struct{}{})
 
-				// Call HelloWorld when the challenge ends
-				svc.ActeFinal(ch)
-			}(ch)
+				// Start a goroutine to monitor the challenge
+				go func(ch *domain.Challenge) {
+					// Calculate the duration until the end time
+					duration := time.Until(ch.End)
+
+					// Sleep until the challenge end time
+					time.Sleep(duration)
+
+					// Run ActeFinal
+					svc.ActeFinal(ch)
+
+					// Remove the challenge from the monitoring in progress map
+					svc.monitor.Delete(ch.ID)
+				}(ch)
+			}
 		}
 	}
 }
