@@ -162,7 +162,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 		longitudeEnd := 50.0
 		latitudeEnd := 50.0
 		h.svc.SetLiveStatus(bindDataInstance.WorkoutID, true)
-		h.StartBackgroundMockTesting(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
+		h.StartBackgroundMockReading(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
 	}
 }
 
@@ -188,29 +188,29 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 		h.cancelF()
 	}
 
-	err1 = h.svc.SetHRMDevStatus(req.WorkoutID, false)
-	if err1 != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to unbind",
-		})
-		return
-	}
+	// err1 = h.svc.SetHRMDevStatus(req.WorkoutID, false)
+	// if err1 != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "failed to unbind",
+	// 	})
+	// 	return
+	// }
 
-	err1 = h.svc.SetGeoDevStatus(req.WorkoutID, false)
-	if err1 != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to unbind",
-		})
-		return
-	}
+	// err1 = h.svc.SetGeoDevStatus(req.WorkoutID, false)
+	// if err1 != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "failed to unbind",
+	// 	})
+	// 	return
+	// }
 
-	err1 = h.svc.DisconnectPeripheral(req.WorkoutID)
-	if err1 != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "failed to unbind",
-		})
-		return
-	}
+	// err1 = h.svc.DisconnectPeripheral(req.WorkoutID)
+	// if err1 != nil {
+	// 	ctx.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "failed to unbind",
+	// 	})
+	// 	return
+	// }
 	ctx.JSON(http.StatusOK, gin.H{
 		"success": "Unbind the data"})
 }
@@ -256,7 +256,7 @@ func (h *HTTPHandler) GetHRMStatus(ctx *gin.Context) {
 
 	wId, err := parseUUID(ctx, "workout_id")
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Fail to get hrm status"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to get hrm status"})
 		return
 	}
 
@@ -409,7 +409,7 @@ func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tLoc)
 }
 
-func (h *HTTPHandler) StartBackgroundMockTesting(ctx context.Context, ctx1 context.Context, wId uuid.UUID, hId uuid.UUID, longitudeStart float64, latitudeStart float64, longitudeEnd float64, latitudeEnd float64) {
+func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 context.Context, wId uuid.UUID, hId uuid.UUID, longitudeStart float64, latitudeStart float64, longitudeEnd float64, latitudeEnd float64) {
 	go func() {
 		startLong := longitudeStart
 		startLat := latitudeStart
