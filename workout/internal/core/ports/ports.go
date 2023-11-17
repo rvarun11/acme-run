@@ -10,10 +10,14 @@ import (
 )
 
 var (
-	ErrorListWorkoutsFailed  = errors.New("failed to list workout")
-	ErrorWorkoutNotFound     = errors.New("workout not found in repository")
-	ErrorCreateWorkoutFailed = errors.New("failed to create the workout")
-	ErrorUpdateWorkoutFailed = errors.New("failed to update workout")
+	ErrorListWorkoutsFailed         = errors.New("failed to list workout")
+	ErrorWorkoutNotFound            = errors.New("workout not found in repository")
+	ErrorCreateWorkoutFailed        = errors.New("failed to create the workout")
+	ErrorUpdateWorkoutFailed        = errors.New("failed to update workout")
+	ErrorWorkoutOptionUnavailable   = errors.New("workout option unavailable")
+	ErrInvalidWorkout               = errors.New("no workout_id matched")
+	ErrWorkoutOptionAlreadyActive   = errors.New("workout option is already active")
+	ErrWorkoutOptionAlreadyInActive = errors.New("no workout option is active")
 )
 
 type WorkoutService interface {
@@ -73,6 +77,6 @@ type UserServiceClient interface {
 
 type PeripheralDeviceClient interface {
 	GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error)
-	BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error
+	BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error
 	UnbindPeripheralData(workoutID uuid.UUID) error
 }
