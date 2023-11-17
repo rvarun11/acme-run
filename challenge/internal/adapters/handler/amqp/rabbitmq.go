@@ -167,7 +167,7 @@ func (c *WorkoutStatsConsumer) worker(ctx context.Context, deliveries <-chan amq
 		logger.Info("Received a message: %s", zap.Any("delivery", d.Body))
 		err := json.Unmarshal(d.Body, csDTO)
 		if err != nil {
-			logger.Info("failed to unmarshal %s", zap.Error(err))
+			logger.Debug("failed to unmarshal %s", zap.Error(err))
 		}
 		c.svc.CreateOrUpdateChallengeStats(csDTO.PlayerID, csDTO.DistanceCovered, csDTO.EnemiesFought, csDTO.EnemiesEscaped, csDTO.WorkoutEnd)
 	}
