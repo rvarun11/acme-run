@@ -1,14 +1,11 @@
 package httphandler
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
-	"github.com/CAS735-F23/macrun-teamvsl/trail/log"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 )
@@ -29,13 +26,23 @@ func (handler *TrailManagerServiceHTTPHandler) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
 
-	router.POST("/trail_manager", handler.ConnectToTrailManager)
-	router.PUT("/trail_manager", handler.CloseTrailManager)
-	router.GET("/trail_manager/get_trail", handler.GetClosestTrail)
+	// router.POST("/trail_manager", handler.ConnectToTrailManager)
+	// router.PUT("/trail_manager", handler.CloseTrailManager)
+	router.GET("/trail_manager/trail/", handler.GetClosestTrail)
+	router.GET("/trail_manager/trail/info", handler.GetTrailLocationInfo)
+	router.POST("/trail_manager/trail/create", handler.CreateTrail)
+	router.PUT("/trail_manager/trail/update", handler.UpdateTrail)
+	router.PUT("/trail_manager/trail/delete", handler.DeleteTrail)
 
-	// router.POST("/shelter", handler.CreateShelter)
-	// router.PUT("/shelter", handler.UpdateShelter)
-	// router.GET("/shelter", handler.GetClosestShelter)
+	router.GET("/trail_manager/shelter/check_status", handler.CheckShelterStatus)
+	router.GET("/trail_manager/shelter/info", handler.GetShelterLocationInfo)
+	router.POST("/trail_manager/shelter/create", handler.CreateShelter)
+	router.PUT("/trail_manager/shelter/update", handler.UpdateShelter)
+	router.PUT("/trail_manager/shelter/delete", handler.DeleteShelter)
+
+	router.POST("/trail_manager/zone/create", handler.CreateZone)
+	router.PUT("/trail_manager/zone/update", handler.UpdateZone)
+	router.PUT("/trail_manager/zone/delete", handler.DeleteZone)
 
 }
 
@@ -48,34 +55,245 @@ func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
 	return uuidValue, nil
 }
 
-func (h *TrailManagerServiceHTTPHandler) ConnectToTrailManager(ctx *gin.Context) {
-	var userDataInstance UserData
-	if err := ctx.ShouldBindJSON(&userDataInstance); err != nil {
+func (s *TrailManagerServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
+
+	var trailDataInstance TrailDTO
+	if err := ctx.ShouldBindJSON(&trailDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
-	fmt.Println(userDataInstance.WorkoutID.String())
-	tm, err1 := h.tvc.CreateTrailManager(userDataInstance.WorkoutID)
-	if err1 != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err1.Error()})
+
+	id := trailDataInstance.TrailID
+	name := trailDataInstance.TrailName
+	startLongitude := trailDataInstance.StartLongitude
+	startLatitude := trailDataInstance.StartLatitude
+	endLongitude := trailDataInstance.EndLongitude
+	endLatitude := trailDataInstance.EndLatitude
+	zId := trailDataInstance.ZoneID
+
+	_, err := s.tvc.CreateTrail(id, name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create trail"})
 		return
 	}
-	// tIdString _ =
-	log.Debug("Trail Manager Created with Id %s", zap.String("trail_manager_id", tm.String()))
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Trail manager created successfully"})
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "trail created successfully"})
 
 }
 
-func (h *TrailManagerServiceHTTPHandler) CloseTrailManager(ctx *gin.Context) {
-	wId, _ := parseUUID(ctx, "workout_id")
-	err := h.tvc.CloseTrailManager(wId)
+func (s *TrailManagerServiceHTTPHandler) UpdateTrail(c *gin.Context) {
+
+	id := c.Query("id")
+	name := c.Query("name")
+	zId := c.Query("zone_id")
+	startLongitude := c.Query("start_longitude")
+	startLatitude := c.Query("start_latitude")
+	endLongitude := c.Query("end_longitude")
+	endLatitude := c.Query("end_latitude")
+
+	err := s.tvc.UpdateTrail(id, name, zId, startLatitude, startLongitude, endLatitude, endLongitude, shelterId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to update trail"})
+		return
+	}
+	c.JSON(http.StatusInternalServerError, gin.H{"status": "success", "message": "updated trail"})
+
+}
+
+func (t *TrailManagerServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
+	id, _ := parseUUID(ctx, "trail_id")
+	err := t.tvc.DeleteTrail(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to delete trail"})
+		return
+	}
+	ctx.JSON(http.StatusInternalServerError, gin.H{"status": "success", "message": "deleted trail"})
+}
+
+func (t *TrailManagerServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
+
+	longitudeStr := ctx.Query("longitude")
+	latitudeStr := ctx.Query("latitude")
+	zId, _ := parseUUID(ctx, "zone_id")
+
+	// Convert query parameters to float64
+	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
+
+	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
+
+	// Assuming you have a method to find the closest trails by coordinates
+	closestTrail, err := t.tvc.GetClosestTrail(zId, longitude, latitude)
+	if err != nil || closestTrail == uuid.Nil {
+		// Handle possible errors, such as no trails being found
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to retrieve closest trail"})
+		return
+	}
+
+	// Respond with the ID of the closest trail
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "trail_id": closestTrail})
+}
+
+func (t *TrailManagerServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
+
+	tId, _ := parseUUID(ctx, "trail_id")
+
+	// Assuming you have a method to find the closest trails by coordinates
+	trail, err := t.tvc.GetTrailByID(tId)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to retrieve trail info"})
+		return
+	}
+
+	// Respond with the ID of the closest trail
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "start_longitude": trail.StartLongitude, "start_latitude": trail.StartLatitude,
+		"end_longitude": trail.EndLongitude, "end_latitude": trail.EndLatitude})
+}
+
+// shelters
+func (t *TrailManagerServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
+
+	var shelterDataInstance ShelterDTO
+	if err := ctx.ShouldBindJSON(&shelterDataInstance); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+	id := shelterDataInstance.ShelterID
+	name := shelterDataInstance.ShelterName
+	longitude := shelterDataInstance.Longitude
+	latitude := shelterDataInstance.Latitude
+	tId := shelterDataInstance.TrailID
+
+	_, err := t.tvc.CreateShelter(id, name, tId, true, longitude, latitude)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to create shelter"})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "shelter created successfully"})
+}
+
+func (t *TrailManagerServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
+
+	sId, _ := parseUUID(ctx, "shelter_id")
+	name := ctx.Query("name")
+	longitudeStr := ctx.Query("longitude")
+	latitudeStr := ctx.Query("latitude")
+	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
+	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
+	availability, _ := strconv.ParseBool("shelter_availability")
+	tId, _ := parseUUID(ctx, "trail_id")
+
+	err := t.tvc.UpdateShelter(sId, name, tId, availability, longitude, latitude)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create shelter"})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "trail updated successfully"})
+}
+
+func (t *TrailManagerServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
+
+	id, _ := parseUUID(ctx, "shelter_id")
+
+	err := t.tvc.DeleteShelter(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to create shelter"})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "shelter deleted successfully"})
+}
+
+func (h *TrailManagerServiceHTTPHandler) CheckShelterStatus(ctx *gin.Context) {
+	sId, _ := parseUUID(ctx, "shelter_id")
+	// first check if the workout is bind to any trail manager, if not raise error
+	shelterInstance, err := h.tvc.GetShelterByID(sId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "cant find shelter"})
+		return
+	}
+	if shelterInstance.ShelterAvailability {
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "available"})
+		return
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "unavailable"})
+		return
+	}
+
+}
+
+func (t *TrailManagerServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context) {
+
+	id, _ := parseUUID(ctx, "shelter_id")
+
+	// Assuming you have a method to find the closest trails by coordinates
+	shelter, err := t.tvc.GetShelterByID(id)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "failed to retrieve shelter info"})
+		return
+	}
+
+	// Respond with the ID of the closest trail
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "longitude": shelter.Longitude, "latitude": shelter.Latitude})
+}
+
+func (h *TrailManagerServiceHTTPHandler) CreateZone(ctx *gin.Context) {
+	var zoneDataInstance ZoneDTO
+	if err := ctx.ShouldBindJSON(&zoneDataInstance); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+	zId, err := h.tvc.CreateZone(zoneDataInstance.ZoneName)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
-		return
+	} else {
+		zIdString := zId.String()
+		ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "zone created with id", "zone_id": zIdString})
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Trail manager created successfully"})
-
+	return
 }
+
+// 	// check if this trail has any shelter, if not return error
+// 	availability, err := h.tvc.CheckTrailShelter(tId)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+// 		return
+// 	}
+// 	var sv ShelterAvailable
+// 	sv.ShelterAvailable = availability
+// 	sv.WorkoutID = wId
+// 	var outputData []byte
+// 	var err2 error
+// 	if !availability {
+// 		// if there is no shelter attached to the trail, return
+// 		sv.DistanceToShelter = math.MaxFloat64
+// 		sv.ShelterAvailable = false
+// 		sv.WorkoutID = wId
+// 		outputData, _ = json.Marshal(sv)
+// 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": string(outputData)})
+// 		return
+// 	} else {
+// 		long := ctx.Query("longitude")
+// 		lat := ctx.Query("latitude")
+// 		inputLongitude, _ := strconv.ParseFloat(long, 64)
+// 		inputLatitude, _ := strconv.ParseFloat(lat, 64)
+// 		// get current location for calculating the distance, if the user is not connected to any instance
+// 		// it will raise error and return
+// 		if returnedTM.CurrentLongitude == math.MaxFloat64 || returnedTM.CurrentLatitude == math.MaxFloat64 {
+// 			fmt.Println(err)
+// 			ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "failed to get shelter info"})
+// 			return
+// 		}
+// 		sv.DistanceToShelter, _ = h.tvc.CalculateDistance(inputLongitude, inputLatitude, returnedTM.CurrentLongitude, returnedTM.CurrentLatitude)
+// 	}
+// 	outputData, err2 = json.Marshal(sv)
+// 	if err2 != nil {
+// 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "failed to get shelter info"})
+// 		return
+// 	}
+// 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": string(outputData)})
+
+// }
 
 // func (h *TrailManagerServiceHTTPHandler) GetDistance(ctx *gin.Context) {
 // 	workoutID, err := parseUUID(ctx, "workoutID")
@@ -129,25 +347,6 @@ func (h *TrailManagerServiceHTTPHandler) CloseTrailManager(ctx *gin.Context) {
 // 	})
 // }
 
-// func (s *TrailManagerServiceHTTPHandler) CreateTrail(c *gin.Context) {
-
-// 	tid := c.Query("id")
-// 	name := c.Query("name")
-// 	startLongitude := c.Query("start_longitude")
-// 	startLatitude := c.Query("start_latitude")
-// 	endLongitude := c.Query("end_longitude")
-// 	endLatitude := c.Query("end_latitude")
-// 	shelterId := c.Query("shelter_id")
-// 	// Now, create the Trail entity using the parsed parameters
-// 	// This is a placeholder; you'll need to implement the actual creation logic
-// 	var tId uuid.UUID
-// 	var err error
-// 	tId, err = s.tvc.repoT.CreateTrail(tid, name, startLatitude, startLongitude, endLatitude, endLongitude, shelterId)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create trail"})
-// 		return
-// 	}
-
 // 	c.JSON(http.StatusCreated, gin.H{"message": "Trail created successfully"})
 // }
 
@@ -194,52 +393,6 @@ func (h *TrailManagerServiceHTTPHandler) CloseTrailManager(ctx *gin.Context) {
 // 	}
 
 // 	c.JSON(http.StatusOK, gin.H{"message": "Trail updated successfully"})
-// }
-
-func (s *TrailManagerServiceHTTPHandler) GetClosestTrail(c *gin.Context) {
-	longitudeStr := c.Query("longitude")
-	latitudeStr := c.Query("latitude")
-	// wId, _ := parseUUID(c, "workout_id")
-
-	// Convert query parameters to float64
-	longitude, err := strconv.ParseFloat(longitudeStr, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid longitude format"})
-		return
-	}
-
-	latitude, err := strconv.ParseFloat(latitudeStr, 64)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid latitude format"})
-		return
-	}
-
-	// Assuming you have a method to find the closest trails by coordinates
-	closestTrail, err := s.tvc.GetClosestTrail(longitude, latitude)
-	if err != nil {
-		// Handle possible errors, such as no trails being found
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve closest trail"})
-		return
-	}
-
-	// Respond with the ID of the closest trail
-	c.JSON(http.StatusOK, gin.H{"closestTrailID": closestTrail})
-}
-
-// func (s *TrailManagerServiceHTTPHandler) CreateShelter(c *gin.Context) {
-
-// 	sid := c.Query("id")
-// 	name := c.Query("name")
-// 	Longitude := c.Query("longitude")
-// 	Latitude := c.Query("latitude")
-
-// 	err := s.tvc.repoS.CreateShelter(sid, name, Latitude, Longitude)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create trail"})
-// 		return
-// 	}
-
-// 	c.JSON(http.StatusCreated, gin.H{"message": "Trail created successfully"})
 // }
 
 // func (s *TrailManagerServiceHTTPHandler) UpdateShelter(c *gin.Context) {

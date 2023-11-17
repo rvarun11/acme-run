@@ -151,9 +151,9 @@ func createAndInsertData(db *sql.DB) error {
 func printTableData(db *sql.DB, tableName string) {
 	// Check if the table is empty
 	var count int
-	err := db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM trail.%s", tableName)).Scan(&count)
+	err := db.QueryRow(fmt.Sprintf("SELECT COUNT(*) FROM %s", tableName)).Scan(&count)
 	if err != nil {
-		// log.Fatalf("Error counting rows in %s: %v", tableName, err)
+		log.Fatal("Error counting rows in print", zap.Error(err))
 	}
 
 	// If the table is not empty, print its contents
@@ -304,7 +304,7 @@ func initializeDB() {
 		{"Cedar Pass Trail", 40.1, 45.0, 42.3, 45.0, uuid.Nil},
 		{"Blue Ridge Path", 42.5, 45.0, 44.7, 45.0, uuid.Nil},
 		{"Redwood Walk", 45.2, 45.0, 47.8, 45.0, shelters[0].ID},
-		{"Willow Way", 48.3, 45.0, 49.9, 45.0, shelters[1].ID},
+		{"Willow Way", 46.3, 45.0, 49.9, 45.0, shelters[1].ID},
 	}
 
 	var trailCount int
@@ -313,21 +313,24 @@ func initializeDB() {
 		log.Fatal("error counting trails: %v", zap.Error(err))
 	}
 
+	initCounter := 0
 	// Create a table within the schema
 	if trailCount < 4 {
 		for _, trail := range trails {
+
 			_, err := db.Exec(`
             INSERT INTO traildb.trail (trail_id, trail_name, zone_id, start_longitude, start_latitude, end_longitude, end_latitude, shelter_id, created_at)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-				uuid.New(), trail.Name, 1, trail.StartLon, trail.StartLat, trail.EndLon, trail.EndLat, trail.ShelterID, time.Now())
+				uuid.New(), trail.Name, initCounter/2+1, trail.StartLon, trail.StartLat, trail.EndLon, trail.EndLat, trail.ShelterID, time.Now())
 			if err != nil {
 				log.Fatal("error inserting trail: %v", zap.Error(err))
 			}
+			initCounter += 1
 		}
 	}
 
-	printTableData(db, "shelter")
-	printTableData(db, "trail")
+	printTableData(db, "traildb.shelter")
+	printTableData(db, "traildb.trail")
 }
 
 func main() {
