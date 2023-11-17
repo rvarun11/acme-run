@@ -75,6 +75,5 @@ func TestPlayer_NewPlayer(t *testing.T) {
 				t.Errorf("expected err %v, got %v", tc.expectedErr, err)
 			}
 		})
-
 	}
 }
