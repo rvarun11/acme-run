@@ -97,19 +97,20 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	s.activeWorkoutsHeartRate[workout.WorkoutID] = ActiveWorkoutsHeartRate{
 		HRMConnected: HRMConnected,
 	}
-	var currentWorkoutOption int8
+	var workoutOptionsAvailable int8
 	if shelterNeeded {
-		currentWorkoutOption = 7
+		workoutOptionsAvailable = 7
 	} else {
-		currentWorkoutOption = 6
+		workoutOptionsAvailable = 6
 	}
 
 	// Create workout options for the new workout
 	workoutOptions := &domain.WorkoutOptions{
-		WorkoutID:             workout.WorkoutID,
-		CurrentWorkoutOption:  currentWorkoutOption,
-		FightsPushDown:        false,
-		IsWorkoutOptionActive: false,
+		WorkoutID:               workout.WorkoutID,
+		CurrentWorkoutOption:    -1,
+		WorkoutOptionsAvailable: workoutOptionsAvailable,
+		FightsPushDown:          false,
+		IsWorkoutOptionActive:   false,
 	}
 
 	// Create the workout and its options in the repository
@@ -120,10 +121,10 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	}
 
 	// Log the successful creation of the workout
-	logger.Info("Workout created with ID", zap.String("workoutID", workout.WorkoutID.String()))
+	logger.Info("Info: Workout created with ID", zap.String("workoutID", workout.WorkoutID.String()))
 
 	// Generate and return the link to the workout options
-	linkURL := fmt.Sprintf("/workoutOptions?workoutID=%s", workout.WorkoutID)
+	linkURL := fmt.Sprintf("/api/v1/workoutOptions?workoutID=%s", workout.WorkoutID)
 	return linkURL, nil // Return nil explicitly to indicate no error occurred
 }
 
@@ -174,7 +175,7 @@ func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
 	order := []uint8{}
 
 	// Add Shelter to the order only if the bit is set for the current workout option
-	if pworkoutOptions.CurrentWorkoutOption&1 != 0 {
+	if pworkoutOptions.WorkoutOptionsAvailable&1 != 0 {
 		order = append(order, ShelterBit)
 	}
 
@@ -453,7 +454,7 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	}
 
 	// Calculate the weight based on cardio
-	weight := calculateWeight(workout.Profile)
+	weight := 50
 
 	// Get the number of fights and escapes
 	fights, err := s.repo.GetFightsFoughtByID(workoutID)
@@ -466,9 +467,10 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	}
 
 	// Calculate the weight based on fights and escapes
-	fightEscapeWeight := calculateFightEscapeWeight(fights, escapes)
+	fightEscapeWeight := calculateFightEscapeWeight(fights, escapes, workout.Profile)
 
-	avgHeartRate, err := s.peripheral.GetAverageHeartRateOfUser(workout.WorkoutID)
+	//avgHeartRate, err := s.peripheral.GetAverageHeartRateOfUser(workout.WorkoutID)
+	avgHeartRate := uint8(120)
 
 	if err != nil {
 		return err
@@ -484,11 +486,17 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	heartRateWeight := calculateHeartRateWeight(avgHeartRate, age)
 
 	// Sum the weights
-	totalWeight := weight + fightEscapeWeight + heartRateWeight
+	totalWeight := weight + fightEscapeWeight
 	// Update FightsPushDown based on the total weight
+	logger.Debug("Total Weight : ", zap.Any("Wt", totalWeight))
 	if totalWeight >= 75 {
 		workoutOptions.FightsPushDown = true
 	} else {
+		workoutOptions.FightsPushDown = false
+	}
+	logger.Debug("heartRateWeight : ", zap.Any("Wt", heartRateWeight))
+
+	if heartRateWeight >= 25 && workout.Profile == "cardio" && workoutOptions.FightsPushDown {
 		workoutOptions.FightsPushDown = false
 	}
 
@@ -501,17 +509,11 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	return nil // Return nil to indicate success
 }
 
-// Helper function to calculate the weight based on cardio
-func calculateWeight(profile string) int {
-	if profile == "cardio" {
-		return 50
-	}
-	return 0
-}
-
 // Helper function to calculate the weight based on fights and escapes
-func calculateFightEscapeWeight(fights, escapes uint16) int {
-	if fights-escapes >= 2 {
+func calculateFightEscapeWeight(fights, escapes uint16, profile string) int {
+	if fights-escapes >= 2 && profile == "strength" {
+		return 25
+	} else if escapes-fights < 2 && profile == "cardio" {
 		return 25
 	}
 	return 0
@@ -519,15 +521,11 @@ func calculateFightEscapeWeight(fights, escapes uint16) int {
 
 // Helper function to calculate the weight based on average heart rate
 func calculateHeartRateWeight(avgHeartRate uint8, age uint8) int {
-	// TODO: Fetch user age from profile or another service
-	// age := profile.Age
-
-	// Mock user age for testing
 
 	maxHeartRate := 220 - age
 	percentageMaxHeartRate := float64(avgHeartRate) / float64(maxHeartRate) * 100
 
-	if percentageMaxHeartRate < 70 {
+	if percentageMaxHeartRate > 70 {
 		return 25
 	}
 
