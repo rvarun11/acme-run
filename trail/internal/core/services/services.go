@@ -5,7 +5,9 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type TrailManagerService struct {
@@ -62,6 +64,7 @@ func (t *TrailManagerService) UpdateTrail(tid uuid.UUID, name string, zId uuid.U
 
 func (t *TrailManagerService) DeleteTrail(tId uuid.UUID) error {
 	err := t.repoT.DeleteTrailByID(tId)
+	log.Debug("deelte trail err", zap.Error(err))
 	if err != nil {
 		return err
 	}
@@ -76,6 +79,14 @@ func (t *TrailManagerService) DisconnectTrailManager(wId uuid.UUID) error {
 func (t *TrailManagerService) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
 	trail, err := t.repoT.GetTrailByID(id)
 	return trail, err
+}
+
+func (t *TrailManagerService) CheckTrail(id uuid.UUID) error {
+	trail, err := t.repoT.GetTrailByID(id)
+	if err != nil || trail.TrailID != id {
+		return err
+	}
+	return nil
 }
 
 func (t *TrailManagerService) GetCurrentLocation(wId uuid.UUID) (float64, float64, error) {
@@ -140,12 +151,28 @@ func (t *TrailManagerService) GetShelterByID(id uuid.UUID) (*domain.Shelter, err
 	return shelter, err
 }
 
+func (t *TrailManagerService) CheckShelter(id uuid.UUID) error {
+	s, err := t.repoS.GetShelterByID(id)
+	if err != nil || s.ShelterID != id {
+		return err
+	}
+	return nil
+}
+
 func (t *TrailManagerService) CreateZone(zName string) (uuid.UUID, error) {
 	zId, err := t.repoZ.CreateZone(zName)
 	if err != nil {
 		return uuid.Nil, err
 	}
 	return zId, nil
+}
+
+func (t *TrailManagerService) CheckZone(zId uuid.UUID) error {
+	z, err := t.repoZ.GetZoneByID(zId)
+	if err != nil || z.ZoneID != zId {
+		return err
+	}
+	return nil
 }
 
 func (t *TrailManagerService) UpdateZone(zId uuid.UUID, zName string) error {
@@ -157,7 +184,13 @@ func (t *TrailManagerService) UpdateZone(zId uuid.UUID, zName string) error {
 }
 
 func (t *TrailManagerService) DeleteZone(zId uuid.UUID) error {
-	err := t.repoZ.DeleteZone(zId)
+
+	err := t.CheckZone(zId)
+	if err != nil {
+		return nil
+	}
+
+	err = t.repoZ.DeleteZone(zId)
 	if err != nil {
 		return err
 	}

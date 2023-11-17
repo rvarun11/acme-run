@@ -176,6 +176,22 @@ func toShelterPostgres(shelter *domain.Shelter) *postgresShelter {
 	}
 }
 
+func toZoneAggregate(pzone *postgresZone) *domain.Zone {
+
+	return &domain.Zone{
+		ZoneID:   pzone.ZoneID,
+		ZoneName: pzone.ZoneName,
+	}
+}
+
+func toZonePostgres(zone *domain.Zone) *postgresZone {
+
+	return &postgresZone{
+		ZoneID:   zone.ZoneID,
+		ZoneName: zone.ZoneName,
+	}
+}
+
 // Repository Functions
 
 func (repo *TrailRepository) CreateTrail(tId uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error) {
@@ -326,6 +342,14 @@ func (repo *ZoneRepository) CreateZone(name string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 	return zone.ZoneID, nil
+}
+
+func (repo *ZoneRepository) GetZoneByID(id uuid.UUID) (*domain.Zone, error) {
+	var zone postgresZone
+	if err := repo.db.Where("zone_id = ?", id).First(&zone).Error; err != nil {
+		return nil, err // remove the domain.Shelter type
+	}
+	return toZoneAggregate(&zone), nil
 }
 
 func (repo *ZoneRepository) UpdateZone(id uuid.UUID, name string) error {

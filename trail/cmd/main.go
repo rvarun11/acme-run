@@ -335,6 +335,8 @@ func initializeDB() {
 		}
 	}
 
+	fmt.Println("inserted zones.")
+
 	var trailCount int
 	err = db.QueryRow("SELECT COUNT(*) FROM traildb.trail").Scan(&trailCount)
 	if err != nil {
@@ -354,6 +356,8 @@ func initializeDB() {
 			}
 		}
 	}
+
+	fmt.Println("inserted trails.")
 	var shelterCount int
 	err = db.QueryRow("SELECT COUNT(*) FROM traildb.shelter").Scan(&shelterCount)
 	if err != nil {
@@ -394,8 +398,6 @@ func main() {
 
 	// Initialize the trailManager service
 	trailManagerService, _ := services.NewTrailManagerService(repo, repoT, repoS, repoZ)
-
-	// Connect to the default database to perform administrative tasks
 
 	// Set up the RabbitMQ connection string
 	// amqpURL := "amqp://" + cfg.RabbitMQ.User + ":" +

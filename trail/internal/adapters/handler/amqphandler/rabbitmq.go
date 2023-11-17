@@ -61,7 +61,7 @@ func (r *RabbitMQService) ListenForLocationUpdates(trailManager *services.TrailM
 			// if err := r.repoTM.UpdateLocation(location.WorkoutID, location.Longitude, location.Latitude); err != nil {
 			// 	log.Printf("Failed to update location: %s", err)
 			// }
-			err = trailManager.SetCurrentLocation(wId, location.Longitude, location.Latitude)
+			// err = trailManager.SetCurrentLocation(wId, location.Longitude, location.Latitude)
 		}
 	}()
 
