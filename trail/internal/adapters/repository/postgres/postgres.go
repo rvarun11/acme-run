@@ -44,6 +44,25 @@ func NewTrailRepository(cfg *config.Postgres) *TrailRepository {
 	return &TrailRepository{db: db}
 }
 
+func NewZoneRepository(cfg *config.Postgres) *ZoneRepository {
+
+	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
+		cfg.Host,
+		cfg.Port,
+		cfg.User,
+		cfg.DB_Name,
+		cfg.Password,
+		cfg.Encoding,
+	)
+
+	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	db.AutoMigrate(&postgresTrail{})
+	return &ZoneRepository{db: db}
+}
+
 func NewShelterRepository(cfg *config.Postgres) *ShelterRepository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
@@ -307,4 +326,15 @@ func (repo *ZoneRepository) CreateZone(name string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 	return zone.ZoneID, nil
+}
+
+func (repo *ZoneRepository) UpdateZone(id uuid.UUID, name string) error {
+	return repo.db.Model(&postgresZone{}).Where("zone_id = ?", id).Updates(postgresZone{
+		ZoneID:   id,
+		ZoneName: name,
+	}).Error
+}
+
+func (repo *ZoneRepository) DeleteZone(id uuid.UUID) error {
+	return repo.db.Delete(&postgresZone{}, "zone_id = ?", id).Error
 }

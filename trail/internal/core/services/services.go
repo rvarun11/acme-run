@@ -78,18 +78,6 @@ func (t *TrailManagerService) GetTrailByID(id uuid.UUID) (*domain.Trail, error) 
 	return trail, err
 }
 
-func (t *TrailManagerService) CheckTrailShelter(tId uuid.UUID) (bool, error) {
-	trail, err := t.repoT.GetTrailByID(tId)
-	if err != nil {
-		return false, err
-	}
-	if trail.ShelterID == uuid.Nil {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
 func (t *TrailManagerService) GetCurrentLocation(wId uuid.UUID) (float64, float64, error) {
 	tmInstance, err := t.repoTM.GetByWorkoutId(wId)
 	if err != nil {
@@ -158,6 +146,22 @@ func (t *TrailManagerService) CreateZone(zName string) (uuid.UUID, error) {
 		return uuid.Nil, err
 	}
 	return zId, nil
+}
+
+func (t *TrailManagerService) UpdateZone(zId uuid.UUID, zName string) error {
+	err := t.repoZ.UpdateZone(zId, zName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t *TrailManagerService) DeleteZone(zId uuid.UUID) error {
+	err := t.repoZ.DeleteZone(zId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // // This should be a method of TrailManagerService

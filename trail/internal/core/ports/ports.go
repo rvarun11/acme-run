@@ -55,6 +55,8 @@ type ShelterRepository interface {
 
 type ZoneRepository interface {
 	CreateZone(name string) (uuid.UUID, error)
+	UpdateZone(id uuid.UUID, name string) error
+	DeleteZone(id uuid.UUID) error
 }
 
 type TrailManagerRepository interface {
