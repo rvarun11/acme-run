@@ -17,20 +17,25 @@ docker compose up
 
 ## Getting Started
 
-Now that you have the project running, follow these steps to get started:
+After successfully setting up the project, follow these steps to get started:
 
 1. **Import Postman Collection**:
 - Import the provided Postman Collection into your Postman workspace.
 - The collection includes predefined API requests for ACME RUN.
 
 2. **Run APIs**:
-TODO: Add note that the default ports are between 8000 and 8005
+- Services use ports 8000 to 8004 by default; ensure they are available for API functionality.
 - Execute the API requests from the top of the Postman Collection.
 - Explore and interact with the various endpoints available in ACME RUN.
 
 
-## Contributors
+## Testing
+To run the tests:
+```bash
+./run_tests.sh
+```
 
+## Contributors
 - Liuyin Shi (shil9@mcmaster.ca)
 - Samkith Jain (kishors@mcmaster.ca)
 - Varun Rajput (rajpuv2@mcmaster.ca)
