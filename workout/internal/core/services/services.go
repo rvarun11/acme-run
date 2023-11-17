@@ -56,7 +56,7 @@ func (s *WorkoutService) List() ([]*domain.Workout, error) {
 func (s *WorkoutService) GetWorkout(id uuid.UUID) (*domain.Workout, error) {
 	workout, err := s.repo.GetWorkout(id)
 	if err != nil {
-		logger.Error("failed to get workout", zap.String("id", id.String()), zap.Error(err))
+		logger.Debug("failed to get workout", zap.String("id", id.String()), zap.Error(err))
 		return nil, fmt.Errorf("failed to get workout with ID %s: %w", id, err)
 	}
 	return workout, nil
@@ -66,12 +66,12 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	// Retrieve user profile details
 	profile, err := s.user.GetWorkoutPreferenceOfUser(workout.PlayerID)
 	if err != nil {
-		logger.Error("failed to get user profile", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
+		logger.Debug("failed to get user profile", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to get profile for user %s: %w", workout.PlayerID, err)
 	}
 
 	if err != nil {
-		logger.Error("failed to get hardcore mode for user", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
+		logger.Debug("failed to get hardcore mode for user", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to get hardcore mode for user %s: %w", workout.PlayerID, err)
 	}
 
@@ -81,15 +81,15 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	// Update workout details in the repository
 	_, err = s.repo.UpdateWorkout(workout)
 	if err != nil {
-		logger.Error("failed to update workout", zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
+		logger.Debug("failed to update workout", zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to update workout %s: %w", workout.WorkoutID, err)
 	}
 
 	shelterNeeded := !workout.HardcoreMode
 
-	err = s.peripheral.BindPeripheralData(workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected, shelterNeeded)
+	err = s.peripheral.BindPeripheralData(workout.TrailID, workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected, shelterNeeded)
 	if err != nil {
-		logger.Error("failed to bind peripheral data", zap.String("HRMID", HRMID.String()), zap.Error(err))
+		logger.Debug("failed to bind peripheral data", zap.String("HRMID", HRMID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to bind HRM device %s for workout %s: %w", HRMID, workout.WorkoutID, err)
 	}
 
@@ -116,8 +116,8 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	// Create the workout and its options in the repository
 	err = s.repo.Create(workout, workoutOptions)
 	if err != nil {
-		logger.Error("failed to create workout", zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
-		return "", fmt.Errorf("failed to create workout %s: %w", workout.WorkoutID, err)
+		logger.Debug(ports.ErrorCreateWorkoutFailed.Error(), zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
+		return "", fmt.Errorf(ports.ErrorCreateWorkoutFailed.Error())
 	}
 
 	// Log the successful creation of the workout
@@ -293,7 +293,12 @@ func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uin
 
 	// Check if the workout option is already active
 	if workoutOptions.IsWorkoutOptionActive {
-		return domain.ErrWorkoutOptionAlreadyActive // Return an error with a custom message
+		return ports.ErrWorkoutOptionAlreadyActive
+	}
+
+	// Check if shelter is available or not
+	if workoutType == 0 && workoutOptions.WorkoutOptionsAvailable&1 == 0 {
+		return ports.ErrorWorkoutOptionUnavailable
 	}
 
 	// Update the workout option to make it active (you need to set appropriate fields)
@@ -314,21 +319,21 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	// Get the workout from the repository
 	workout, err := s.repo.GetWorkout(workoutID)
 	if err != nil {
-		logger.Error("failed to get workout for stopping options", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to get workout for stopping options", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to get workout %s for stopping options: %w", workoutID, err)
 	}
 
 	// Get the workout options from the repository
 	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
-		logger.Error("failed to get workout options for workout", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to get workout options for workout", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to get workout options for workout %s: %w", workoutID, err)
 	}
 
 	// Check if the workout option is already inactive
 	if !workoutOptions.IsWorkoutOptionActive {
-		logger.Info("workout option already inactive", zap.String("workoutID", workoutID.String()))
-		return domain.ErrWorkoutOptionAlreadyInActive
+		logger.Debug("workout option already inactive", zap.String("workoutID", workoutID.String()))
+		return ports.ErrWorkoutOptionAlreadyInActive
 	}
 
 	// Update the Shelters, Fights and Escapes
@@ -347,14 +352,14 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	// Update the workout options in the repository
 	_, err = s.repo.UpdateWorkoutOptions(workoutOptions)
 	if err != nil {
-		logger.Error("failed to update workout options on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to update workout options on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to update workout options for workout %s on stop: %w", workoutID, err)
 	}
 
 	// Update the workout in the repository
 	_, err = s.repo.UpdateWorkout(workout)
 	if err != nil {
-		logger.Error("failed to update workout on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to update workout on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to update workout %s on stop: %w", workoutID, err)
 	}
 
@@ -369,7 +374,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	// Retrieve the workout to be stopped
 	tempWorkout, err := s.repo.GetWorkout(id)
 	if err != nil {
-		logger.Error("failed to get workout for stopping", zap.String("workoutID", id.String()), zap.Error(err))
+		logger.Debug("failed to get workout for stopping", zap.String("workoutID", id.String()), zap.Error(err))
 		return nil, fmt.Errorf("failed to get workout %s for stopping: %w", id, err)
 	}
 
@@ -469,8 +474,7 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	// Calculate the weight based on fights and escapes
 	fightEscapeWeight := calculateFightEscapeWeight(fights, escapes, workout.Profile)
 
-	//avgHeartRate, err := s.peripheral.GetAverageHeartRateOfUser(workout.WorkoutID)
-	avgHeartRate := uint8(120)
+	avgHeartRate, err := s.peripheral.GetAverageHeartRateOfUser(workout.WorkoutID)
 
 	if err != nil {
 		return err

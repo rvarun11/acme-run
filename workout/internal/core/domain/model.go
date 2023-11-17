@@ -9,9 +9,7 @@ import (
 )
 
 var (
-	ErrInvalidWorkout               = errors.New("no workout_id matched")
-	ErrWorkoutOptionAlreadyActive   = errors.New("workout option is already active")
-	ErrWorkoutOptionAlreadyInActive = errors.New("no workout option is active")
+	ErrInvalidWorkout = errors.New("no workout_id matched")
 )
 
 // Workout is a entity that represents a workout in all Domains

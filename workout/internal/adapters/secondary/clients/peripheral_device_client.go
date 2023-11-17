@@ -16,9 +16,10 @@ func NewPeripheralDeviceClient() *PeripheralDeviceClientImpl {
 	return &PeripheralDeviceClientImpl{}
 }
 
-func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
+func (p *PeripheralDeviceClientImpl) BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
 	// Prepare the data for the POST request
 	bindData := BindPeripheralData{
+		TrailID:                        trailID,
 		PlayerID:                       playerID,
 		WorkoutID:                      workoutID,
 		HRMId:                          hrmID,
