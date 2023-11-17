@@ -25,6 +25,8 @@ func NewTrailManagerServiceHTTPHandler(gin *gin.Engine, tmSvc *services.TrailMan
 func (handler *TrailManagerServiceHTTPHandler) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
+	router.POST("/trail_manager/", handler.CreateTrailManager)
+
 	router.GET("/trail_manager/trail/", handler.GetClosestTrail)
 	router.GET("/trail_manager/trail/info", handler.GetTrailLocationInfo)
 	router.POST("/trail_manager/trail/create", handler.CreateTrail)
@@ -50,6 +52,25 @@ func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
 		return uuid.UUID{}, err
 	}
 	return uuidValue, nil
+}
+
+func (s *TrailManagerServiceHTTPHandler) CreateTrailManager(ctx *gin.Context) {
+
+	var userDataInstance UserData
+	if err := ctx.ShouldBindJSON(&userDataInstance); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
+		return
+	}
+
+	id := userDataInstance.WorkoutID
+
+	_, err := s.tvc.CreateTrailManager(id)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to create trail manager"})
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "trail manager created successfully"})
+
 }
 
 func (s *TrailManagerServiceHTTPHandler) CreateTrail(ctx *gin.Context) {

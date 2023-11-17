@@ -1,20 +1,24 @@
 package services
 
 import (
+	"fmt"
 	"math"
+	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/ports"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/log"
 	"github.com/google/uuid"
+	"github.com/umahmood/haversine"
 	"go.uber.org/zap"
 )
 
 type TrailManagerService struct {
-	repoT  ports.TrailRepository
-	repoS  ports.ShelterRepository
-	repoZ  ports.ZoneRepository
-	repoTM ports.TrailManagerRepository
+	repoT     ports.TrailRepository
+	repoS     ports.ShelterRepository
+	repoZ     ports.ZoneRepository
+	repoTM    ports.TrailManagerRepository
+	publisher ports.AMQPPublisher
 }
 
 // Factory for creating a new TrailManager
@@ -197,55 +201,83 @@ func (t *TrailManagerService) DeleteZone(zId uuid.UUID) error {
 	return nil
 }
 
-// // This should be a method of TrailManagerService
-// func (t *TrailManagerService) ListenForLocationUpdates(queueName string, wId uuid.UUID) {
-// 	conn, err := amqp.Dial("amqp://guest:guest@rabbitmq/")
-// 	if err != nil {
-// 		log.Fatalf("Failed to connect to RabbitMQ: %s", err)
-// 	}
-// 	defer conn.Close()
+func (t *TrailManagerService) UpdateCurrentLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
+	tmInstance, err := t.repoTM.GetByWorkoutId(wId)
+	if err != nil {
+		log.Debug("testing", zap.Error(err))
+		return err
+	}
+	fmt.Println(tmInstance.CurrentWorkoutID)
+	tmInstance.CurrentLatitude = latitude
+	tmInstance.CurrentLongitude = longitude
+	tmInstance.CurrentWorkoutID = wId
+	tmInstance.CurrentTime = time
+	t.repoTM.Update(*tmInstance)
+	return nil
+}
 
-// 	ch, err := conn.Channel()
-// 	if err != nil {
-// 		log.Fatalf("Failed to open a channel: %s", err)
-// 	}
-// 	defer ch.Close()
+func (t *TrailManagerService) GetClosestShelter(wId uuid.UUID) (uuid.UUID, float64, time.Time, error) {
 
-// 	msgs, err := ch.Consume(
-// 		queueName,
-// 		"",
-// 		true,
-// 		false,
-// 		false,
-// 		false,
-// 		nil,
-// 	)
-// 	if err != nil {
-// 		log.Fatalf("Failed to register a consumer: %s", err)
-// 	}
+	shelters, err := t.repoS.List()
+	if err != nil {
+		return uuid.Nil, math.MaxFloat64, time.Now(), nil
+	}
+	tm, err1 := t.repoTM.GetByWorkoutId(wId)
+	if err1 != nil {
+		return uuid.Nil, math.MaxFloat64, time.Now(), nil
+	}
 
-// 	forever := make(chan bool)
+	if tm == nil {
+		// if it does not exist, create a new instance
+		tmNew, _ := domain.NewTrailManager(wId)
+		t.repoTM.AddTrailManagerIntance(tmNew)
+		tm, _ = t.repoTM.GetByWorkoutId(wId)
+	}
+	var closestShelter *domain.Shelter
+	minDistance := math.MaxFloat64 // Initialize with the maximum float value
 
-// 	go func() {
-// 		for d := range msgs {
-// 			var location dto.LocationDTO //
-// 			if err := json.Unmarshal(d.Body, &location); err != nil {
-// 				log.Printf("Error decoding JSON: %s", err)
-// 				continue
-// 			}
-// 			tmInstance, err := t.repoTM.GetByWorkoutId(wId)
-// 			if err != nil {
+	for _, shelter := range shelters {
 
-// 			}
-// 			tmInstance.CurrentLongitude = location.Longitude
-// 			tmInstance.CurrentLatitude = location.Latitude
-// 			// Update TrailManager's current location using the repository method.
-// 			// if err := t.repoTM.UpdateLocation(location.WorkoutID, location.Longitude, location.Latitude); err != nil {
-// 			// 	log.Printf("Failed to update location: %s", err)
-// 			// }
-// 		}
-// 	}()
+		distance := 0.0
+		point1 := haversine.Coord{Lat: tm.CurrentLatitude, Lon: tm.CurrentLongitude}
+		point2 := haversine.Coord{Lat: shelter.Latitude, Lon: shelter.Longitude}
+		_, distance = haversine.Distance(point1, point2)
 
-// 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-// 	<-forever
-// }
+		if distance < minDistance {
+			minDistance = distance
+			closestShelter = shelter
+		}
+	}
+
+	// If a closest trail is found, update the TrailManager
+	if closestShelter != nil {
+
+		return closestShelter.ShelterID, minDistance, tm.CurrentTime, nil
+	}
+
+	return uuid.Nil, math.MaxFloat64, time.Now(), nil // Or return an appropriate error if necessary
+}
+
+func (t *TrailManagerService) GetCloestShelterInfo(latitude float64, longitude float64) (uuid.UUID, float64, error) {
+	shelters, err := t.repoS.List()
+	if err != nil || len(shelters) == 0 {
+		return uuid.Nil, math.MaxFloat64, err
+	}
+	var closestShelter *domain.Shelter
+	minDistance := math.MaxFloat64 // Initialize with the maximum float value
+
+	for _, shelter := range shelters {
+
+		distance := 0.0
+		point1 := haversine.Coord{Lat: latitude, Lon: longitude}
+		point2 := haversine.Coord{Lat: shelter.Latitude, Lon: shelter.Longitude}
+		_, distance = haversine.Distance(point1, point2)
+
+		if distance < minDistance {
+			minDistance = distance
+			closestShelter = shelter
+		}
+	}
+	return closestShelter.ShelterID, minDistance, nil
+
+}

@@ -7,6 +7,7 @@ require (
 	github.com/google/uuid v1.3.1
 	github.com/lib/pq v1.10.9
 	github.com/rabbitmq/amqp091-go v1.9.0
+	github.com/umahmood/haversine v0.0.0-20151105152445-808ab04add26
 	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5
 )

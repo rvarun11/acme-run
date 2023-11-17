@@ -66,3 +66,7 @@ type TrailManagerRepository interface {
 	DeleteTrailManagerInstance(wId uuid.UUID) error
 	AddTrailManagerIntance(t domain.TrailManager) error
 }
+
+type AMQPPublisher interface {
+	PublishDistance(distance float64) error
+}

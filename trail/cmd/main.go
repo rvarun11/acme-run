@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"strconv"
-	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/config"
 	httphandler "github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/handler/http"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/handler/peripheralhandler"
 	repository "github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/repository/memory"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
@@ -19,134 +19,6 @@ import (
 )
 
 var cfg *config.AppConfiguration = config.Config
-
-func createTables(db *sql.DB, dbName string) error {
-	createTablesSQL := fmt.Sprintf(`
-	CREATE TABLE IF NOT EXISTS %s.trail (
-		trail_id UUID PRIMARY KEY,
-		trail_name TEXT NOT NULL,
-		zone_id INT NOT NULL,
-		start_longitude FLOAT,
-		start_latitude FLOAT,
-		end_longitude FLOAT,
-		end_latitude FLOAT,
-		shelter_id UUID,
-		created_at TIMESTAMP
-	);
-	CREATE TABLE IF NOT EXISTS %s.shelter (
-		shelter_id UUID PRIMARY KEY,
-		shelter_name TEXT NOT NULL,
-		zone_id INT NOT NULL,
-		shelter_availability BOOLEAN,
-		longitude FLOAT,
-		latitude FLOAT
-	);
-	`, dbName, dbName)
-
-	_, err := db.Exec(createTablesSQL)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func createAndInsertData(db *sql.DB) error {
-	// Define SQL statements for table creation
-	createTrailTableSQL := `
-	CREATE TABLE IF NOT EXISTS trail (
-		trail_id UUID PRIMARY KEY,
-		trail_name TEXT,
-		zone_id INT,
-		start_longitude DOUBLE PRECISION,
-		start_latitude DOUBLE PRECISION,
-		end_longitude DOUBLE PRECISION,
-		end_latitude DOUBLE PRECISION,
-		shelter_id UUID,
-		created_at TIMESTAMP
-	);
-	`
-
-	createShelterTableSQL := `
-	CREATE TABLE IF NOT EXISTS shelter (
-		shelter_id UUID PRIMARY KEY,
-		shelter_name TEXT,
-		zone_id INT,
-		shelter_availability BOOLEAN,
-		longitude DOUBLE PRECISION,
-		latitude DOUBLE PRECISION
-	);
-	`
-
-	// Execute table creation SQL statements
-	if _, err := db.Exec(createTrailTableSQL); err != nil {
-		return err
-	}
-
-	if _, err := db.Exec(createShelterTableSQL); err != nil {
-		return err
-	}
-
-	// Check if Trail table is empty and insert sample data
-	var trailCount int
-	err := db.QueryRow("SELECT COUNT(*) FROM trail").Scan(&trailCount)
-	if err != nil {
-		return fmt.Errorf("failed to count trails: %w", err)
-	}
-
-	if trailCount == 0 {
-		for i := 1; i <= 3; i++ {
-			trailID := uuid.New()
-			trailName := fmt.Sprintf("Trail %d", i)
-			zoneID := i
-			startLongitude := float64(i)
-			startLatitude := float64(i)
-			endLongitude := float64(i + 1)
-			endLatitude := float64(i + 1)
-			shelterID := uuid.New()
-			createdAt := time.Now()
-
-			_, err := db.Exec(`
-				INSERT INTO trail (trail_id, trail_name, zone_id, start_longitude, start_latitude, end_longitude, end_latitude, shelter_id, created_at)
-				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-			`, trailID, trailName, zoneID, startLongitude, startLatitude, endLongitude, endLatitude, shelterID, createdAt)
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	// Check if the shelter table is empty and insert sample data if it is
-	var shelterCount int
-	err = db.QueryRow("SELECT COUNT(*) FROM shelter").Scan(&shelterCount)
-	if err != nil {
-		log.Error("cant count shelter")
-		return err // Handle the error appropriately
-	}
-
-	if shelterCount == 0 {
-		for i := 1; i <= 3; i++ {
-			shelterID := uuid.New()
-			shelterName := fmt.Sprintf("Shelter %d", i)
-			zoneID := i
-			shelterAvailability := true
-			longitude := float64(i)
-			latitude := float64(i)
-
-			_, err := db.Exec(`
-				INSERT INTO shelter (shelter_id, shelter_name, zone_id, shelter_availability, longitude, latitude)
-				VALUES ($1, $2, $3, $4, $5, $6)
-			`, shelterID, shelterName, zoneID, shelterAvailability, longitude, latitude)
-
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
 
 func printTableData(db *sql.DB, tableName string) {
 	// Check if the table is empty
@@ -376,8 +248,8 @@ func initializeDB() {
 		}
 	}
 
-	printTableData(db, "traildb.shelter")
-	printTableData(db, "traildb.trail")
+	// printTableData(db, "traildb.shelter")
+	// printTableData(db, "traildb.trail")
 }
 
 func main() {
@@ -399,27 +271,17 @@ func main() {
 	// Initialize the trailManager service
 	trailManagerService, _ := services.NewTrailManagerService(repo, repoT, repoS, repoZ)
 
-	// Set up the RabbitMQ connection string
-	// amqpURL := "amqp://" + cfg.RabbitMQ.User + ":" +
-	// 	cfg.RabbitMQ.Password + "@" + cfg.RabbitMQ.Host + ":" + cfg.RabbitMQ.Port + "/"
-
-	// Initialize the RabbitMQ handler with the Peripheral service and the AMQP URL
-	// peripheralAMQPHandler, err1 := handler.NewRabbitMQHandler(peripheralService, amqpURL) // Adjusted for package
-	// if err1 != nil {
-	// 	// log.Fatal("Error setting up RabbitMQ %v ", zap.error(err1))
-	// 	fmt.Fprintf(os.Stderr, "Error setting up RabbitMQ: %v\n", err1)
-	// }
-	// defer peripheralAMQPHandler.Close()
-
 	// Initialize the HTTP handler with the trail manager service and the RabbitMQ handler
 	trailManagerHTTPHandler := httphandler.NewTrailManagerServiceHTTPHandler(router, trailManagerService) // Adjusted for package
 
 	// Set up the HTTP routes
 	trailManagerHTTPHandler.InitRouter()
+	phandler := peripheralhandler.NewAMQPHandler(trailManagerService)
+	phandler.InitAMQP()
 
 	// Start the HTTP server
 	err := router.Run(":" + cfg.Port)
 	if err != nil {
-		// log.Fatal("Failed to run the server: %v", err)
+		log.Fatal("Failed to run the server", zap.Error(err))
 	}
 }

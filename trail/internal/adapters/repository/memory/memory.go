@@ -54,7 +54,7 @@ func (r *MemoryRepository) DeleteTrailManagerInstance(wId uuid.UUID) error {
 	}
 
 	if !found {
-		return fmt.Errorf("peripheral with workout ID %v not found: %w", wId, ports.ErrorTrailManagerlNotFound)
+		return fmt.Errorf("trail manager with workout ID %v not found: %w", wId, ports.ErrorTrailManagerlNotFound)
 	}
 
 	delete(r.ts, keyToDelete)
@@ -63,7 +63,7 @@ func (r *MemoryRepository) DeleteTrailManagerInstance(wId uuid.UUID) error {
 
 func (r *MemoryRepository) Update(t domain.TrailManager) error {
 	if _, ok := r.ts[t.CurrentWorkoutID]; !ok {
-		return fmt.Errorf("peripheral does not exist: %w", ports.ErrorUpdateTrailManagerFailed)
+		return fmt.Errorf("trail manager does not exist: %w", ports.ErrorUpdateTrailManagerFailed)
 	}
 	r.Lock()
 	r.ts[t.CurrentWorkoutID] = t
