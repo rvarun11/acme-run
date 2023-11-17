@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/services"
-	"github.com/CAS735-F23/macrun-teamvsl/user/logger"
+	logger "github.com/CAS735-F23/macrun-teamvsl/user/log"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
