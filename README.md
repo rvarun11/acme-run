@@ -24,6 +24,7 @@ Now that you have the project running, follow these steps to get started:
 - The collection includes predefined API requests for ACME RUN.
 
 2. **Run APIs**:
+TODO: Add note that the default ports are between 8000 and 8005
 - Execute the API requests from the top of the Postman Collection.
 - Explore and interact with the various endpoints available in ACME RUN.
 
