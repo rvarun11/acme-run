@@ -1,8 +1,8 @@
 package amqphandler
 
 import (
-	"github.com/CAS735-F23/macrun-teamvsl/user/logger"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"go.uber.org/zap"
 )
 

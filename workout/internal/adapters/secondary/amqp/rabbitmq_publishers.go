@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/CAS735-F23/macrun-teamvsl/user/logger"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )
