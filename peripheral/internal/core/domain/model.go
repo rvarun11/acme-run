@@ -1,20 +1,13 @@
 package domain
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-/*
-LS-TODO: Remove json parsing information & remove un-needed fields
-LS-TODO Move the entities like HRM and Geo to separate structs, for example:
-type HRM struct {
-
-}
-type Geo struct {}
-*/
 type HRMData struct {
 	HRate        int
 	HRateTime    time.Time
@@ -76,8 +69,16 @@ func (p *Peripheral) GetGeoLocation() (time.Time, float64, float64, uuid.UUID) {
 
 func NewPeripheral(pId uuid.UUID, hId uuid.UUID, wId uuid.UUID, hStatus bool, liveStatus bool) (Peripheral, error) {
 
-	// LS-TODO: Add validation for different fields.
-	// Create a hrm object and initialize all the values to avoid nil pointer exceptions
+	if pId == uuid.Nil {
+		return Peripheral{}, errors.New("player ID cannot be empty")
+	}
+	if hId == uuid.Nil {
+		return Peripheral{}, errors.New("HRM ID cannot be empty")
+	}
+	if wId == uuid.Nil {
+		return Peripheral{}, errors.New("workout ID cannot be empty")
+	}
+
 	pN := Peripheral{
 		PlayerId:   pId,
 		HRMId:      hId,

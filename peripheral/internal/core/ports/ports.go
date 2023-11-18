@@ -16,9 +16,6 @@ var (
 	ErrorListPeripheralFailed   = errors.New("failed to list Peripheral")
 )
 
-// LS-TODO: Remove or comment out the unused functions
-
-// LS-TODO: The sergvices should return the domain object with error
 type PeripheralService interface {
 	CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error
 	CheckStatusByHRMId(hId uuid.UUID) bool
@@ -47,4 +44,8 @@ type PeripheralRepository interface {
 	GetByHRMId(hID uuid.UUID) (*domain.Peripheral, error)
 	Update(p domain.Peripheral) error
 	List() ([]*domain.Peripheral, error)
+}
+
+type RabbitMQHandler interface {
+	SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error
 }

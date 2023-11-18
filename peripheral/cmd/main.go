@@ -5,7 +5,8 @@ import (
 	"os"
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler"
+	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/http"
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/repository"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
@@ -24,15 +25,19 @@ func main() {
 	// Initialize the repository
 	repo := repository.NewMemoryRepository()
 
-	// Initialize the Peripheral service
-	peripheralService := services.NewPeripheralService(repo)
-
-	// Set up the RabbitMQ connection string
 	amqpURL := "amqp://" + cfg.RabbitMQ.User + ":" +
 		cfg.RabbitMQ.Password + "@" + cfg.RabbitMQ.Host + ":" + cfg.RabbitMQ.Port + "/"
-
 	// Initialize the RabbitMQ handler with the Peripheral service and the AMQP URL
-	peripheralAMQPHandler, err1 := handler.NewRabbitMQHandler(peripheralService, amqpURL) // Adjusted for package
+
+	peripheralAMQPHandler, err1 := rabbitmqhandler.NewRabbitMQHandler(amqpURL) // Adjusted for package
+
+	// Initialize rabbitmqhandler
+
+	// Initialize the Peripheral service
+	peripheralService := services.NewPeripheralService(repo, peripheralAMQPHandler)
+
+	// Set up the RabbitMQ connection string
+
 	if err1 != nil {
 		// log.Fatal("Error setting up RabbitMQ %v ", zap.error(err1))
 		fmt.Fprintf(os.Stderr, "Error setting up RabbitMQ: %v\n", err1)
@@ -40,7 +45,7 @@ func main() {
 	defer peripheralAMQPHandler.Close()
 
 	// Initialize the HTTP handler with the Peripheral service and the RabbitMQ handler
-	peripheralHTTPHandler := handler.NewPeripheralServiceHTTPHandler(router, peripheralService, peripheralAMQPHandler) // Adjusted for package
+	peripheralHTTPHandler := httphandler.NewPeripheralServiceHTTPHandler(router, peripheralService, peripheralAMQPHandler) // Adjusted for package
 
 	// Set up the HTTP routes
 	peripheralHTTPHandler.InitRouter()

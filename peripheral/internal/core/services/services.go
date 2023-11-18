@@ -11,12 +11,14 @@ import (
 )
 
 type PeripheralService struct {
-	repo ports.PeripheralRepository
+	repo      ports.PeripheralRepository
+	publisher ports.RabbitMQHandler
 }
 
-func NewPeripheralService(repo ports.PeripheralRepository) *PeripheralService {
+func NewPeripheralService(repo ports.PeripheralRepository, handler ports.RabbitMQHandler) *PeripheralService {
 	return &PeripheralService{
-		repo: repo,
+		repo:      repo,
+		publisher: handler,
 	}
 }
 
@@ -169,6 +171,14 @@ func (s *PeripheralService) SetLiveStatus(wId uuid.UUID, code bool) error {
 	}
 	pInstance.LiveStatus = code
 	s.repo.Update(*pInstance)
+	return nil
+}
+
+func (s *PeripheralService) SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
+	err := s.publisher.SendLastLocation(wId, latitude, longitude, time)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

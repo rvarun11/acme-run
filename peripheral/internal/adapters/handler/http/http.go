@@ -1,4 +1,4 @@
-package handler
+package httphandler
 
 import (
 	"bytes"
@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"time"
 
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/google/uuid"
@@ -31,17 +32,16 @@ func randomFloat64(min, max float64) float64 {
 	return min + rand.Float64()*(max-min)
 }
 
-// LS-TODO: An adapter cannot talk to another adapter, rabbitMQ handler cannot be here
 type HTTPHandler struct {
 	gin             *gin.Engine
 	svc             *services.PeripheralService
-	rabbitMQHandler *RabbitMQHandler
+	rabbitMQHandler *rabbitmqhandler.RabbitMQHandler
 	cancelF         context.CancelFunc
 	bCtx            context.Context
 	hLiveCount      int
 }
 
-func NewPeripheralServiceHTTPHandler(gin *gin.Engine, PeripheralService *services.PeripheralService, rabbitMQHandler *RabbitMQHandler) *HTTPHandler {
+func NewPeripheralServiceHTTPHandler(gin *gin.Engine, PeripheralService *services.PeripheralService, rabbitMQHandler *rabbitmqhandler.RabbitMQHandler) *HTTPHandler {
 	return &HTTPHandler{
 		gin:             gin,
 		svc:             PeripheralService,
@@ -73,8 +73,6 @@ func (handler *HTTPHandler) InitRouter() {
 
 }
 
-// LS-TODO: Remove bool connect
-// LS-TODO: Update all the handler functions to be private, for example:
 func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 	var req BindPeripheralData
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -157,10 +155,11 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 		})
 		h.hLiveCount += 1
 		h.bCtx, h.cancelF = context.WithCancel(context.Background())
-		longitudeStart := 40.0
-		latitudeStart := 40.0
-		longitudeEnd := 50.0
-		latitudeEnd := 50.0
+		longitudeStart := -79.919390
+		latitudeStart := 43.257715
+		longitudeEnd := 43.258012
+		latitudeEnd := -79.910866
+
 		h.svc.SetLiveStatus(bindDataInstance.WorkoutID, true)
 		h.StartBackgroundMockReading(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
 	}
@@ -188,29 +187,6 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 		h.cancelF()
 	}
 
-	// err1 = h.svc.SetHRMDevStatus(req.WorkoutID, false)
-	// if err1 != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"error": "failed to unbind",
-	// 	})
-	// 	return
-	// }
-
-	// err1 = h.svc.SetGeoDevStatus(req.WorkoutID, false)
-	// if err1 != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"error": "failed to unbind",
-	// 	})
-	// 	return
-	// }
-
-	// err1 = h.svc.DisconnectPeripheral(req.WorkoutID)
-	// if err1 != nil {
-	// 	ctx.JSON(http.StatusBadRequest, gin.H{
-	// 		"error": "failed to unbind",
-	// 	})
-	// 	return
-	// }
 	ctx.JSON(http.StatusOK, gin.H{
 		"success": "Unbind the data"})
 }
@@ -271,10 +247,8 @@ func (h *HTTPHandler) GetHRMStatus(ctx *gin.Context) {
 
 func (h *HTTPHandler) SetHRMStatus(ctx *gin.Context) {
 
-	wId, err := parseUUID(ctx, "workout_id")
-	if err != nil {
+	wId, _ := parseUUID(ctx, "workout_id")
 
-	}
 	code := ctx.Query("code")
 	boolValue, boolErr := strconv.ParseBool(code)
 	if boolErr != nil {
@@ -284,7 +258,7 @@ func (h *HTTPHandler) SetHRMStatus(ctx *gin.Context) {
 	} else {
 		fmt.Println("Boolean value:", boolValue)
 	}
-	err = h.svc.SetHRMDevStatus(wId, boolValue)
+	err := h.svc.SetHRMDevStatus(wId, boolValue)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -390,7 +364,7 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 		return
 	}
 	log.Info("sending location to queue now")
-	go h.rabbitMQHandler.SendLastLocation(tempLastLoc)
+	go h.svc.SendLastLocation(tempLastLoc.WorkoutID, tempLastLoc.Latitude, tempLastLoc.Longitude, tempLastLoc.TimeOfLocation)
 	ctx.JSON(http.StatusOK, gin.H{"message": "Geo reading set and location sent"})
 }
 
@@ -415,8 +389,8 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 		startLat := latitudeStart
 		rand.Seed(time.Now().UnixNano())
 
-		min := 0.01
-		max := 0.05
+		min := 0.0000002
+		max := 0.0000005
 
 		minHR := 80
 		maxHR := 200
@@ -440,12 +414,18 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 					fmt.Println("hello")
 					if startLat <= latitudeEnd {
 						randomNumber1 := randomFloat64(min, max)
-						startLat += (0.05 + randomNumber1)
+						startLat += (0.0000001 + randomNumber1)
+					} else {
+						randomNumber1 := randomFloat64(min, max)
+						startLat -= (0.0000001 + randomNumber1)
 					}
 
 					if startLong <= longitudeEnd {
 						randomNumber2 := randomFloat64(min, max)
-						startLong += (0.05 + randomNumber2)
+						startLong += (0.0000001 + randomNumber2)
+					} else {
+						randomNumber2 := randomFloat64(min, max)
+						startLong -= (0.0000001 + randomNumber2)
 					}
 
 					var tLoc LastLocation
@@ -454,10 +434,10 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 					tLoc.TimeOfLocation = time.Now()
 					tLoc.WorkoutID = wId
 
-					go h.rabbitMQHandler.SendLastLocation(tLoc)
+					go h.svc.SendLastLocation(tLoc.WorkoutID, tLoc.Latitude, tLoc.Longitude, tLoc.TimeOfLocation)
 					err2 := h.svc.SetGeoLocation(wId, tLoc.Longitude, tLoc.Latitude)
 					if err2 != nil {
-
+						log.Error("error in sending location", zap.Error(err2))
 					}
 
 					randomInteger := rand.Intn(maxHR-minHR+1) + minHR
