@@ -9,12 +9,15 @@ import (
 
 var (
 	// Challenge
-	ErrorListChallengesFailed  = errors.New("failed to list challenges")
-	ErrorChallengeNotFound     = errors.New("the challenge not found in repository")
-	ErrorCreateChallengeFailed = errors.New("failed to add the challenge")
-	ErrorUpdateChallengeFailed = errors.New("failed to update challenge")
+	ErrorListChallengesFailed   = errors.New("failed to list challenges")
+	ErrNoActiveChallengePresent = errors.New("no active challenges present")
+	ErrorChallengeNotFound      = errors.New("the challenge not found in repository")
+	ErrorCreateChallengeFailed  = errors.New("failed to add the challenge")
+	ErrorUpdateChallengeFailed  = errors.New("failed to update challenge")
 	// Challenge Stats
 	ErrorChallengeStatsNotFound = errors.New("unable to find challenge stats")
+	// Badge
+	ErrBadgeNotFound = errors.New("badge not found")
 )
 
 // Service Interfaces
@@ -29,9 +32,7 @@ type ChallengeService interface {
 	// Badges
 	CreateBadge(cid uuid.UUID, pid uuid.UUID) error
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
-
-	// StatsTracker
-	// Register a player id with the active challenges
+	DispatchBadges(ch *domain.Challenge)
 	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
 	ListChallengeStatsByPlayerID(pid uuid.UUID) error
 
@@ -56,6 +57,7 @@ type ChallengeRepository interface {
 	ListChallenges() ([]*domain.Challenge, error)
 	// Badges
 	CreateBadge(b *domain.Badge) (*domain.Badge, error)
+	ListBadges() ([]*domain.Badge, error)
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
 	// ChallengeStats
 	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error

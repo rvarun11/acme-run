@@ -18,7 +18,7 @@ type ChallengeStats struct {
 }
 
 func NewChallengeStats(ch *Challenge, pid uuid.UUID, dc float64, ef uint8, ee uint8, workoutEnd time.Time) (*ChallengeStats, error) {
-	err := validateTime(ch.End, workoutEnd)
+	err := validateTime(workoutEnd, ch.End)
 	if err != nil {
 		return &ChallengeStats{}, err
 	}

@@ -15,7 +15,7 @@ IMPORTANT FOR REPORT:
 
 var (
 	ErrorInvalidCriteria   = errors.New("criteria can only be DistanceCovered, Escape, Fight, FightMoreThanEscape or EscapeMoreThanFight")
-	ErrorChallengeInactive = errors.New("cannot create a badge as challenge is inactive")
+	ErrorChallengeIsActive = errors.New("cannot create a badge as challenge is active")
 	ErrInvalidTime         = errors.New("end time exceeds start time")
 )
 

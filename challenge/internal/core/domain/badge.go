@@ -16,8 +16,8 @@ type Badge struct {
 }
 
 func NewBadge(cs *ChallengeStats) (*Badge, error) {
-	if !cs.Challenge.IsActive() {
-		return &Badge{}, ErrorChallengeInactive
+	if cs.Challenge.IsActive() {
+		return &Badge{}, ErrorChallengeIsActive
 	}
 	score, err := cs.GetValidatedScore()
 	if err != nil {

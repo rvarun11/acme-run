@@ -52,7 +52,7 @@ func (s *PlayerService) Get(id uuid.UUID) (*domain.Player, error) {
 func (s *PlayerService) Update(req *domain.Player) (*domain.Player, error) {
 	player, err := s.repo.Update(req)
 	if err != nil {
-		return &domain.Player{}, nil
+		return &domain.Player{}, err
 	}
 	return player, nil
 }

@@ -15,6 +15,8 @@ func (r *Repository) CreateChallenge(ch *domain.Challenge) (*domain.Challenge, e
 		BadgeURL:    ch.BadgeURL,
 		Criteria:    string(ch.Criteria),
 		Goal:        ch.Goal,
+		Start:       ch.Start,
+		End:         ch.End,
 		CreatedAt:   ch.CreatedAt,
 	}
 
