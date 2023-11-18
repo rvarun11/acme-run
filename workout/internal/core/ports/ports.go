@@ -13,6 +13,7 @@ var (
 	ErrorListWorkoutsFailed         = errors.New("failed to list workout")
 	ErrorWorkoutNotFound            = errors.New("workout not found in repository")
 	ErrorCreateWorkoutFailed        = errors.New("failed to create the workout")
+	ErrorActiveWorkoutAlreadyExists = errors.New("active workout already exists")
 	ErrorUpdateWorkoutFailed        = errors.New("failed to update workout")
 	ErrorWorkoutOptionUnavailable   = errors.New("workout option unavailable")
 	ErrInvalidWorkout               = errors.New("no workout_id matched")

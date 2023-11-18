@@ -35,6 +35,7 @@ type WorkoutService struct {
 	publisher                  ports.AMQPPublisher
 	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
 	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
+	activePlayers              map[uuid.UUID]bool
 }
 
 // Factory for creating a new WorkoutService
@@ -46,6 +47,7 @@ func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.Peripheral
 		publisher:                  publisher,
 		activeWorkoutsLastLocation: make(map[uuid.UUID]ActiveWorkoutsLastLocation),
 		activeWorkoutsHeartRate:    make(map[uuid.UUID]ActiveWorkoutsHeartRate),
+		activePlayers:              make(map[uuid.UUID]bool),
 	}
 }
 
@@ -63,6 +65,13 @@ func (s *WorkoutService) GetWorkout(id uuid.UUID) (*domain.Workout, error) {
 }
 
 func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConnected bool) (string, error) {
+
+	_, validActiveWorkout := s.activePlayers[workout.PlayerID]
+	if validActiveWorkout {
+		logger.Debug(ports.ErrorActiveWorkoutAlreadyExists.Error(), zap.String("workoutID", workout.WorkoutID.String()))
+		return "", fmt.Errorf(ports.ErrorActiveWorkoutAlreadyExists.Error())
+	}
+
 	// Retrieve user profile details
 	profile, err := s.user.GetWorkoutPreferenceOfUser(workout.PlayerID)
 	if err != nil {
@@ -98,6 +107,7 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	s.activeWorkoutsHeartRate[workout.WorkoutID] = ActiveWorkoutsHeartRate{
 		HRMConnected: HRMConnected,
 	}
+	s.activePlayers[workout.PlayerID] = true
 	var workoutOptionsAvailable int8
 	if shelterNeeded {
 		workoutOptionsAvailable = 7
@@ -408,6 +418,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	// Remove the workout from active workouts tracking
 	delete(s.activeWorkoutsLastLocation, tempWorkout.WorkoutID)
 	delete(s.activeWorkoutsHeartRate, tempWorkout.WorkoutID)
+	delete(s.activePlayers, tempWorkout.PlayerID)
 	logger.Info("Workout stopped", zap.String("workoutID", tempWorkout.WorkoutID.String()))
 
 	// Unbind peripheral data associated with the workout
