@@ -30,12 +30,16 @@ After successfully setting up the project, follow these steps to get started:
 
 
 ## Testing
-To run the tests:
+
+Run the tests with the following command:
 ```bash
 ./run_tests.sh
 ```
+If you don't have Go configured locally, you can use the preconfigured devcontainer. Reopen the repository in the devcontainer and execute the script.
+
 
 ## Contributors
+
 - Liuyin Shi (shil9@mcmaster.ca)
 - Samkith Jain (kishors@mcmaster.ca)
 - Varun Rajput (rajpuv2@mcmaster.ca)
