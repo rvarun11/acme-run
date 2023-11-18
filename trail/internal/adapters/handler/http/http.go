@@ -1,6 +1,7 @@
 package httphandler
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -35,6 +36,7 @@ func (handler *TrailManagerServiceHTTPHandler) InitRouter() {
 
 	router.GET("/trail_manager/shelter/check_status", handler.CheckShelterStatus)
 	router.GET("/trail_manager/shelter/info", handler.GetShelterLocationInfo)
+	router.GET("/trail_manager/shelter/closest_shelter_info", handler.GetClosestShelterInfo)
 	router.POST("/trail_manager/shelter/create", handler.CreateShelter)
 	router.PUT("/trail_manager/shelter/update", handler.UpdateShelter)
 	router.PUT("/trail_manager/shelter/delete", handler.DeleteShelter)
@@ -70,6 +72,26 @@ func (s *TrailManagerServiceHTTPHandler) CreateTrailManager(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "trail manager created successfully"})
+
+}
+
+func (s *TrailManagerServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) {
+	id, _ := parseUUID(ctx, "workout_id")
+	sId, distance, availability, time, err := s.tvc.GetClosestShelter(id)
+	var shelterDataInstance ShelterAvailable
+	shelterDataInstance.WorkoutID = id
+	shelterDataInstance.ShelterID = sId
+	shelterDataInstance.ShelterAvailable = availability
+	shelterDataInstance.ShelterAvailable = (sId == uuid.Nil)
+	shelterDataInstance.DistanceToShelter = distance
+	shelterDataInstance.ShelterCheckTime = time
+	fmt.Println(sId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "no shelter found "})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": shelterDataInstance})
 
 }
 

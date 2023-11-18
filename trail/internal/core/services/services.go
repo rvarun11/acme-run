@@ -101,12 +101,6 @@ func (t *TrailManagerService) GetCurrentLocation(wId uuid.UUID) (float64, float6
 	return tmInstance.CurrentLongitude, tmInstance.CurrentLatitude, nil
 }
 
-func (t *TrailManagerService) CalculateDistance(Longitude1 float64, Latitude1, Longitude2 float64, Latitude2 float64) (float64, error) {
-	x := Longitude2 - Longitude1
-	y := Latitude2 - Latitude1
-	return math.Sqrt(x*x + y*y), nil
-}
-
 func (t *TrailManagerService) GetClosestTrail(zId uuid.UUID, currentLongitude float64, currentLatitude float64) (uuid.UUID, error) {
 
 	trails, err := t.repoT.ListTrailsByZoneId(zId)
@@ -115,9 +109,11 @@ func (t *TrailManagerService) GetClosestTrail(zId uuid.UUID, currentLongitude fl
 	}
 	var closestTrail *domain.Trail
 	minDistance := math.MaxFloat64 // Initialize with the maximum float value
-
+	distance := math.MaxFloat64
 	for _, trail := range trails {
-		distance, _ := t.CalculateDistance(currentLongitude, currentLatitude, trail.StartLongitude, trail.StartLatitude)
+		point1 := haversine.Coord{Lat: currentLatitude, Lon: currentLongitude}
+		point2 := haversine.Coord{Lat: trail.StartLatitude, Lon: trail.StartLongitude}
+		_, distance = haversine.Distance(point1, point2)
 		if distance < minDistance {
 			minDistance = distance
 			closestTrail = trail
@@ -204,8 +200,9 @@ func (t *TrailManagerService) DeleteZone(zId uuid.UUID) error {
 func (t *TrailManagerService) UpdateCurrentLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
 	tmInstance, err := t.repoTM.GetByWorkoutId(wId)
 	if err != nil {
-		log.Debug("testing", zap.Error(err))
-		return err
+		log.Debug("No such trail manager instance found will create on request", zap.Error(err))
+		_, _ = t.CreateTrailManager(wId)
+		tmInstance, _ = t.repoTM.GetByWorkoutId(wId)
 	}
 	fmt.Println(tmInstance.CurrentWorkoutID)
 	tmInstance.CurrentLatitude = latitude
@@ -216,15 +213,15 @@ func (t *TrailManagerService) UpdateCurrentLocation(wId uuid.UUID, latitude floa
 	return nil
 }
 
-func (t *TrailManagerService) GetClosestShelter(wId uuid.UUID) (uuid.UUID, float64, time.Time, error) {
+func (t *TrailManagerService) GetClosestShelter(wId uuid.UUID) (uuid.UUID, float64, bool, time.Time, error) {
 
 	shelters, err := t.repoS.List()
 	if err != nil {
-		return uuid.Nil, math.MaxFloat64, time.Now(), nil
+		return uuid.Nil, math.MaxFloat64, false, time.Now(), err
 	}
 	tm, err1 := t.repoTM.GetByWorkoutId(wId)
 	if err1 != nil {
-		return uuid.Nil, math.MaxFloat64, time.Now(), nil
+		return uuid.Nil, math.MaxFloat64, false, time.Now(), err1
 	}
 
 	if tm == nil {
@@ -248,17 +245,19 @@ func (t *TrailManagerService) GetClosestShelter(wId uuid.UUID) (uuid.UUID, float
 			closestShelter = shelter
 		}
 	}
+	fmt.Println(closestShelter.ShelterID)
+	fmt.Println(minDistance)
 
 	// If a closest trail is found, update the TrailManager
 	if closestShelter != nil {
 
-		return closestShelter.ShelterID, minDistance, tm.CurrentTime, nil
+		return closestShelter.ShelterID, minDistance, closestShelter.ShelterAvailability, tm.CurrentTime, nil
 	}
 
-	return uuid.Nil, math.MaxFloat64, time.Now(), nil // Or return an appropriate error if necessary
+	return uuid.Nil, math.MaxFloat64, false, time.Now(), nil // Or return an appropriate error if necessary
 }
 
-func (t *TrailManagerService) GetCloestShelterInfo(latitude float64, longitude float64) (uuid.UUID, float64, error) {
+func (t *TrailManagerService) GetClosestShelterInfo(latitude float64, longitude float64) (uuid.UUID, float64, error) {
 	shelters, err := t.repoS.List()
 	if err != nil || len(shelters) == 0 {
 		return uuid.Nil, math.MaxFloat64, err
