@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -23,12 +22,13 @@ type TrailManagerService struct {
 
 // Factory for creating a new TrailManager
 
-func NewTrailManagerService(rTM ports.TrailManagerRepository, rT ports.TrailRepository, rS ports.ShelterRepository, rZ ports.ZoneRepository) (*TrailManagerService, error) {
+func NewTrailManagerService(rTM ports.TrailManagerRepository, rT ports.TrailRepository, rS ports.ShelterRepository, rZ ports.ZoneRepository, publisher ports.AMQPPublisher) (*TrailManagerService, error) {
 	return &TrailManagerService{
-		repoTM: rTM,
-		repoT:  rT,
-		repoS:  rS,
-		repoZ:  rZ,
+		repoTM:    rTM,
+		repoT:     rT,
+		repoS:     rS,
+		repoZ:     rZ,
+		publisher: publisher,
 	}, nil
 }
 
@@ -204,12 +204,26 @@ func (t *TrailManagerService) UpdateCurrentLocation(wId uuid.UUID, latitude floa
 		_, _ = t.CreateTrailManager(wId)
 		tmInstance, _ = t.repoTM.GetByWorkoutId(wId)
 	}
-	fmt.Println(tmInstance.CurrentWorkoutID)
 	tmInstance.CurrentLatitude = latitude
 	tmInstance.CurrentLongitude = longitude
 	tmInstance.CurrentWorkoutID = wId
 	tmInstance.CurrentTime = time
 	t.repoTM.Update(*tmInstance)
+
+	// Now push the shelter data data to the queue to the workout
+	shelterId, distance, availability, _, err := t.GetClosestShelter(wId)
+	if err != nil {
+		log.Error("error when getting cloest shelter info", zap.Error(err))
+		return err
+	}
+	closestShelter, _ := t.GetShelterByID(shelterId)
+	err = t.publisher.PublishShelterInfo(shelterId, closestShelter.ShelterName, availability, distance)
+
+	if err != nil {
+		log.Error("error when publishing shelter info", zap.Error(err))
+	}
+	log.Debug("publishing shelter data to workout thru queue")
+
 	return nil
 }
 
@@ -245,8 +259,6 @@ func (t *TrailManagerService) GetClosestShelter(wId uuid.UUID) (uuid.UUID, float
 			closestShelter = shelter
 		}
 	}
-	fmt.Println(closestShelter.ShelterID)
-	fmt.Println(minDistance)
 
 	// If a closest trail is found, update the TrailManager
 	if closestShelter != nil {

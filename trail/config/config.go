@@ -9,6 +9,7 @@ type AppConfiguration struct {
 	Port     string
 	Postgres *Postgres
 	RabbitMQ *RabbitMQ
+	Publish  *Publish
 }
 
 type Postgres struct {
@@ -25,6 +26,10 @@ type RabbitMQ struct {
 	Port     string
 	User     string
 	Password string
+}
+
+type Publish struct {
+	Destination string
 }
 
 func init() {
@@ -44,11 +49,16 @@ func init() {
 		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
 	}
 
+	publish := &Publish{
+		Destination: getEnv("SEND_DESTINATION", "TRAIL_TO_WORKOUT_SHELTER_INFO_QUEUE"),
+	}
+
 	Config = &AppConfiguration{
 		Mode:     getEnv("MODE", "dev"),
 		Port:     getEnv("PORT", "8005"),
 		Postgres: postgres,
 		RabbitMQ: rabbitmq,
+		Publish:  publish,
 	}
 }
 

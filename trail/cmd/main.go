@@ -8,6 +8,7 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/trail/config"
 	httphandler "github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/handler/http"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/handler/peripheralhandler"
+	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/handler/workouthandler"
 	repository "github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/repository/memory"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
@@ -166,12 +167,13 @@ func initializeDB() {
 		EndLon   float64
 		EndLat   float64
 	}{
-		{uuid.New(), zones[0].ID, "Cedar Pass Trail", 40.1, 45.0, 42.3, 45.0},
-		{uuid.New(), zones[0].ID, "Blue Ridge Path", 42.5, 45.0, 44.7, 45.0},
-		{uuid.New(), zones[1].ID, "Redwood Walk", 45.2, 45.0, 47.8, 45.0},
-		{uuid.New(), zones[2].ID, "Willow Way", 46.3, 45.0, 49.9, 45.0},
-		{uuid.New(), zones[2].ID, "Willow2 Way", 46.3, 45.0, 49.9, 45.0},
-		{uuid.New(), zones[2].ID, "Willow3 Way", 46.3, 45.0, 49.9, 45.0},
+		{uuid.New(), zones[0].ID, "Starbucks Trail", 43.257538, -79.919628, 43.257903, -79.912135},
+		{uuid.New(), zones[0].ID, "ITB Trail", 43.258524, -79.921946, 43.262500, -79.923594},
+		{uuid.New(), zones[1].ID, "Fortinos Trail", 43.256875, -79.930235, 43.250969, -79.928593},
+		{uuid.New(), zones[1].ID, "Church Trail", 43.252870, -79.929062, 43.250162, -79.928219},
+		{uuid.New(), zones[2].ID, "Westdale UPS Trail", 43.260574, -79.909137, 43.263184, -79.902858},
+		{uuid.New(), zones[2].ID, "Westdale TD Trail", 43.263325, -79.902569, 43.262191, -79.897021},
+		{uuid.New(), zones[2].ID, "Churchill Park Trail", 43.269293, -79.899137, 43.264866, -79.897739},
 	}
 
 	shelters := []struct {
@@ -182,10 +184,10 @@ func initializeDB() {
 		Lon     float64
 		Lat     float64
 	}{
-		{uuid.New(), "Westdale Shelter1", trails[0].ID, true, 45.0, 45.0},
-		{uuid.New(), "Westdale Shelter2", trails[0].ID, true, 46.0, 46.0},
-		{uuid.New(), "Fortinos Shelter", trails[2].ID, true, 46.0, 46.0},
-		{uuid.New(), "McMaster Shelter", trails[3].ID, false, 46.0, 46.0},
+		{uuid.New(), "McMaster Shelter1", trails[0].ID, true, 43.257540, -79.918279},
+		{uuid.New(), "McMaster Shelter2", trails[0].ID, false, 43.257616, -79.915874},
+		{uuid.New(), "Fortinos Shelter", trails[2].ID, true, 43.254928, -79.929630},
+		{uuid.New(), "Westdale Shelter", trails[5].ID, true, 43.263117, -79.901379},
 	}
 
 	// Insert initial data into zone table
@@ -195,7 +197,7 @@ func initializeDB() {
 	if err != nil {
 		log.Fatal("error counting zones: %v", zap.Error(err))
 	}
-	if zoneCount < 2 {
+	if zoneCount < len(zones) {
 		for _, zone := range zones {
 			_, err := db.Exec(`
             INSERT INTO traildb.zone (zone_id, zone_name) VALUES ($1, $2)
@@ -268,8 +270,11 @@ func main() {
 	repoT := postgres.NewTrailRepository(cfg.Postgres)
 	repoZ := postgres.NewZoneRepository(cfg.Postgres)
 
+	// Initialize the publisher for the trail managaer to send the shelter info to the queue
+	workoutDataHandler, _ := workouthandler.NewAMQPPublisher()
+
 	// Initialize the trailManager service
-	trailManagerService, _ := services.NewTrailManagerService(repo, repoT, repoS, repoZ)
+	trailManagerService, _ := services.NewTrailManagerService(repo, repoT, repoS, repoZ, workoutDataHandler)
 
 	// Initialize the HTTP handler with the trail manager service and the RabbitMQ handler
 	trailManagerHTTPHandler := httphandler.NewTrailManagerServiceHTTPHandler(router, trailManagerService) // Adjusted for package
