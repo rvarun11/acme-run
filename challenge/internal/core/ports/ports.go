@@ -35,10 +35,6 @@ type ChallengeService interface {
 	DispatchBadges(ch *domain.Challenge)
 	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
 	ListChallengeStatsByPlayerID(pid uuid.UUID) error
-
-	// RemoveTracker(ch *domain.Challenge) error
-	// This notifies all
-	// NotifyAll(ch *domain.Challenge) error
 }
 
 // type BadgeService interface {
