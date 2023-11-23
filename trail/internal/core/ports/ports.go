@@ -10,8 +10,6 @@ import (
 )
 
 var (
-	ErrorListWorkoutsFailed       = errors.New("failed to list workout")
-	ErrorWorkoutNotFound          = errors.New("workout not found in repository")
 	ErrorCreateTrailManagerFailed = errors.New("failed to create the trail manager in repo")
 	ErrorUpdateTrailManagerFailed = errors.New("failed to update trail manager in repo")
 	ErrorTrailManagerInvalidArgs  = errors.New("invalid arguments in trail manager in repo")
