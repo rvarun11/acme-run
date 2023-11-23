@@ -103,7 +103,8 @@ func TestWorkoutService_StartWorkoutTwice(t *testing.T) {
 	assert.NoError(t, startErr)
 
 	// Attempt to start the same workout again
-	_, secondStartErr := service.Start(&workout, HRMID, true)
+	workout_two, _ := domain.NewWorkout(playerID, trailID, HRMID, false, false)
+	_, secondStartErr := service.Start(&workout_two, HRMID, true)
 	assert.Error(t, secondStartErr, "Expected an error when starting an already active workout")
 
 	// Stop the workout
