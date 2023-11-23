@@ -12,7 +12,7 @@ import (
 var cfg *config.AppConfiguration = config.Config
 
 func main() {
-	logger.Info("Challenge Manager is starting")
+	logger.Info("Challenge Manager is starting...")
 
 	// Initialize router
 	router := gin.Default()
@@ -25,8 +25,6 @@ func main() {
 	challengeSvc := services.NewChallengeService(store)
 	challengeHandler := http.NewChallengeHandler(router, challengeSvc)
 	challengeHandler.InitRouter()
-
-	challengeSvc.MonitorChallenges()
 
 	// Initialize badge service
 	// badgeSvc := services.NewBadgeService(store)

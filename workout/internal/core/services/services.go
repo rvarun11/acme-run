@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"strconv"
 	"time"
 
 	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
@@ -34,6 +35,7 @@ type WorkoutService struct {
 	publisher                  ports.AMQPPublisher
 	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
 	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
+	activePlayers              map[uuid.UUID]bool
 }
 
 // Factory for creating a new WorkoutService
@@ -45,6 +47,7 @@ func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.Peripheral
 		publisher:                  publisher,
 		activeWorkoutsLastLocation: make(map[uuid.UUID]ActiveWorkoutsLastLocation),
 		activeWorkoutsHeartRate:    make(map[uuid.UUID]ActiveWorkoutsHeartRate),
+		activePlayers:              make(map[uuid.UUID]bool),
 	}
 }
 
@@ -55,22 +58,29 @@ func (s *WorkoutService) List() ([]*domain.Workout, error) {
 func (s *WorkoutService) GetWorkout(id uuid.UUID) (*domain.Workout, error) {
 	workout, err := s.repo.GetWorkout(id)
 	if err != nil {
-		logger.Error("failed to get workout", zap.String("id", id.String()), zap.Error(err))
+		logger.Debug("failed to get workout", zap.String("id", id.String()), zap.Error(err))
 		return nil, fmt.Errorf("failed to get workout with ID %s: %w", id, err)
 	}
 	return workout, nil
 }
 
 func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConnected bool) (string, error) {
+
+	_, validActiveWorkout := s.activePlayers[workout.PlayerID]
+	if validActiveWorkout {
+		logger.Debug(ports.ErrorActiveWorkoutAlreadyExists.Error(), zap.String("workoutID", workout.WorkoutID.String()))
+		return "", fmt.Errorf(ports.ErrorActiveWorkoutAlreadyExists.Error())
+	}
+
 	// Retrieve user profile details
 	profile, err := s.user.GetWorkoutPreferenceOfUser(workout.PlayerID)
 	if err != nil {
-		logger.Error("failed to get user profile", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
+		logger.Debug("failed to get user profile", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to get profile for user %s: %w", workout.PlayerID, err)
 	}
 
 	if err != nil {
-		logger.Error("failed to get hardcore mode for user", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
+		logger.Debug("failed to get hardcore mode for user", zap.String("playerID", workout.PlayerID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to get hardcore mode for user %s: %w", workout.PlayerID, err)
 	}
 
@@ -80,15 +90,16 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	// Update workout details in the repository
 	_, err = s.repo.UpdateWorkout(workout)
 	if err != nil {
-		logger.Error("failed to update workout", zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
+		logger.Debug("failed to update workout", zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to update workout %s: %w", workout.WorkoutID, err)
 	}
 
 	shelterNeeded := !workout.HardcoreMode
 
-	err = s.peripheral.BindPeripheralData(workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected, shelterNeeded)
+	err = s.peripheral.BindPeripheralData(workout.TrailID, workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected, shelterNeeded)
+	logger.Info("Peripheral bounded to ", zap.String("workoutID", workout.WorkoutID.String()))
 	if err != nil {
-		logger.Error("failed to bind peripheral data", zap.String("HRMID", HRMID.String()), zap.Error(err))
+		logger.Debug("failed to bind peripheral data", zap.String("HRMID", HRMID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to bind HRM device %s for workout %s: %w", HRMID, workout.WorkoutID, err)
 	}
 
@@ -96,37 +107,43 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	s.activeWorkoutsHeartRate[workout.WorkoutID] = ActiveWorkoutsHeartRate{
 		HRMConnected: HRMConnected,
 	}
-	var currentWorkoutOption int8
+	s.activePlayers[workout.PlayerID] = true
+	var workoutOptionsAvailable int8
 	if shelterNeeded {
-		currentWorkoutOption = 7
+		workoutOptionsAvailable = 7
 	} else {
-		currentWorkoutOption = 6
+		workoutOptionsAvailable = 6
 	}
 
 	// Create workout options for the new workout
 	workoutOptions := &domain.WorkoutOptions{
-		WorkoutID:             workout.WorkoutID,
-		CurrentWorkoutOption:  currentWorkoutOption,
-		FightsPushDown:        false,
-		IsWorkoutOptionActive: false,
+		WorkoutID:               workout.WorkoutID,
+		CurrentWorkoutOption:    -1,
+		WorkoutOptionsAvailable: workoutOptionsAvailable,
+		FightsPushDown:          false,
+		IsWorkoutOptionActive:   false,
 	}
 
 	// Create the workout and its options in the repository
 	err = s.repo.Create(workout, workoutOptions)
 	if err != nil {
-		logger.Error("failed to create workout", zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
-		return "", fmt.Errorf("failed to create workout %s: %w", workout.WorkoutID, err)
+		logger.Debug(ports.ErrorCreateWorkoutFailed.Error(), zap.String("workoutID", workout.WorkoutID.String()), zap.Error(err))
+		return "", fmt.Errorf(ports.ErrorCreateWorkoutFailed.Error())
 	}
 
 	// Log the successful creation of the workout
-	logger.Info("Workout created with ID", zap.String("workoutID", workout.WorkoutID.String()))
+	logger.Info("Workout started with ", zap.String("workoutID", workout.WorkoutID.String()))
 
 	// Generate and return the link to the workout options
-	linkURL := fmt.Sprintf("/workoutOptions?workoutID=%s", workout.WorkoutID)
+	linkURL := fmt.Sprintf("/api/v1/workoutOptions?workoutID=%s", workout.WorkoutID)
 	return linkURL, nil // Return nil explicitly to indicate no error occurred
 }
 
 func (s *WorkoutService) GetWorkoutOptions(workoutID uuid.UUID) ([]domain.WorkoutOptionLink, error) {
+
+	// Compute Workout Options
+	s.ComputeWorkoutOptionsOrder(workoutID)
+
 	// Retrieve workout options from the repository
 	pworkoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
@@ -144,7 +161,12 @@ func (s *WorkoutService) GetWorkoutOptions(workoutID uuid.UUID) ([]domain.Workou
 	optionsOrder := computeOptionsOrder(pworkoutOptions)
 
 	// Generating HATEOAS links for StartWorkoutOption based on the computed order
-	links := generateStartWorkoutOptionLinks(workoutID, optionsOrder)
+	links := generateStartWorkoutOptionLinks(workoutID, optionsOrder, pworkoutOptions.DistanceToShelter)
+	var options string
+	for _, link := range links {
+		options = options + link.Name + ", "
+	}
+	logger.Info("Workout options computed : " + options)
 
 	return links, nil
 }
@@ -170,7 +192,7 @@ func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
 	order := []uint8{}
 
 	// Add Shelter to the order only if the bit is set for the current workout option
-	if pworkoutOptions.CurrentWorkoutOption&ShelterBit != 0 {
+	if pworkoutOptions.WorkoutOptionsAvailable&1 != 0 {
 		order = append(order, ShelterBit)
 	}
 
@@ -184,14 +206,14 @@ func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
 	return order
 }
 
-func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8) []domain.WorkoutOptionLink {
+func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, distance_to_shleter float64) []domain.WorkoutOptionLink {
 	var links []domain.WorkoutOptionLink // A slice to hold ordered links
 
 	for _, option := range optionsOrder {
 		var optionName string
 		switch option {
 		case ShelterBit:
-			optionName = "Shelter"
+			optionName = "Distance to Shelter = " + strconv.FormatFloat(distance_to_shleter, 'f', -1, 64) + " : "
 		case FightBit:
 			optionName = "Fight"
 		case EscapeBit:
@@ -268,7 +290,6 @@ func (s *WorkoutService) UpdateShelter(workoutID uuid.UUID, DistanceToShelter fl
 	if err != nil {
 		return err // Propagate the error from the repository
 	}
-
 	workoutOptions.DistanceToShelter = DistanceToShelter
 
 	s.repo.UpdateWorkoutOptions(workoutOptions)
@@ -289,7 +310,12 @@ func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uin
 
 	// Check if the workout option is already active
 	if workoutOptions.IsWorkoutOptionActive {
-		return domain.ErrWorkoutOptionAlreadyActive // Return an error with a custom message
+		return ports.ErrWorkoutOptionAlreadyActive
+	}
+
+	// Check if shelter is available or not
+	if workoutType == 0 && workoutOptions.WorkoutOptionsAvailable&1 == 0 {
+		return ports.ErrorWorkoutOptionUnavailable
 	}
 
 	// Update the workout option to make it active (you need to set appropriate fields)
@@ -302,7 +328,7 @@ func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uin
 	if err != nil {
 		return err // Propagate the error from the repository
 	}
-	logger.Info("Workout Option OPT started for ID : workoutID", zap.String("workoutID", workoutOptions.WorkoutID.String()), zap.String("OPT", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
+	logger.Info("Workout option started", zap.String("workoutID", workoutOptions.WorkoutID.String()), zap.String("optionType", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
 	return nil // Return nil to indicate success
 }
 
@@ -310,21 +336,21 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	// Get the workout from the repository
 	workout, err := s.repo.GetWorkout(workoutID)
 	if err != nil {
-		logger.Error("failed to get workout for stopping options", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to get workout for stopping options", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to get workout %s for stopping options: %w", workoutID, err)
 	}
 
 	// Get the workout options from the repository
 	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
-		logger.Error("failed to get workout options for workout", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to get workout options for workout", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to get workout options for workout %s: %w", workoutID, err)
 	}
 
 	// Check if the workout option is already inactive
 	if !workoutOptions.IsWorkoutOptionActive {
-		logger.Info("workout option already inactive", zap.String("workoutID", workoutID.String()))
-		return domain.ErrWorkoutOptionAlreadyInActive
+		logger.Debug("workout option already inactive", zap.String("workoutID", workoutID.String()))
+		return ports.ErrWorkoutOptionAlreadyInActive
 	}
 
 	// Update the Shelters, Fights and Escapes
@@ -343,14 +369,14 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	// Update the workout options in the repository
 	_, err = s.repo.UpdateWorkoutOptions(workoutOptions)
 	if err != nil {
-		logger.Error("failed to update workout options on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to update workout options on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to update workout options for workout %s on stop: %w", workoutID, err)
 	}
 
 	// Update the workout in the repository
 	_, err = s.repo.UpdateWorkout(workout)
 	if err != nil {
-		logger.Error("failed to update workout on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
+		logger.Debug("failed to update workout on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
 		return fmt.Errorf("failed to update workout %s on stop: %w", workoutID, err)
 	}
 
@@ -365,7 +391,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	// Retrieve the workout to be stopped
 	tempWorkout, err := s.repo.GetWorkout(id)
 	if err != nil {
-		logger.Error("failed to get workout for stopping", zap.String("workoutID", id.String()), zap.Error(err))
+		logger.Debug("failed to get workout for stopping", zap.String("workoutID", id.String()), zap.Error(err))
 		return nil, fmt.Errorf("failed to get workout %s for stopping: %w", id, err)
 	}
 
@@ -392,6 +418,8 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 	// Remove the workout from active workouts tracking
 	delete(s.activeWorkoutsLastLocation, tempWorkout.WorkoutID)
 	delete(s.activeWorkoutsHeartRate, tempWorkout.WorkoutID)
+	delete(s.activePlayers, tempWorkout.PlayerID)
+	logger.Info("Workout stopped", zap.String("workoutID", tempWorkout.WorkoutID.String()))
 
 	// Unbind peripheral data associated with the workout
 	err = s.peripheral.UnbindPeripheralData(tempWorkout.WorkoutID)
@@ -399,6 +427,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 		logger.Debug("failed to unbind peripheral data on stop", zap.String("workoutID", tempWorkout.WorkoutID.String()), zap.Error(err))
 		return nil, fmt.Errorf("failed to unbind peripheral data on stop")
 	}
+	logger.Info("Peripheral unbinded from ", zap.String("workoutID", tempWorkout.WorkoutID.String()))
 
 	return tempWorkout, nil
 }
@@ -435,23 +464,6 @@ func (s *WorkoutService) GetSheltersTakenBetweenDates(playerID uuid.UUID, startD
 	return s.repo.GetSheltersTakenBetweenDates(playerID, startDate, endDate)
 }
 
-// Function to run periodically
-func (s *WorkoutService) RunPeriodicTask() {
-	for {
-		// Iterate through active workouts in locationMap
-		for workoutID := range s.activeWorkoutsLastLocation {
-			_ = s.ComputeWorkoutOptionsOrder(workoutID)
-			// TODO
-			//if err != nil {
-			// Handle the error (e.g., log it)
-			//}
-		}
-
-		// Sleep for 4 seconds before the next iteration
-		time.Sleep(4 * time.Second)
-	}
-}
-
 // ComputeWorkoutOptionsOrder is modified to take profile directly
 func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	// Get the workout options from the repository
@@ -467,7 +479,7 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	}
 
 	// Calculate the weight based on cardio
-	weight := calculateWeight(workout.Profile)
+	weight := 50
 
 	// Get the number of fights and escapes
 	fights, err := s.repo.GetFightsFoughtByID(workoutID)
@@ -480,7 +492,7 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	}
 
 	// Calculate the weight based on fights and escapes
-	fightEscapeWeight := calculateFightEscapeWeight(fights, escapes)
+	fightEscapeWeight := calculateFightEscapeWeight(fights, escapes, workout.Profile)
 
 	avgHeartRate, err := s.peripheral.GetAverageHeartRateOfUser(workout.WorkoutID)
 
@@ -498,11 +510,17 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	heartRateWeight := calculateHeartRateWeight(avgHeartRate, age)
 
 	// Sum the weights
-	totalWeight := weight + fightEscapeWeight + heartRateWeight
+	totalWeight := weight + fightEscapeWeight
 	// Update FightsPushDown based on the total weight
+	logger.Debug("Total Weight : ", zap.Any("Wt", totalWeight))
 	if totalWeight >= 75 {
 		workoutOptions.FightsPushDown = true
 	} else {
+		workoutOptions.FightsPushDown = false
+	}
+	logger.Debug("heartRateWeight : ", zap.Any("Wt", heartRateWeight))
+
+	if heartRateWeight >= 25 && workout.Profile == "cardio" && workoutOptions.FightsPushDown {
 		workoutOptions.FightsPushDown = false
 	}
 
@@ -515,17 +533,11 @@ func (s *WorkoutService) ComputeWorkoutOptionsOrder(workoutID uuid.UUID) error {
 	return nil // Return nil to indicate success
 }
 
-// Helper function to calculate the weight based on cardio
-func calculateWeight(profile string) int {
-	if profile == "cardio" {
-		return 50
-	}
-	return 0
-}
-
 // Helper function to calculate the weight based on fights and escapes
-func calculateFightEscapeWeight(fights, escapes uint16) int {
-	if fights-escapes >= 2 {
+func calculateFightEscapeWeight(fights, escapes uint16, profile string) int {
+	if fights-escapes >= 2 && profile == "strength" {
+		return 25
+	} else if escapes-fights < 2 && profile == "cardio" {
 		return 25
 	}
 	return 0
@@ -533,15 +545,11 @@ func calculateFightEscapeWeight(fights, escapes uint16) int {
 
 // Helper function to calculate the weight based on average heart rate
 func calculateHeartRateWeight(avgHeartRate uint8, age uint8) int {
-	// TODO: Fetch user age from profile or another service
-	// age := profile.Age
-
-	// Mock user age for testing
 
 	maxHeartRate := 220 - age
 	percentageMaxHeartRate := float64(avgHeartRate) / float64(maxHeartRate) * 100
 
-	if percentageMaxHeartRate < 70 {
+	if percentageMaxHeartRate > 70 {
 		return 25
 	}
 

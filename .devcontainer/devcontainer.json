@@ -34,7 +34,8 @@
 						"path": "/bin/bash"
 				}
 				},
-				"terminal.integrated.defaultProfile.linux": "bash"
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"go.testTimeout": "300s"
 			},
 			"extensions": [
 				"golang.Go"

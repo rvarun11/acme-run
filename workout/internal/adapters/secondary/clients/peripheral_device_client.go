@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 type PeripheralDeviceClientImpl struct {
@@ -18,9 +16,10 @@ func NewPeripheralDeviceClient() *PeripheralDeviceClientImpl {
 	return &PeripheralDeviceClientImpl{}
 }
 
-func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
+func (p *PeripheralDeviceClientImpl) BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
 	// Prepare the data for the POST request
 	bindData := BindPeripheralData{
+		TrailID:                        trailID,
 		PlayerID:                       playerID,
 		WorkoutID:                      workoutID,
 		HRMId:                          hrmID,
@@ -35,7 +34,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(playerID uuid.UUID, work
 
 	url := "http://localhost:8004/api/v1/peripheral_bind"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bindPayload))
-	logger.Debug("Bind Error", zap.Error(err))
+
 	if err != nil {
 		return err
 	}

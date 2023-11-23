@@ -9,9 +9,9 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-// TODO: unique constraint not working here
 type postgresChallenge struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	Name        string    `gorm:"unique;not null"`
@@ -28,6 +28,7 @@ type postgresBadge struct {
 	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
 	PlayerID    uuid.UUID `gorm:"not null"`
 	ChallengeID uuid.UUID `gorm:"not null"`
+	Score       float64
 	CompletedOn time.Time
 }
 
@@ -50,15 +51,20 @@ func NewRepository(cfg *config.Postgres) *Repository {
 		cfg.Host,
 		cfg.Port,
 		cfg.User,
-		cfg.DB_Name,
+		cfg.DBName,
 		cfg.Password,
 		cfg.Encoding,
 	)
 
-	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	logLevel := getLogLevel(cfg.LogLevel)
+
+	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{
+		Logger: logger.Default.LogMode(logLevel),
+	})
 	if err != nil {
 		panic(err)
 	}
+
 	db.AutoMigrate(&postgresChallenge{}, &postgresBadge{}, &postgresChallengeStats{})
 
 	return &Repository{
@@ -99,5 +105,21 @@ func (pcs *postgresChallengeStats) toAggregate(ch *domain.Challenge) *domain.Cha
 		DistanceCovered: pcs.DistanceCovered,
 		EnemiesFought:   pcs.EnemiesFought,
 		EnemiesEscaped:  pcs.EnemiesEscaped,
+	}
+}
+
+// getLogLevel returns the GORM Log Level
+func getLogLevel(l string) logger.LogLevel {
+	switch l {
+	case "silent":
+		return logger.Silent
+	case "info":
+		return logger.Info
+	case "error":
+		return logger.Error
+	case "warn":
+		return logger.Warn
+	default:
+		return logger.Warn
 	}
 }

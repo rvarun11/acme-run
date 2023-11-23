@@ -6,6 +6,7 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
 	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
@@ -25,11 +26,10 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 			if err := r.db.Save(&pcs).Error; err != nil {
 				return err
 			}
-			// newCS := pcs.toAggregate(cs.Challenge)
-			logger.Debug("challenge stats record not found, creating new one instead")
+			logger.Debug("challenge stat record not found, creating new one instead", zap.Any("challenge_stat", pcs))
 			return nil
 		} else {
-			logger.Fatal("error occured while finding challenge stats")
+			logger.Fatal("error occured while finding challenge stats", zap.Error(err))
 			return err
 		}
 	}
@@ -41,15 +41,14 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 		ChallengeID:     pcs.ChallengeID,
 		DistanceCovered: pcs.DistanceCovered + cs.DistanceCovered,
 		EnemiesFought:   pcs.EnemiesFought + cs.EnemiesFought,
-		EnemiesEscaped:  pcs.EnemiesEscaped + cs.EnemiesFought,
+		EnemiesEscaped:  pcs.EnemiesEscaped + cs.EnemiesEscaped,
 	}
-
-	// Save or update ChallengeStats in the database
+	logger.Debug("updating challenge stat record with new values", zap.Any("postgres ds", newPCS))
 	if err := r.db.Save(&newPCS).Error; err != nil {
 		logger.Fatal("unable to update challenge stats, returning old value instead")
 		return err
 	}
-	// newCS := newPCS.toAggregate(cs.Challenge)
+
 	return nil
 }
 
@@ -95,26 +94,12 @@ func (r *Repository) ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.C
 	return csArr, nil
 }
 
-// func (r *Repository) ListEligibleChallengeStatsForChallenge(ch *domain.Challenge) ([]*domain.ChallengeStats, error) {
-// 	var pcs []postgresChallengeStats
-// 	res := r.db.First(&pcs, "challenge_id = ?", cid)
-// 	if res.Error != nil {
-// 		return []*domain.ChallengeStats{}, res.Error
-// 	}
-
-// 	var csArr []*domain.ChallengeStats
-// 	for _, pc := range pcs {
-// 		ch, err := r.GetChallengeByID(pc.ChallengeID)
-// 		if err != nil {
-// 			return []*domain.ChallengeStats{}, err
-// 		}
-// 		cs := pc.toAggregate(ch)
-// 		csArr = append(csArr, cs)
-// 	}
-// 	return csArr, nil
-// }
-
-// TODO: Once the other parts work, add this
 func (r *Repository) DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error {
+	var pcs postgresChallengeStats
+	res := r.db.First(&pcs, "player_id = ? AND challenge_id = ?", pid, cid)
+	if res.Error != nil {
+		return res.Error
+	}
+	r.db.Delete(&pcs)
 	return nil
 }

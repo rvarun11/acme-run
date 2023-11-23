@@ -6,7 +6,9 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.uber.org/zap"
 )
 
 type AMQPPublisher struct {
@@ -73,6 +75,7 @@ func (pub *AMQPPublisher) PublishWorkoutStats(workoutStats *domain.Workout) erro
 			Body:        body,
 		},
 	)
+	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", body))
 	if err != nil {
 		return fmt.Errorf("failed to publish a message: %w", err)
 	}

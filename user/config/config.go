@@ -1,6 +1,8 @@
 package config
 
-import "os"
+import (
+	"os"
+)
 
 var Config *AppConfiguration
 
@@ -15,18 +17,20 @@ type Postgres struct {
 	Port     string
 	User     string
 	Password string
-	DB_Name  string
+	DBName   string
 	Encoding string
+	LogLevel string
 }
 
 func init() {
 	postgres := &Postgres{
-		Host:     getEnv("POSTGRES_HOSTNAME", "localhost"),
+		Host:     getEnv("POSTGRES_HOST", "localhost"),
 		Port:     getEnv("POSTGRES_PORT", "5432"),
 		User:     getEnv("POSTGRES_USER", "postgres"),
 		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
-		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
+		DBName:   getEnv("POSTGRES_DB", "postgres"),
 		Encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
+		LogLevel: getEnv("POSTGRES_LOG_LEVEL", "warn"),
 	}
 
 	Config = &AppConfiguration{

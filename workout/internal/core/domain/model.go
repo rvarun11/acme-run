@@ -9,9 +9,7 @@ import (
 )
 
 var (
-	ErrInvalidWorkout               = errors.New("no workout_id matched")
-	ErrWorkoutOptionAlreadyActive   = errors.New("workout option is already active")
-	ErrWorkoutOptionAlreadyInActive = errors.New("no workout option is active")
+	ErrInvalidWorkout = errors.New("no workout_id matched")
 )
 
 // Workout is a entity that represents a workout in all Domains
@@ -45,6 +43,8 @@ type Workout struct {
 type WorkoutOptions struct {
 	// ID is the identifier of the Entity, the ID is shared for all sub domains
 	WorkoutID uuid.UUID `json:"workout_id"`
+	// 1,2,3 for valid current Workout Options, negative for no current workoutOption
+	WorkoutOptionsAvailable int8 `json:"workout_options"`
 	// 1,2,3 for valid current Workout Options, negative for no current workoutOption
 	CurrentWorkoutOption int8 `json:"current_workout_option"`
 	// FightsPushDown Ranking bool

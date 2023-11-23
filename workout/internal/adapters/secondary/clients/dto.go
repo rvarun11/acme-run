@@ -9,6 +9,8 @@ import (
 type BindPeripheralData struct {
 	// PlayerID
 	PlayerID uuid.UUID `json:"player_id"`
+	// Trail ID
+	TrailID uuid.UUID `json:"trail_id"`
 	// WorkoutID for the workout to be stopped
 	WorkoutID uuid.UUID `json:"workout_id"`
 	// If HRM is connected then HRM ID otherwise garbage
