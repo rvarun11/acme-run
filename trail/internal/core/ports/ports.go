@@ -34,7 +34,7 @@ type TrailManagerService interface {
 }
 
 type TrailRepository interface {
-	CreateTrail(tId uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error)
+	CreateTrail(name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error)
 	UpdateTrailByID(id uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) error
 	DeleteTrailByID(id uuid.UUID) error
 	GetTrailByID(id uuid.UUID) (*domain.Trail, error)
@@ -43,7 +43,7 @@ type TrailRepository interface {
 }
 
 type ShelterRepository interface {
-	CreateShelter(id uuid.UUID, name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error)
+	CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error)
 	UpdateShelterByID(id uuid.UUID, tId uuid.UUID, name string, availability bool, lat, long float64) error
 	DeleteShelterByID(id uuid.UUID) error
 	GetShelterByID(id uuid.UUID) (*domain.Shelter, error)
@@ -56,6 +56,7 @@ type ZoneRepository interface {
 	UpdateZone(id uuid.UUID, name string) error
 	DeleteZone(id uuid.UUID) error
 	GetZoneByID(id uuid.UUID) (*domain.Zone, error)
+	GetZoneByName(name string) (*domain.Zone, error)
 }
 
 type TrailManagerRepository interface {

@@ -59,7 +59,7 @@ func NewZoneRepository(cfg *config.Postgres) *ZoneRepository {
 	if err != nil {
 		panic(err)
 	}
-	db.AutoMigrate(&postgresTrail{})
+	db.AutoMigrate(&postgresZone{})
 	return &ZoneRepository{db: db}
 }
 
@@ -112,17 +112,17 @@ type postgresZone struct {
 
 // Override the TableName method to specify the custom table name for the Trail model
 func (postgresTrail) TableName() string {
-	return cfg.Postgres.DB_Name + ".trail"
+	return "trail"
 }
 
 // Override the TableName method to specify the custom table name for the Shelter model
 func (postgresShelter) TableName() string {
-	return cfg.Postgres.DB_Name + ".shelter"
+	return "shelter"
 }
 
 // Override the TableName method to specify the custom table name for the Zone model
 func (postgresZone) TableName() string {
-	return cfg.Postgres.DB_Name + ".zone"
+	return "zone"
 }
 
 func toTrailAggregate(ptrail *postgresTrail) *domain.Trail {
@@ -194,9 +194,9 @@ func toZonePostgres(zone *domain.Zone) *postgresZone {
 
 // Repository Functions
 
-func (repo *TrailRepository) CreateTrail(tId uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error) {
+func (repo *TrailRepository) CreateTrail(name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error) {
 	trail := postgresTrail{
-		TrailID:        tId,
+		TrailID:        uuid.New(),
 		TrailName:      name,
 		ZoneID:         zId,
 		StartLatitude:  startLat,
@@ -208,7 +208,7 @@ func (repo *TrailRepository) CreateTrail(tId uuid.UUID, name string, zId uuid.UU
 	if err := repo.db.Create(&trail).Error; err != nil {
 		return uuid.Nil, err
 	}
-	return tId, nil
+	return trail.TrailID, nil
 }
 
 func (repo *TrailRepository) UpdateTrailByID(id uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) error {
@@ -263,9 +263,9 @@ func (repo *TrailRepository) ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail,
 }
 
 // Shelters
-func (repo *ShelterRepository) CreateShelter(id uuid.UUID, name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
+func (repo *ShelterRepository) CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
 	shelter := postgresShelter{
-		ShelterID:           id,
+		ShelterID:           uuid.New(),
 		ShelterName:         name,
 		TrailID:             tId,
 		ShelterAvailability: availability,
@@ -347,6 +347,14 @@ func (repo *ZoneRepository) CreateZone(name string) (uuid.UUID, error) {
 func (repo *ZoneRepository) GetZoneByID(id uuid.UUID) (*domain.Zone, error) {
 	var zone postgresZone
 	if err := repo.db.Where("zone_id = ?", id).First(&zone).Error; err != nil {
+		return nil, err // remove the domain.Shelter type
+	}
+	return toZoneAggregate(&zone), nil
+}
+
+func (repo *ZoneRepository) GetZoneByName(name string) (*domain.Zone, error) {
+	var zone postgresZone
+	if err := repo.db.Where("zone_name = ?", name).First(&zone).Error; err != nil {
 		return nil, err // remove the domain.Shelter type
 	}
 	return toZoneAggregate(&zone), nil

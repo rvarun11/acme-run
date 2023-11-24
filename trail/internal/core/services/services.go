@@ -1,6 +1,7 @@
 package services
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -50,8 +51,8 @@ func (t *TrailManagerService) GetTrailManagerByWorkoutId(id uuid.UUID) (*domain.
 	return tm, err
 }
 
-func (t *TrailManagerService) CreateTrail(tid uuid.UUID, name string, zId uuid.UUID, startLatitude float64, startLongitude float64, endLatitude float64, endLongitude float64) (uuid.UUID, error) {
-	res, err := t.repoT.CreateTrail(tid, name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
+func (t *TrailManagerService) CreateTrail(name string, zId uuid.UUID, startLatitude float64, startLongitude float64, endLatitude float64, endLongitude float64) (uuid.UUID, error) {
+	res, err := t.repoT.CreateTrail(name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -129,8 +130,8 @@ func (t *TrailManagerService) GetClosestTrail(zId uuid.UUID, currentLongitude fl
 	return uuid.Nil, nil // Or return an appropriate error if necessary
 }
 
-func (t *TrailManagerService) CreateShelter(id uuid.UUID, name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
-	sId, err := t.repoS.CreateShelter(id, name, tId, availability, lat, long)
+func (t *TrailManagerService) CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
+	sId, err := t.repoS.CreateShelter(name, tId, availability, lat, long)
 	if err != nil {
 		return uuid.Nil, err
 	} else {
@@ -169,7 +170,17 @@ func (t *TrailManagerService) CreateZone(zName string) (uuid.UUID, error) {
 
 func (t *TrailManagerService) CheckZone(zId uuid.UUID) error {
 	z, err := t.repoZ.GetZoneByID(zId)
+
 	if err != nil || z.ZoneID != zId {
+		fmt.Println("z.ZoneID")
+		return err
+	}
+	return nil
+}
+
+func (t *TrailManagerService) CheckZoneByName(name string) error {
+	z, err := t.repoZ.GetZoneByName(name)
+	if err != nil || z.ZoneName != name {
 		return err
 	}
 	return nil
