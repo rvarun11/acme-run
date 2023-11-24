@@ -56,7 +56,7 @@ func (handler *HTTPHandler) InitRouter() {
 	// VR TODO: Fix API endpoints
 	router.POST("/peripheral", handler.CreatePeripheralDevice)
 	router.POST("/peripheral_bind", handler.BindPeripheralToData)
-	router.POST("/peripheral_unbind", handler.UnbindPeripheralToData)
+	router.PUT("/peripheral_unbind", handler.UnbindPeripheralToData)
 	router.PUT("/hrm_status", handler.SetHRMStatus)
 
 	// HRM
@@ -213,7 +213,7 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 	} else if hrType == "normal" {
 		var tLoc LastHR
 		var err error
-		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMAvgReading(wId)
+		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMReading(wId)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "reading from device failure",
