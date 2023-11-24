@@ -5,8 +5,8 @@ import (
 	"os"
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
-	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/http"
-	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/rabbitmq"
+	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/http"
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/repository"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/peripheral/log"

@@ -34,7 +34,9 @@ type BindPeripheralData struct {
 	// if HRM Connected is false then no HRM mock
 	HRMId uuid.UUID `json:"hrm_id"`
 	// HRM Connected or not
-	HRMConnected bool `json:"hrm_connected"`
+	HRMConnected bool `json:"connect"`
+	// Trail for this workout
+	TrailOfWorkout uuid.UUID `json:"trail_id"`
 	// Do we need live location? based on Hardcore mode
 	SendLiveLocationToTrailManager bool `json:"send_live_location_to_trail_manager"`
 }
