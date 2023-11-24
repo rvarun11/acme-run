@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/trail/internal/core/services"
 	"github.com/google/uuid"
@@ -33,9 +34,9 @@ func (handler *TrailManagerServiceHTTPHandler) InitRouter() {
 	router.PUT("/zone/:zone_id/trail/:trail_id", handler.UpdateTrail)
 	router.DELETE("/zone/:zone_id/trail/:trail_id", handler.DeleteTrail)
 
-	router.GET("/trail_manager/shelter/check_status", handler.CheckShelterStatus)
-	router.GET("/trail_manager/shelter/info", handler.GetShelterLocationInfo)
-	router.GET("/trail_manager/shelter/closest_shelter_info", handler.GetClosestShelterInfo)
+	// router.GET("/zone/:zone_id/trail/:trail_id/shelter/check_status", handler.CheckShelterStatus)
+	router.GET("/zone/:zone_id/trail/:trail_id/shelter/:shelter_id", handler.GetShelterLocationInfo)
+	router.GET("/zone/:zone_id/trail/:trail_id/shelter/", handler.GetClosestShelterInfo)
 
 	router.POST("/zone/:zone_id/trail/:trail_id/shelter", handler.CreateShelter)
 	router.PUT("/zone/:zone_id/trail/:trail_id/shelter", handler.UpdateShelter)
@@ -57,8 +58,40 @@ func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
 }
 
 func (s *TrailManagerServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) {
-	id, _ := parseUUID(ctx, "workout_id")
-	sId, distance, availability, time, err := s.tvc.GetClosestShelter(id)
+
+	zoneIdStr := ctx.Param("zone_id")
+	longitudeStr := ctx.Query("longitude")
+	latitudeStr := ctx.Query("latitude")
+	longitude, _ := strconv.ParseFloat(longitudeStr, 64)
+	latitude, _ := strconv.ParseFloat(latitudeStr, 64)
+
+	_, errZ := uuid.Parse(zoneIdStr)
+	if errZ != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": errZ.Error()})
+		return
+
+	}
+
+	trailIdStr := ctx.Param("trail_id")
+	_, errT := uuid.Parse(trailIdStr)
+	if errT != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": errT.Error()})
+		return
+
+	}
+
+	shelterIdStr := ctx.Param("shelter_id")
+	id, errS := uuid.Parse(shelterIdStr)
+	if errS != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": errT.Error()})
+		return
+
+	}
+
+	sId, distance, availability, time, err := s.tvc.GetClosestShelter(longitude, latitude, time.Now())
 	var shelterDataInstance ShelterAvailable
 	shelterDataInstance.WorkoutID = id
 	shelterDataInstance.ShelterID = sId
@@ -361,27 +394,34 @@ func (t *TrailManagerServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "shelter deleted successfully"})
 }
 
-func (h *TrailManagerServiceHTTPHandler) CheckShelterStatus(ctx *gin.Context) {
-	sId, _ := parseUUID(ctx, "shelter_id")
-	// first check if the workout is bind to any trail manager, if not raise error
-	shelterInstance, err := h.tvc.GetShelterByID(sId)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "cant find shelter"})
-		return
-	}
-	if shelterInstance.ShelterAvailability {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "available"})
-		return
-	} else {
-		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "unavailable"})
-		return
-	}
-
-}
-
 func (t *TrailManagerServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context) {
 
-	id, _ := parseUUID(ctx, "shelter_id")
+	zoneIdStr := ctx.Param("zone_id")
+	_, errZ := uuid.Parse(zoneIdStr)
+	if errZ != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": errZ.Error()})
+		return
+
+	}
+
+	trailIdStr := ctx.Param("trail_id")
+	_, errT := uuid.Parse(trailIdStr)
+	if errT != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": errT.Error()})
+		return
+
+	}
+
+	shelterIdStr := ctx.Param("shelter_id")
+	id, errS := uuid.Parse(shelterIdStr)
+	if errS != nil {
+
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": errT.Error()})
+		return
+
+	}
 
 	// Assuming you have a method to find the closest trails by coordinates
 	shelter, err := t.tvc.GetShelterByID(id)
