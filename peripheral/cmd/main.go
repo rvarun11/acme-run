@@ -8,6 +8,7 @@ import (
 	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/http"
 	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/repository"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/clients"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/gin-gonic/gin"
@@ -31,10 +32,10 @@ func main() {
 
 	peripheralAMQPHandler, err1 := rabbitmqhandler.NewRabbitMQHandler(amqpURL) // Adjusted for package
 
-	// Initialize rabbitmqhandler
+	client := clients.NewZoneServiceClient()
 
 	// Initialize the Peripheral service
-	peripheralService := services.NewPeripheralService(repo, peripheralAMQPHandler)
+	peripheralService := services.NewPeripheralService(repo, peripheralAMQPHandler, client)
 
 	// Set up the RabbitMQ connection string
 

@@ -2,7 +2,6 @@ package domain
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -44,7 +43,6 @@ func (p *Peripheral) GetHRate() (uuid.UUID, time.Time, int) {
 func (p *Peripheral) SetHRate(reading int) {
 	if p.HRMDev.HRMStatus {
 		p.HRMDev.AverageHRate = (p.HRMDev.AverageHRate*p.HRMDev.HRateCount + reading) * 1.0 / (1 + p.HRMDev.HRateCount)
-		fmt.Println("count %d avg %d current %d", p.HRMDev.HRateCount, p.HRMDev.AverageHRate, reading)
 		p.HRMDev.HRateCount += 1
 		p.HRMDev.HRate = reading
 		p.HRMDev.HRateTime = time.Now()

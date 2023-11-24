@@ -109,7 +109,7 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 		})
 		return
 	}
-	if !req.HRMConnected {
+	if !req.HRMConnect {
 		err2 := h.svc.SetHRMDevStatusByHRMId(req.HRMId, false)
 		if err2 != nil {
 			ctx.JSON(http.StatusInternalServerError, gin.H{
@@ -134,7 +134,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 		return
 	}
 
-	err := h.svc.BindPeripheral(bindDataInstance.PlayerID, bindDataInstance.WorkoutID, bindDataInstance.HRMId, bindDataInstance.HRMConnected, bindDataInstance.SendLiveLocationToTrailManager)
+	err := h.svc.BindPeripheral(bindDataInstance.PlayerID, bindDataInstance.WorkoutID, bindDataInstance.HRMId, bindDataInstance.HRMConnect, bindDataInstance.SendLiveLocationToTrailManager)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
@@ -150,11 +150,14 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 		h.hLiveCount += 1
 		h.bCtx, h.cancelF = context.WithCancel(context.Background())
 
-		// TODO get the start and end location
-		longitudeStart := -79.919390
-		latitudeStart := 43.257715
-		longitudeEnd := 43.258012
-		latitudeEnd := -79.910866
+		longitudeStart, latitudeStart, longitudeEnd, latitudeEnd, errL := h.svc.GetTrailLocationInfo(bindDataInstance.TrailOfWorkout)
+		if errL != nil {
+			log.Error("failed to get trail location, using default info now", zap.Error(errL))
+			longitudeStart = -79.919390
+			latitudeStart = 43.257715
+			longitudeEnd = 43.258012
+			latitudeEnd = -79.910866
+		}
 
 		h.svc.SetLiveStatus(bindDataInstance.WorkoutID, true)
 		h.StartBackgroundMockReading(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
@@ -293,7 +296,7 @@ func (h *HTTPHandler) SetHRMReading(ctx *gin.Context) {
 		return
 	}
 	log.Debug("HRM Smart Watch Reading", zap.Int("reading", intValue))
-	ctx.JSON(http.StatusOK, gin.H{"success": "hrm read data from smart watch"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "hrm read data from smart watch"})
 }
 
 func (h *HTTPHandler) GetGeoStatus(ctx *gin.Context) {
@@ -365,7 +368,7 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 	}
 	log.Info("sending location to queue now")
 	go h.svc.SendLastLocation(tempLastLoc.WorkoutID, tempLastLoc.Latitude, tempLastLoc.Longitude, tempLastLoc.TimeOfLocation)
-	ctx.JSON(http.StatusOK, gin.H{"message": "Geo reading set and location sent"})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Geo reading set and location sent"})
 }
 
 func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
@@ -445,6 +448,7 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 					baseURL := "http://localhost:8004/api/v1/hrm_reading"
 					params := url.Values{}
 					params.Add("hrm_id", hId.String())
+					fmt.Println(currentReadingStr)
 					params.Add("current_reading", currentReadingStr)
 					requestURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 					req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(nil))

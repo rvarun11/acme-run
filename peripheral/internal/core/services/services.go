@@ -13,12 +13,14 @@ import (
 type PeripheralService struct {
 	repo      ports.PeripheralRepository
 	publisher ports.RabbitMQHandler
+	client    ports.ZoneClient
 }
 
-func NewPeripheralService(repo ports.PeripheralRepository, handler ports.RabbitMQHandler) *PeripheralService {
+func NewPeripheralService(repo ports.PeripheralRepository, handler ports.RabbitMQHandler, client ports.ZoneClient) *PeripheralService {
 	return &PeripheralService{
 		repo:      repo,
 		publisher: handler,
+		client:    client,
 	}
 }
 
@@ -186,4 +188,8 @@ func failOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
 	}
+}
+
+func (s *PeripheralService) GetTrailLocationInfo(trailId uuid.UUID) (float64, float64, float64, float64, error) {
+	return s.client.GetTrailLocation(trailId)
 }
