@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/services"
-	"github.com/CAS735-F23/macrun-teamvsl/user/logger"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
@@ -47,7 +46,7 @@ func (h *PlayerHandler) registerPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	logger.Info("player registered")
+
 	res := fromAggregate(player)
 	ctx.JSON(http.StatusCreated, gin.H{
 		"message": "New player created successfully",
@@ -70,10 +69,8 @@ func (h *PlayerHandler) getPlayer(ctx *gin.Context) {
 		})
 		return
 	}
-	res := fromAggregate(p)
-	ctx.JSON(http.StatusOK, gin.H{
-		"player": res,
-	})
+	player := fromAggregate(p)
+	ctx.JSON(http.StatusOK, player)
 }
 
 func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {

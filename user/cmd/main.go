@@ -5,15 +5,14 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/adapters/handler/http"
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/services"
-	"github.com/CAS735-F23/macrun-teamvsl/user/logger"
+	logger "github.com/CAS735-F23/macrun-teamvsl/user/log"
 	"github.com/gin-gonic/gin"
 )
 
 var cfg *config.AppConfiguration = config.Config
 
 func main() {
-	logger.Info("Challenge Manager is starting")
-
+	logger.Info("User Manager is starting...")
 	// Initialize router
 	router := gin.Default()
 	router.Use(gin.Recovery())

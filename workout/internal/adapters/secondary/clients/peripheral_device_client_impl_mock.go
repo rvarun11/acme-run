@@ -29,8 +29,8 @@ func NewPeripheralDeviceClientMock() *PeripheralDeviceClientMock {
 }
 
 // BindPeripheralData provides a mock function with given fields
-func (m *PeripheralDeviceClientMock) BindPeripheralData(playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error {
-	args := m.Called(playerID, workoutID, hrmID, HRMConnected, SendLiveLocationToTrailManager)
+func (m *PeripheralDeviceClientMock) BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error {
+	args := m.Called(trailID, playerID, workoutID, hrmID, HRMConnected, SendLiveLocationToTrailManager)
 	return args.Error(0)
 }
 

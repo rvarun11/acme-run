@@ -3,7 +3,9 @@ package services
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/ports"
+	logger "github.com/CAS735-F23/macrun-teamvsl/user/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 )
 
 type PlayerService struct {
@@ -28,6 +30,7 @@ func (s *PlayerService) Register(req *domain.Player) (*domain.Player, error) {
 	if err != nil {
 		return &domain.Player{}, ports.ErrorCreatePlayerFailed
 	}
+	logger.Info("New player registered successfully", zap.String("player", player.User.Name))
 	return player, nil
 }
 
@@ -36,7 +39,7 @@ func (s *PlayerService) Get(id uuid.UUID) (*domain.Player, error) {
 	if err != nil {
 		return &domain.Player{}, err
 	}
-
+	// logger.Info("")
 	return player, nil
 }
 
@@ -52,7 +55,7 @@ func (s *PlayerService) Get(id uuid.UUID) (*domain.Player, error) {
 func (s *PlayerService) Update(req *domain.Player) (*domain.Player, error) {
 	player, err := s.repo.Update(req)
 	if err != nil {
-		return &domain.Player{}, nil
+		return &domain.Player{}, err
 	}
 	return player, nil
 }

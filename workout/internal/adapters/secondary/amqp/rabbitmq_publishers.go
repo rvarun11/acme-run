@@ -6,7 +6,9 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	amqp "github.com/rabbitmq/amqp091-go"
+	"go.uber.org/zap"
 )
 
 type AMQPPublisher struct {
@@ -50,7 +52,15 @@ func (pub *AMQPPublisher) PublishWorkoutStats(workoutStats *domain.Workout) erro
 	}
 	defer ch.Close()
 
-	body, err := json.Marshal(workoutStats)
+	var challengeStatsDTO = challengeStatsDTO{
+		PlayerID:        workoutStats.PlayerID,
+		WorkoutEnd:      workoutStats.EndedAt,
+		EnemiesFought:   workoutStats.Fights,
+		EnemiesEscaped:  workoutStats.Escapes,
+		DistanceCovered: workoutStats.DistanceCovered,
+	}
+
+	body, err := json.Marshal(challengeStatsDTO)
 	if err != nil {
 		return fmt.Errorf("failed to serialize workoutStats: %w", err)
 	}
@@ -65,6 +75,7 @@ func (pub *AMQPPublisher) PublishWorkoutStats(workoutStats *domain.Workout) erro
 			Body:        body,
 		},
 	)
+	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", body))
 	if err != nil {
 		return fmt.Errorf("failed to publish a message: %w", err)
 	}

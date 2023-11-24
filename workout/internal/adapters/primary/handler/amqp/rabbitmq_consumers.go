@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
@@ -13,11 +14,11 @@ import (
 )
 
 const (
-	exchangeKind       = "direct"
-	exchangeDurable    = true
-	exchangeAutoDelete = false
-	exchangeInternal   = false
-	exchangeNoWait     = false
+	// exchangeKind       = "direct"
+	// exchangeDurable    = true
+	// exchangeAutoDelete = false
+	// exchangeInternal   = false
+	// exchangeNoWait     = false
 
 	queueDurable    = true
 	queueAutoDelete = false
@@ -31,7 +32,7 @@ const (
 	prefetchSize   = 0
 	prefetchGlobal = false
 
-	consumeAutoAck   = false
+	consumeAutoAck   = true
 	consumeExclusive = false
 	consumeNoLocal   = false
 	consumeNoWait    = false
@@ -107,7 +108,7 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	/*logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
 	err = ch.ExchangeDeclare(
 		exchangeName,
 		exchangeKind,
@@ -119,7 +120,7 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
-	}
+	}*/
 
 	queue, err := ch.QueueDeclare(
 		queueName,
@@ -142,13 +143,13 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 		zap.String("binding_key", bindingKey),
 	)
 
-	err = ch.QueueBind(
+	/*err = ch.QueueBind(
 		queue.Name,
 		bindingKey,
 		exchangeName,
 		queueNoWait,
 		nil,
-	)
+	)*/
 	if err != nil {
 		return nil, fmt.Errorf("error ch.QueueBind %w", err)
 	}
@@ -168,7 +169,8 @@ func (c *ShelterSubscriber) CreateChannel(exchangeName, queueName, bindingKey, c
 }
 
 // Start new rabbitmq consumer
-func (c *ShelterSubscriber) StartConsumer(workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+func (c *ShelterSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+	defer wg.Done()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -191,14 +193,16 @@ func (c *ShelterSubscriber) StartConsumer(workerPoolSize int, exchange, queueNam
 		return fmt.Errorf("consume error %w", err)
 	}
 
+	var forever chan struct{}
 	for i := 0; i < workerPoolSize; i++ {
 		/// Do something with the deliveriesFind
 		go c.worker(ctx, deliveries)
 	}
 
 	// TODO Fix blocking error handling
-	//chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
-	//logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
+	logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	<-forever
 	return nil
 }
 
@@ -222,7 +226,7 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 	}
 
 	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
-	err = ch.ExchangeDeclare(
+	/*err = ch.ExchangeDeclare(
 		exchangeName,
 		exchangeKind,
 		exchangeDurable,
@@ -233,7 +237,7 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 	)
 	if err != nil {
 		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
-	}
+	}*/
 
 	queue, err := ch.QueueDeclare(
 		queueName,
@@ -256,13 +260,13 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 		zap.String("binding_key", bindingKey),
 	)
 
-	err = ch.QueueBind(
+	/*err = ch.QueueBind(
 		queue.Name,
 		bindingKey,
 		exchangeName,
 		queueNoWait,
 		nil,
-	)
+	)*/
 	if err != nil {
 		return nil, fmt.Errorf("error ch.QueueBind %w", err)
 	}
@@ -282,7 +286,8 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 }
 
 // Start new rabbitmq consumer
-func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+func (c *LocationSubscriber) StartConsumer(wg *sync.WaitGroup, workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -307,14 +312,12 @@ func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueNa
 
 	for i := 0; i < workerPoolSize; i++ {
 		/// Do something with the deliveriesFind
-		logger.Info("HelloStart")
 		go c.worker(ctx, deliveries)
-		logger.Info("HelloEnd")
 	}
 
 	// TODO Fix blocking error handling
-	//chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
-	//logger.Debug("ch.NotifyClose", zap.Error(chanErr))
+	chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
+	logger.Debug("ch.NotifyClose", zap.Error(chanErr))
 	return nil
 }
 
@@ -331,17 +334,10 @@ func (c *LocationSubscriber) worker(ctx context.Context, deliveries <-chan amqp.
 }
 
 func (wah *WorkoutAMQPHandler) InitAMQP() error {
-
-	err := wah.locationSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "LOCATION_PERIPHERAL_WORKOUT", "", "")
-	if err != nil {
-		return err
-	}
-	logger.Debug("Error err", zap.Any("err", err))
-	err = wah.shelterSubscriber.StartConsumer(1, "WORKOUT_EXCHANGE", "SHELTER_TRAIL_WORKOUT", "", "")
-	if err != nil {
-		return err
-	}
-	logger.Debug("Error err", zap.Any("err", err))
+	var wg sync.WaitGroup
+	wg.Add(2)
+	go wah.locationSubscriber.StartConsumer(&wg, 1, "WORKOUT_EXCHANGE", "LOCATION_PERIPHERAL_WORKOUT", "", "")
+	go wah.shelterSubscriber.StartConsumer(&wg, 1, "WORKOUT_EXCHANGE", "SHELTER_TRAIL_WORKOUT", "", "")
 
 	return nil
 }
