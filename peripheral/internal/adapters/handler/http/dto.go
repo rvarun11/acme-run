@@ -1,4 +1,4 @@
-package handler
+package httphandler
 
 import (
 	"time"
@@ -22,7 +22,7 @@ type LastHR struct {
 	// Latitude of the Player
 	HeartRate int `json:"heart_rate"`
 	// Time of reading
-	TimeOfLocation time.Time `json:"time_of_location"`
+	TimeOfLocation time.Time `json:"time_of_reading"`
 }
 
 type BindPeripheralData struct {

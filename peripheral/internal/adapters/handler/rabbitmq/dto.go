@@ -1,4 +1,4 @@
-package services
+package rabbitmqhandler
 
 import (
 	"time"
@@ -20,9 +20,9 @@ type LastLocation struct {
 type LastHR struct {
 	HRMID uuid.UUID `json:"hrm_id"`
 	// Latitude of the Player
-	HeartRate int `json:"latitude"`
+	HeartRate int `json:"heart_rate"`
 	// Time of reading
-	TimeOfLocation time.Time `json:"time_of_location"`
+	TimeOfLocation time.Time `json:"time_of_reading"`
 }
 
 type BindPeripheralData struct {
