@@ -73,9 +73,8 @@ func NewPeripheral(pId uuid.UUID, hId uuid.UUID, wId uuid.UUID, hStatus bool, li
 	if hId == uuid.Nil {
 		return Peripheral{}, errors.New("HRM ID cannot be empty")
 	}
-	if wId == uuid.Nil {
-		return Peripheral{}, errors.New("workout ID cannot be empty")
-	}
+
+	// dont't check wId as it is allowed to be empty
 
 	pN := Peripheral{
 		PlayerId:   pId,
