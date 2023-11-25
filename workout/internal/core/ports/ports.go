@@ -67,7 +67,7 @@ type WorkoutRepository interface {
 	GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
 }
 
-type AMQPPublisher interface {
+type Publisher interface {
 	PublishWorkoutStats(workoutStats *domain.Workout) error
 }
 

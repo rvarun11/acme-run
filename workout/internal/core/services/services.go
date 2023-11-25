@@ -32,14 +32,14 @@ type WorkoutService struct {
 	repo                       ports.WorkoutRepository
 	peripheral                 ports.PeripheralDeviceClient
 	user                       ports.UserServiceClient
-	publisher                  ports.AMQPPublisher
+	publisher                  ports.Publisher
 	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
 	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
 	activePlayers              map[uuid.UUID]bool
 }
 
 // Factory for creating a new WorkoutService
-func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralDeviceClient, user ports.UserServiceClient, publisher ports.AMQPPublisher) *WorkoutService {
+func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralDeviceClient, user ports.UserServiceClient, publisher ports.Publisher) *WorkoutService {
 	return &WorkoutService{
 		repo:                       repo,
 		peripheral:                 peripheral,

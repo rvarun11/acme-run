@@ -32,7 +32,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(trailID uuid.UUID, playe
 		return err
 	}
 
-	url := "http://localhost:8004/api/v1/peripheral_bind"
+	url := "http://localhost:8004/api/v1/peripheral"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bindPayload))
 
 	if err != nil {
@@ -62,8 +62,8 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 		return err
 	}
 
-	url := "http://localhost:8004/api/v1/peripheral_unbind"
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(unbindPayload))
+	url := "http://localhost:8004/api/v1/peripheral"
+	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(unbindPayload))
 	if err != nil {
 		return err
 	}

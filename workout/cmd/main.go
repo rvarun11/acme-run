@@ -26,7 +26,7 @@ func main() {
 	peripheralDeviceClient := clients.NewPeripheralDeviceClient()
 	user := clients.NewUserServiceClient()
 
-	workoutAMQPSecondaryHandler, _ := amqpsecondaryadapter.NewAMQPPublisher()
+	workoutAMQPSecondaryHandler, _ := amqpsecondaryadapter.NewPublisher()
 
 	// Initialize Workout service
 	workoutSvc := services.NewWorkoutService(store, peripheralDeviceClient, user, workoutAMQPSecondaryHandler)
