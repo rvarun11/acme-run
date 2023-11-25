@@ -57,6 +57,7 @@ type ZoneRepository interface {
 	DeleteZone(id uuid.UUID) error
 	GetZoneByID(id uuid.UUID) (*domain.Zone, error)
 	GetZoneByName(name string) (*domain.Zone, error)
+	List() ([]*domain.Zone, error)
 }
 
 type TrailManagerRepository interface {

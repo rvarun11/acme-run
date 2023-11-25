@@ -370,3 +370,19 @@ func (repo *ZoneRepository) UpdateZone(id uuid.UUID, name string) error {
 func (repo *ZoneRepository) DeleteZone(id uuid.UUID) error {
 	return repo.db.Delete(&postgresZone{}, "zone_id = ?", id).Error
 }
+
+// List retrieves all zone records from the database.
+func (repo *ZoneRepository) List() ([]*domain.Zone, error) {
+	var postgresZones []postgresZone
+	if err := repo.db.Find(&postgresZones).Error; err != nil {
+		return nil, err
+	}
+
+	// Convert the postgresZone records to domain.Zone objects
+	domainZones := make([]*domain.Zone, len(postgresZones))
+	for i, pzone := range postgresZones {
+		domainZones[i] = toZoneAggregate(&pzone)
+	}
+
+	return domainZones, nil
+}

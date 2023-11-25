@@ -282,3 +282,12 @@ func (t *TrailManagerService) GetClosestShelterInfo(latitude float64, longitude 
 	return closestShelter.ShelterID, minDistance, nil
 
 }
+
+// Add this function to the TrailManagerService type
+func (t *TrailManagerService) ListZones() ([]*domain.Zone, error) {
+	zones, err := t.repoZ.List()
+	if err != nil {
+		return nil, err
+	}
+	return zones, nil
+}
