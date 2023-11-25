@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type AMQPPublisher struct {
+type Publisher struct {
 	amqpConn *amqp.Connection
 }
 
@@ -34,18 +34,18 @@ func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
 	return mq, nil
 }
 
-// NewAMQPPublisher initializes a new AMQPPublisher with a RabbitMQ connection
-func NewAMQPPublisher() (*AMQPPublisher, error) {
+// NewPublisher initializes a new Publisher with a RabbitMQ connection
+func NewPublisher() (*Publisher, error) {
 	conn, err := NewConnection(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("error creating RabbitMQ connection: %w", err)
 	}
 
-	return &AMQPPublisher{amqpConn: conn}, nil
+	return &Publisher{amqpConn: conn}, nil
 }
 
 // PublishWorkoutStats publishes workout stats to the specified RabbitMQ queue
-func (pub *AMQPPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
+func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 	ch, err := pub.amqpConn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open a channel: %w", err)

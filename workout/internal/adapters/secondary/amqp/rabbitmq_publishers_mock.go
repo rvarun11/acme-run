@@ -6,21 +6,21 @@ import (
 	"go.uber.org/zap"
 )
 
-// MockAMQPPublisher is a mock implementation of the AMQPPublisher interface
-type MockAMQPPublisher struct {
+// MockPublisher is a mock implementation of the Publisher interface
+type MockPublisher struct {
 	// Add fields to store information about calls to the methods, if necessary
 	PublishedWorkouts []*domain.Workout
 }
 
-// NewMockAMQPPublisher creates a new instance of MockAMQPPublisher
-func NewMockAMQPPublisher() *MockAMQPPublisher {
-	return &MockAMQPPublisher{
+// NewMockPublisher creates a new instance of MockPublisher
+func NewMockPublisher() *MockPublisher {
+	return &MockPublisher{
 		PublishedWorkouts: make([]*domain.Workout, 0),
 	}
 }
 
-// PublishWorkoutStats mocks the PublishWorkoutStats method of AMQPPublisher
-func (m *MockAMQPPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
+// PublishWorkoutStats mocks the PublishWorkoutStats method of Publisher
+func (m *MockPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 	// In the mock, we just store the workoutStats for verification in tests
 
 	var challengeStatsDTO = challengeStatsDTO{
