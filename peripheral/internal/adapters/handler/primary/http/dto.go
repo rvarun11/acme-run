@@ -26,6 +26,13 @@ type LastHR struct {
 	TimeOfLocation time.Time `json:"time_of_reading"`
 }
 
+type AverageHeartRate struct {
+	// WorkoutID for the workout to be stopped
+	WorkoutID uuid.UUID `json:"workout_id"`
+	// Average Heart Rate
+	AverageHeartRate uint8 `json:"heart_rate"`
+}
+
 type BindPeripheralData struct {
 	// PlayerID
 	PlayerID uuid.UUID `json:"player_id"`

@@ -212,7 +212,10 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 			})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"reading": tLoc})
+		avgRate := AverageHeartRate{}
+		avgRate.WorkoutID = wId
+		avgRate.AverageHeartRate = uint8(tLoc.HeartRate)
+		ctx.JSON(http.StatusOK, gin.H{"reading": avgRate})
 	} else if hrType == "normal" {
 		var tLoc LastHR
 		var err error
