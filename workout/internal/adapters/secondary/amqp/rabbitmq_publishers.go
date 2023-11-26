@@ -52,6 +52,19 @@ func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 	}
 	defer ch.Close()
 
+	// Declare the queue to ensure it exists
+	_, err = ch.QueueDeclare(
+		"WORKOUT_STATS_QUEUE", // queue name
+		true,                  // durable
+		false,                 // delete when unused
+		false,                 // exclusive
+		false,                 // no-wait
+		nil,                   // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare a queue: %w", err)
+	}
+
 	var challengeStatsDTO = challengeStatsDTO{
 		PlayerID:        workoutStats.PlayerID,
 		WorkoutEnd:      workoutStats.EndedAt,
