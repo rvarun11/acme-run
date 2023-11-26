@@ -9,6 +9,7 @@ type AppConfiguration struct {
 	Port     string
 	Postgres *Postgres
 	RabbitMQ *RabbitMQ
+	Publish  *Publish
 }
 
 type Postgres struct {
@@ -27,19 +28,14 @@ type RabbitMQ struct {
 	Password string
 }
 
-func init() {
-	postgres := &Postgres1{
-		Host:     getEnv("POSTGRES_HOSTNAME", "localhost"),
-		Port:     getEnv("POSTGRES_PORT", "5900"),
-		User:     getEnv("POSTGRES_USER", "postgres"),
-		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
-		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
-		Encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
-	}
+type Publish struct {
+	Destination string
+}
 
-	postgres := &Postgres2{
+func init() {
+	postgres := &Postgres{
 		Host:     getEnv("POSTGRES_HOSTNAME", "localhost"),
-		Port:     getEnv("POSTGRES_PORT", "5901"),
+		Port:     getEnv("POSTGRES_PORT", "5432"),
 		User:     getEnv("POSTGRES_USER", "postgres"),
 		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
 		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
@@ -48,16 +44,21 @@ func init() {
 
 	rabbitmq := &RabbitMQ{
 		Host:     getEnv("RABBITMQ_HOSTNAME", "localhost"),
-		Port:     getEnv("RABBITMQ_PORT", "5673"),
+		Port:     getEnv("RABBITMQ_PORT", "5672"),
 		User:     getEnv("RABBITMQ_USER", "guest"),
 		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
 	}
 
+	publish := &Publish{
+		Destination: getEnv("SEND_DESTINATION", "SHELTER_TRAIL_WORKOUT"),
+	}
+
 	Config = &AppConfiguration{
 		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8001"),
+		Port:     getEnv("PORT", "8005"),
 		Postgres: postgres,
 		RabbitMQ: rabbitmq,
+		Publish:  publish,
 	}
 }
 

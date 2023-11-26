@@ -1,0 +1,50 @@
+NOTES
+Liuyin Shi
+
+2023-11-17
+This note is created for you for testing purposes
+
+1. To run this application, you need to stat postgres database first, and make sure 
+ther is a user named guest and passwor guest set
+
+2. Please create a database named traildb, we will store all zones, trails and shelters
+in this database.
+
+3. In the main.go, I created several trails, zones and shelters. They are based on the 
+real-worl location data around mcmaster (Inside the InitializeDB function), i will have 
+them listed below. The names are very intuitive and you chekc them out in google map
+
+4 For sending from the trail manager to the workout service thru the queue, the name is 
+configured in config.go, the name is inside the Publish struct, variable named Destination
+on line 52, you can change it to the other name based on your need
+
+
+5. Some quickcuts when droping table in postgres
+
+delete tables for fresh start
+DROP TABLE traildb.shelter CASCADE;
+DROP TABLE traildb.trail CASCADE;
+DROP TABLE traildb.zone CASCADE;
+
+
+6. MockData is shown below:
+zones
+		McMaster Zone
+		Fortinos Zone
+		Westdale Zone
+
+Trails
+
+		 McMaster Zone, "Starbucks Trail", 43.257538, -79.919628, 43.257903, -79.912135
+		 McMaster Zone, "ITB Trail", 43.258524, -79.921946, 43.262500, -79.923594
+		 Fortinos Zone, "Fortinos Trail", 43.256875, -79.930235, 43.250969, -79.928593
+		 Fortinos Zone, "Church Trail", 43.252870, -79.929062, 43.250162, -79.928219
+		 Westdale Zone, "Westdale UPS Trail", 43.260574, -79.909137, 43.263184, -79.902858
+		 Westdale Zone, "Westdale TD Trail", 43.263325, -79.902569, 43.262191, -79.897021
+		 Westdale Zone, "Churchill Park Trail", 43.269293, -79.899137, 43.264866, -79.897739
+
+Shelters
+		 "McMaster Shelter1", Starbucks Trail, availabilty:true, 43.257540, -79.918279
+		 "McMaster Shelter2", Starbucks Trail, availabilty:false, 43.257616, -79.915874
+		 "Fortinos Shelter", Fortinos Trail, availabilty:true, 43.254928, -79.929630
+		 "Westdale Shelter", Churchill Park Trail, availabilty: true, 43.263117, -79.901379

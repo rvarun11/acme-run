@@ -6,8 +6,8 @@ COPY . .
 
 RUN go get -d -v ./...
 
-RUN go build -o workout ./cmd
+RUN go build -o trail ./cmd
 
 EXPOSE 8001
 
-CMD ["./workout"]
+CMD ["./trail"]

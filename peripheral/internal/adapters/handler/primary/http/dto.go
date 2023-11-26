@@ -1,12 +1,11 @@
-package services
+package httphandler
 
+// LS-TODO: Remove this file as this does not belong in the domain.
 import (
 	"time"
 
 	"github.com/google/uuid"
 )
-
-// LS-TODO: This file is not needed. Remove this
 
 type LastLocation struct {
 	// WorkoutID for which the Shelter Availability is there or not
@@ -22,9 +21,9 @@ type LastLocation struct {
 type LastHR struct {
 	HRMID uuid.UUID `json:"hrm_id"`
 	// Latitude of the Player
-	HeartRate int `json:"latitude"`
+	HeartRate int `json:"heart_rate"`
 	// Time of reading
-	TimeOfLocation time.Time `json:"time_of_location"`
+	TimeOfLocation time.Time `json:"time_of_reading"`
 }
 
 type BindPeripheralData struct {
@@ -35,7 +34,9 @@ type BindPeripheralData struct {
 	// if HRM Connected is false then no HRM mock
 	HRMId uuid.UUID `json:"hrm_id"`
 	// HRM Connected or not
-	HRMConnected bool `json:"hrm_connected"`
+	HRMConnect bool `json:"hrm_connected"`
+	// Trail for this workout
+	TrailOfWorkout uuid.UUID `json:"trail_id"`
 	// Do we need live location? based on Hardcore mode
 	SendLiveLocationToTrailManager bool `json:"send_live_location_to_trail_manager"`
 }
