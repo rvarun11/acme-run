@@ -37,11 +37,17 @@ func (h *ChallengeHandler) InitRouter() {
 
 // Challenges
 
+// @Summary create a challenge
+// @ID create-challenge
+// @Produce json
+// @Success 200 {object} challengeDTO
+// @Failure 400
+// @Router /api/v1/challenges [post]
 func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	var req challengeDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "invalid request",
 		})
 		return
 	}
@@ -49,7 +55,7 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "unable to create challenge",
 		})
 		return
 	}
@@ -60,11 +66,17 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	})
 }
 
+// @Summary get challenge
+// @ID get-challenge
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Router /api/v1/challenges/{id} [get]
 func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 	cid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "invalid request",
 		})
 		return
 	}
@@ -72,18 +84,24 @@ func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "error occured while fetching the challenge",
 		})
 		return
 	}
 	ctx.JSON(http.StatusOK, res)
 }
 
+// @Summary update challenge
+// @ID update-challenge
+// @Produce json
+// @Success 204
+// @Failure 400
+// @Router /api/v1/challenges [put]
 func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	var req *challengeDTO
 	if err := ctx.ShouldBindJSON(req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"message": "invalid request",
 		})
 		return
 	}
@@ -92,24 +110,30 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "error occured while updating challenge",
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusNoContent, gin.H{
-		// 204 returns no body so this can be changed to 200 if body is needed
+		// 204 returns no body so this can be changed to 200 if body is needed/
 		"player":  res,
 		"message": "Player updated successfully",
 	})
 }
 
+// @Summary list challenges
+// @ID list-challenges
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Router /api/v1/challenges [get]
 func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
 	status := ctx.Query("status")
 	chs, err := h.svc.ListChallenges(status)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "unable to fetch list of challenges",
 		})
 		return
 	}

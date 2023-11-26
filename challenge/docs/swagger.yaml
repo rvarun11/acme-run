@@ -1,0 +1,76 @@
+definitions:
+  http.challengeDTO:
+    properties:
+      badge_url:
+        type: string
+      created_at:
+        type: string
+      criteria:
+        type: string
+      description:
+        type: string
+      end:
+        type: string
+      goal:
+        type: number
+      id:
+        type: string
+      name:
+        type: string
+      start:
+        type: string
+    type: object
+info:
+  contact:
+    email: rajpuv2@mcmaster.ca
+    name: Varun Rajput
+    url: https://github.com/rvarun11
+  description: This provides a description of API endpoints for the Challenge Manager
+  title: Challenge Manager API
+  version: "1.0"
+paths:
+  /api/v1/challenges:
+    get:
+      operationId: list-challenges
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: list challenges
+    post:
+      operationId: create-challenge
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.challengeDTO'
+        "400":
+          description: Bad Request
+      summary: create a challenge
+    put:
+      operationId: update-challenge
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+      summary: update challenge
+  /api/v1/challenges/{id}:
+    get:
+      operationId: get-challenge
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+      summary: get challenge
+swagger: "2.0"
