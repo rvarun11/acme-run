@@ -50,7 +50,7 @@ func init() {
 	}
 
 	publish := &Publish{
-		Destination: getEnv("SEND_DESTINATION", "TRAIL_TO_WORKOUT_SHELTER_INFO_QUEUE"),
+		Destination: getEnv("SEND_DESTINATION", "SHELTER_TRAIL_WORKOUT"),
 	}
 
 	Config = &AppConfiguration{
