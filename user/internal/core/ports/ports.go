@@ -15,17 +15,18 @@ var (
 )
 
 type PlayerService interface {
-	Register(player *domain.Player) (*domain.Player, error)
-	Get(uuid uuid.UUID) (*domain.Player, error)
-	// GetByID(email string) (*domain.Player, error)
-	Update(playerDTO *domain.Player) (*domain.Player, error)
 	List() ([]*domain.Player, error)
+	Register(player *domain.Player) (*domain.Player, error)
+	Get(id uuid.UUID) (*domain.Player, error)
+	Update(player *domain.Player) (*domain.Player, error)
+	Delete(id uuid.UUID) error
 }
 
 type PlayerRepository interface {
+	List() ([]*domain.Player, error)
 	Create(player *domain.Player) (*domain.Player, error)
-	Get(uuid uuid.UUID) (*domain.Player, error)
+	Get(id uuid.UUID) (*domain.Player, error)
 	GetByEmail(email string) (*domain.Player, error)
 	Update(player *domain.Player) (*domain.Player, error)
-	List() ([]*domain.Player, error)
+	Delete(id uuid.UUID) error
 }

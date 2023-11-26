@@ -19,6 +19,15 @@ func NewPlayerService(repo ports.PlayerRepository) *PlayerService {
 	}
 }
 
+func (s *PlayerService) List() ([]*domain.Player, error) {
+	players, err := s.repo.List()
+	if err != nil {
+		return []*domain.Player{}, err
+	}
+
+	return players, nil
+}
+
 func (s *PlayerService) Register(req *domain.Player) (*domain.Player, error) {
 	// TODO: This can be improved because the types of all these fields are same and can cause problems, if ordered incorrectly
 	p, err := domain.NewPlayer(req.User.Name, req.User.Email, req.User.DateOfBirth, req.Weight, req.Height, domain.Preference(req.Preference), req.ZoneID)
@@ -60,11 +69,7 @@ func (s *PlayerService) Update(req *domain.Player) (*domain.Player, error) {
 	return player, nil
 }
 
-func (s *PlayerService) List() ([]*domain.Player, error) {
-	players, err := s.repo.List()
-	if err != nil {
-		return []*domain.Player{}, err
-	}
-
-	return players, nil
+func (svc *PlayerService) DeletePlayerByID(id uuid.UUID) error {
+	// TODO: Can be implemented, if needed
+	return nil
 }
