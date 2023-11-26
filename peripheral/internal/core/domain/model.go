@@ -30,6 +30,7 @@ type Peripheral struct {
 	GeoDev     GeoData
 	CreatedAt  time.Time
 	LiveStatus bool
+	ToShelter  bool
 }
 
 func (p *Peripheral) GetAverageHRate() (uuid.UUID, time.Time, int) {
@@ -65,7 +66,7 @@ func (p *Peripheral) GetGeoLocation() (time.Time, float64, float64, uuid.UUID) {
 
 }
 
-func NewPeripheral(pId uuid.UUID, hId uuid.UUID, wId uuid.UUID, hStatus bool, liveStatus bool) (Peripheral, error) {
+func NewPeripheral(pId uuid.UUID, hId uuid.UUID, wId uuid.UUID, hStatus bool, liveStatus bool, toShelter bool) (Peripheral, error) {
 
 	if pId == uuid.Nil {
 		return Peripheral{}, errors.New("player ID cannot be empty")
@@ -84,6 +85,7 @@ func NewPeripheral(pId uuid.UUID, hId uuid.UUID, wId uuid.UUID, hStatus bool, li
 		HRMDev:     HRMData{},
 		GeoDev:     GeoData{},
 		LiveStatus: liveStatus,
+		ToShelter:  toShelter,
 	}
 	pN.HRMDev.HRMStatus = hStatus
 	pN.GeoDev.GeoStatus = true

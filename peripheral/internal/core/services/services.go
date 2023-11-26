@@ -25,7 +25,7 @@ func NewPeripheralService(repo ports.PeripheralRepository, handler ports.RabbitM
 }
 
 func (s *PeripheralService) CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error {
-	p, err := domain.NewPeripheral(pId, hId, uuid.Nil, false, false)
+	p, err := domain.NewPeripheral(pId, hId, uuid.Nil, false, false, false)
 	if err != nil {
 		return err
 	}
@@ -43,12 +43,12 @@ func (s *PeripheralService) CheckStatusByHRMId(hId uuid.UUID) bool {
 	}
 }
 
-func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uuid.UUID, connected bool, sendToTrail bool) error {
+func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uuid.UUID, connected bool, toShelter bool) error {
 
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
 
-		p, _ := domain.NewPeripheral(pId, hId, wId, connected, sendToTrail)
+		p, _ := domain.NewPeripheral(pId, hId, wId, connected, true, toShelter)
 		s.repo.AddPeripheralIntance(p)
 		return nil
 	}
@@ -56,7 +56,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 	pInstance.PlayerId = pId
 	pInstance.WorkoutId = wId
 	pInstance.HRMDev.HRMStatus = connected
-	pInstance.LiveStatus = sendToTrail
+	pInstance.ToShelter = toShelter
 	s.repo.Update(pInstance)
 	return nil
 
@@ -177,7 +177,8 @@ func (s *PeripheralService) SetLiveStatus(wId uuid.UUID, code bool) error {
 }
 
 func (s *PeripheralService) SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
-	err := s.publisher.SendLastLocation(wId, latitude, longitude, time)
+	pInstance, _ := s.repo.GetByWorkoutId(wId)
+	err := s.publisher.SendLastLocation(wId, latitude, longitude, time, pInstance.ToShelter)
 	if err != nil {
 		return err
 	}

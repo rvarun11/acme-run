@@ -50,7 +50,7 @@ type PeripheralRepository interface {
 }
 
 type RabbitMQHandler interface {
-	SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error
+	SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time, toTrail bool) error
 }
 
 type ZoneClient interface {

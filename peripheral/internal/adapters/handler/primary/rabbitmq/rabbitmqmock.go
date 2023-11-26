@@ -18,7 +18,7 @@ func NewRabbitMQHandlerMock() *RabbitMQHandlerMock {
 }
 
 // SendLastLocation is a mock method that simulates sending location data to a queue
-func (r *RabbitMQHandlerMock) SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
+func (r *RabbitMQHandlerMock) SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time, toTrail bool) error {
 	args := r.Called(wId, latitude, longitude, time)
 	return args.Error(0)
 }

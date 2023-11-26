@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	lastLocationQueueName = "LOCATION_PERIPHERAL_WORKOUT"
-	lastHRQueueName       = "Peripheral-HRM-Queue-001"
+	lastLocationQueueName        = "LOCATION_PERIPHERAL_WORKOUT"
+	lastLocationToTrailQueueName = "LOCATION_PERIPHERL_TRAIL_MANAGER"
 )
 
 const (
@@ -62,7 +62,7 @@ func NewRabbitMQHandler(amqpURL string) (*RabbitMQHandler, error) {
 }
 
 func (handler *RabbitMQHandler) declareQueues() error {
-	queues := []string{lastLocationQueueName, lastHRQueueName}
+	queues := []string{lastLocationQueueName, lastLocationToTrailQueueName}
 	for _, queue := range queues {
 		_, err := handler.channel.QueueDeclare(
 			queue,
@@ -88,7 +88,7 @@ func (handler *RabbitMQHandler) Close() {
 	}
 }
 
-func (handler *RabbitMQHandler) SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
+func (handler *RabbitMQHandler) SendLastLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time, toTrail bool) error {
 	// location := handler.peripheralService.GetGeoLocation(wId)
 	var location LastLocation
 	location.WorkoutID = wId
@@ -115,6 +115,23 @@ func (handler *RabbitMQHandler) SendLastLocation(wId uuid.UUID, latitude float64
 	if err != nil {
 		log.Fatal("Failed to publish LastLocation", zap.Error(err))
 		return err
+	}
+
+	if toTrail {
+		err = handler.channel.Publish(
+			"",
+			lastLocationToTrailQueueName,
+			false,
+			false,
+			amqp.Publishing{
+				ContentType: "application/json",
+				Body:        body,
+			},
+		)
+		if err != nil {
+			log.Fatal("Failed to publish LastLocation", zap.Error(err))
+			return err
+		}
 	}
 
 	log.Debug("Sent LastLocation", zap.ByteString("body", body))
