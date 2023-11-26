@@ -193,7 +193,7 @@ func (c *LocationSubscriber) worker(deliveries <-chan amqp.Delivery) {
 
 		logger.Info("Received a message and unmarshalled successfully", zap.Any("location", lastLocation))
 		// Process the message...
-		err = c.svc.UpdateCurrentLocation(lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
+		err = c.svc.UpdateCurrentLocation(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
 		if err != nil {
 			logger.Error("Failed to update current location", zap.Error(err))
 		}

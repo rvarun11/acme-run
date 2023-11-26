@@ -208,7 +208,7 @@ func (t *TrailManagerService) DeleteZone(zId uuid.UUID) error {
 	return nil
 }
 
-func (t *TrailManagerService) UpdateCurrentLocation(latitude float64, longitude float64, time time.Time) error {
+func (t *TrailManagerService) UpdateCurrentLocation(wId uuid.UUID, latitude float64, longitude float64, time time.Time) error {
 
 	// Now push the shelter data data to the queue to the workout
 	shelterId, distance, availability, _, err := t.GetClosestShelter(longitude, latitude, time)
@@ -217,7 +217,7 @@ func (t *TrailManagerService) UpdateCurrentLocation(latitude float64, longitude 
 		return err
 	}
 	closestShelter, _ := t.GetShelterByID(shelterId)
-	err = t.publisher.PublishShelterInfo(shelterId, closestShelter.ShelterName, availability, distance)
+	err = t.publisher.PublishShelterInfo(wId, shelterId, closestShelter.ShelterName, availability, distance)
 
 	if err != nil {
 		log.Error("error when publishing shelter info", zap.Error(err))

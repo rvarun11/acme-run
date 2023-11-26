@@ -68,5 +68,5 @@ type TrailManagerRepository interface {
 }
 
 type AMQPPublisher interface {
-	PublishShelterInfo(sId uuid.UUID, name string, availability bool, distance float64) error
+	PublishShelterInfo(wId uuid.UUID, sId uuid.UUID, name string, availability bool, distance float64) error
 }

@@ -50,7 +50,7 @@ func NewAMQPPublisher() (*AMQPPublisher, error) {
 }
 
 // PublishWorkoutStats publishes workout stats to the specified RabbitMQ queue
-func (pub *AMQPPublisher) PublishShelterInfo(sId uuid.UUID, name string, availability bool, distance float64) error {
+func (pub *AMQPPublisher) PublishShelterInfo(wId uuid.UUID, sId uuid.UUID, name string, availability bool, distance float64) error {
 	ch, err := pub.amqpConn.Channel()
 	if err != nil {
 		log.Error("publish shelter: failed to open a channel", zap.Error(err))
@@ -58,6 +58,7 @@ func (pub *AMQPPublisher) PublishShelterInfo(sId uuid.UUID, name string, availab
 	}
 	defer ch.Close()
 	var shelter ShelterDTO
+	shelter.WorkoutID = wId
 	shelter.DistanceToShelter = distance
 	shelter.ShelterName = name
 	shelter.ShelterID = sId
@@ -68,6 +69,7 @@ func (pub *AMQPPublisher) PublishShelterInfo(sId uuid.UUID, name string, availab
 		return fmt.Errorf("failed to serialize workoutStats: %w", err)
 	}
 	fmt.Println(destinationQueueName)
+	log.Debug("distance to shelter", zap.Float64("distance", distance))
 	err = ch.Publish(
 		"",                   // exchange
 		destinationQueueName, // queue name
