@@ -182,14 +182,14 @@ func (h *ChallengeHandler) listBadgesByPlayerID(ctx *gin.Context) {
 	pid, err := uuid.Parse(ctx.Query("player_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "invalid request",
 		})
 		return
 	}
 	badges, err := h.svc.ListBadgesByPlayerID(pid)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "error occured while fetching badges for player",
 		})
 		return
 	}
@@ -209,14 +209,14 @@ func (h *ChallengeHandler) listChallengeStatsByPlayerID(ctx *gin.Context) {
 	pid, err := uuid.Parse(ctx.Query("player_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "invalid request",
 		})
 		return
 	}
 	csArr, err := h.svc.ListChallengeStatsByPlayerID(pid)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "error occured while fetching stats for player",
 		})
 		return
 	}
