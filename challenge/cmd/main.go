@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
-	docs "github.com/CAS735-F23/macrun-teamvsl/challenge/docs"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/docs"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/handler/http"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
