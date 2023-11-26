@@ -3,6 +3,8 @@ package clients
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"io/ioutil"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -80,8 +82,12 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 }
 
 func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
+	// Ensure workoutID is valid
+	if workoutID == uuid.Nil {
+		return 0, errors.New("invalid workout ID")
+	}
 
-	url := "http://localhost:8004/api/v1/peripheral/hrm/workout_id=" + workoutID.String() + "&type=avg"
+	url := "http://localhost:8004/api/v1/peripheral/hrm?workout_id=" + workoutID.String() + "&type=avg"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return 0, err
@@ -92,13 +98,21 @@ func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UU
 	if err != nil {
 		return 0, err
 	}
+	if resp == nil || resp.Body == nil {
+		return 0, errors.New("received nil response or nil body")
+	}
 	defer resp.Body.Close()
 
-	var averageHeartRate uint8
-	err = json.NewDecoder(resp.Body).Decode(&averageHeartRate)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return 0, err
 	}
 
-	return averageHeartRate, nil
+	var averageHeartRate AverageHeartRate
+	err = json.Unmarshal(body, &averageHeartRate)
+	if err != nil {
+		return 0, err
+	}
+
+	return averageHeartRate.AverageHeartRate, nil
 }
