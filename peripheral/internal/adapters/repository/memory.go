@@ -112,12 +112,12 @@ func (r *MemoryRepository) GetByHRMId(hId uuid.UUID) (*domain.Peripheral, error)
 	return nil, ports.ErrorPeripheralNotFound // No peripheral found with the given WorkoutId
 }
 
-func (r *MemoryRepository) Update(p domain.Peripheral) error {
+func (r *MemoryRepository) Update(p *domain.Peripheral) error {
 	if _, ok := r.ps[p.HRMId]; !ok {
 		return fmt.Errorf("peripheral does not exist: %w", ports.ErrorUpdatePeripheralFailed)
 	}
 	r.Lock()
-	r.ps[p.HRMId] = p
+	r.ps[p.HRMId] = *p
 	r.Unlock()
 	return nil
 }

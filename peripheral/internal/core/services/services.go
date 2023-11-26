@@ -1,11 +1,11 @@
 package services
 
 import (
-	"log"
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/ports"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -38,7 +38,7 @@ func (s *PeripheralService) CheckStatusByHRMId(hId uuid.UUID) bool {
 	if err != nil {
 		return false
 	} else {
-		s.repo.Update(*pInstance)
+		s.repo.Update(pInstance)
 		return true
 	}
 }
@@ -57,7 +57,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 	pInstance.WorkoutId = wId
 	pInstance.HRMDev.HRMStatus = connected
 	pInstance.LiveStatus = sendToTrail
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 
 }
@@ -90,7 +90,7 @@ func (s *PeripheralService) SetHeartRateReading(hId uuid.UUID, reading int) erro
 		return err
 	}
 	pInstance.SetHRate(reading)
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 }
 
@@ -108,7 +108,7 @@ func (s *PeripheralService) SetHRMDevStatusByHRMId(hId uuid.UUID, code bool) err
 		return err
 	}
 	pInstance.HRMDev.HRMStatus = code
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 }
 
@@ -118,7 +118,7 @@ func (s *PeripheralService) SetHRMDevStatus(wId uuid.UUID, code bool) error {
 		return err
 	}
 	pInstance.HRMDev.HRMStatus = code
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 }
 
@@ -128,7 +128,7 @@ func (s *PeripheralService) SetGeoLocation(wId uuid.UUID, longitude float64, lat
 		return err
 	}
 	pInstance.SetLocation(longitude, latitude)
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 }
 
@@ -146,7 +146,7 @@ func (s *PeripheralService) SetGeoDevStatus(wId uuid.UUID, code bool) error {
 		return err
 	}
 	pInstance.GeoDev.GeoStatus = code
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 }
 
@@ -172,7 +172,7 @@ func (s *PeripheralService) SetLiveStatus(wId uuid.UUID, code bool) error {
 		return err
 	}
 	pInstance.LiveStatus = code
-	s.repo.Update(*pInstance)
+	s.repo.Update(pInstance)
 	return nil
 }
 

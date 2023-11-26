@@ -45,7 +45,7 @@ type PeripheralRepository interface {
 	GetByWorkoutId(wID uuid.UUID) (*domain.Peripheral, error)
 	GetByPlayerId(pID uuid.UUID) (*domain.Peripheral, error)
 	GetByHRMId(hID uuid.UUID) (*domain.Peripheral, error)
-	Update(p domain.Peripheral) error
+	Update(p *domain.Peripheral) error
 	List() ([]*domain.Peripheral, error)
 }
 
