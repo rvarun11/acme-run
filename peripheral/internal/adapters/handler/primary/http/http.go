@@ -3,6 +3,7 @@ package httphandler
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -215,7 +216,15 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		avgRate := AverageHeartRate{}
 		avgRate.WorkoutID = wId
 		avgRate.AverageHeartRate = uint8(tLoc.HeartRate)
-		ctx.JSON(http.StatusOK, gin.H{"reading": avgRate})
+
+		jsonData, err := json.Marshal(avgRate)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{
+				"status": "error", "message": "could not marshal JSON for average heart rate",
+			})
+			return
+		}
+		ctx.JSON(http.StatusOK, gin.H{"status": "error", "data": jsonData})
 	} else if hrType == "normal" {
 		var tLoc LastHR
 		var err error
