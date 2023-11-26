@@ -75,7 +75,7 @@ func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 			Body:        body,
 		},
 	)
-	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", body))
+	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", challengeStatsDTO))
 	if err != nil {
 		return fmt.Errorf("failed to publish a message: %w", err)
 	}
