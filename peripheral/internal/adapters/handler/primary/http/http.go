@@ -224,7 +224,10 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 			})
 			return
 		}
-		ctx.JSON(http.StatusOK, gin.H{"status": "error", "data": jsonData})
+		// ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": jsonData})
+		ctx.Writer.Header().Set("Content-Type", "application/json")
+		ctx.Writer.WriteHeader(http.StatusOK)
+		ctx.Writer.Write(jsonData)
 	} else if hrType == "normal" {
 		var tLoc LastHR
 		var err error
