@@ -361,6 +361,7 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	} else if workoutOptions.CurrentWorkoutOption == EscapeBit {
 		workout.Escapes++
 	}
+	workoutType := getWorkoutType(workoutOptions.CurrentWorkoutOption) // Assuming getWorkoutType is a valid function
 
 	// Update the workout option to make it inactive
 	workoutOptions.IsWorkoutOptionActive = false
@@ -381,7 +382,6 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	}
 
 	// Log the successful stopping of the workout option
-	workoutType := getWorkoutType(workoutOptions.CurrentWorkoutOption) // Assuming getWorkoutType is a valid function
 	logger.Info("Workout option stopped", zap.String("workoutID", workoutID.String()), zap.String("optionType", workoutType))
 
 	return nil

@@ -636,7 +636,7 @@ func TestWorkoutService_WorkoutOptionsIfStrength(t *testing.T) {
 	// Assert that the BindPeripheralData was called with shelterNeeded as false
 	peripheralClientMock.AssertCalled(t, "BindPeripheralData", trailID, playerID, workout.WorkoutID, HRMID, true, false)
 
-	// Get workout options and assert shelter is not an option
+	// Get workout options
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 

@@ -30,7 +30,7 @@ type AverageHeartRate struct {
 	// WorkoutID for the workout to be stopped
 	WorkoutID uuid.UUID `json:"workout_id"`
 	// Average Heart Rate
-	AverageHeartRate uint8 `json:"average_heart_rate"`
+	AverageHeartRate uint8 `json:"heart_rate"`
 }
 
 type userDTO struct {
