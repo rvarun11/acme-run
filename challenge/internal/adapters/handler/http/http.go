@@ -28,21 +28,22 @@ func (h *ChallengeHandler) InitRouter() {
 	router.GET("/challenges/:id", h.getChallengeByID)
 	router.PUT("/challenges", h.updateChallenge)
 	router.GET("/challenges", h.listChallenges)
+	router.DELETE("/challenges/:id", h.deleteChallengeById)
 
-	// Badges: This may end up in a separate handler
-	router.GET("/badges/:player_id", h.listBadgesByPlayerID)
-	// ChallengeStats: This may end up in a separate handler
-	router.GET("/stats/:player_id", h.listChallengeStatsByPlayerID)
+	// Badges
+	router.GET("/badges", h.listBadgesByPlayerID)
+	router.GET("/stats", h.listChallengeStatsByPlayerID)
 }
 
 // Challenges
 
-// @Summary create a challenge
-// @ID create-challenge
-// @Produce json
-// @Success 200 {object} challengeDTO
-// @Failure 400
-// @Router /api/v1/challenges [post]
+// @Summary	Create a Challenge
+// @Tags		challenges
+// @ID			create-challenge
+// @Produce	json
+// @Param		challenge	body		http.challengeDTO	true	"Challenge data"
+// @Success	200			{object}	http.challengeDTO
+// @Router		/api/v1/challenges [post]
 func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	var req challengeDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -66,12 +67,13 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	})
 }
 
-// @Summary get challenge
-// @ID get-challenge
-// @Produce json
-// @Success 200
-// @Failure 400
-// @Router /api/v1/challenges/{id} [get]
+// @Summary	Get Challenge by ID
+// @Tags		challenges
+// @ID			get-challenge
+// @Produce	json
+// @Param		id	path		string	true	"Challenge ID (UUID)"
+// @Success	200	{object}	http.challengeDTO
+// @Router		/api/v1/challenges/{id} [get]
 func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 	cid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
@@ -91,12 +93,13 @@ func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, res)
 }
 
-// @Summary update challenge
-// @ID update-challenge
-// @Produce json
-// @Success 204
-// @Failure 400
-// @Router /api/v1/challenges [put]
+// @Summary	Update Challenge
+// @Tags		challenges
+// @ID			update-challenge
+// @Produce	json
+// @Param		challenge	body	http.challengeDTO	true	"Challenge data"
+// @Success	204
+// @Router		/api/v1/challenges [put]
 func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	var req *challengeDTO
 	if err := ctx.ShouldBindJSON(req); err != nil {
@@ -122,12 +125,12 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	})
 }
 
-// @Summary list challenges
-// @ID list-challenges
-// @Produce json
-// @Success 200
-// @Failure 400
-// @Router /api/v1/challenges [get]
+// @Summary	List Challenges
+// @Tags		challenges
+// @ID			list-challenges
+// @Produce	json
+// @Success	200	{array}	http.challengeDTO
+// @Router		/api/v1/challenges [get]
 func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
 	status := ctx.Query("status")
 	chs, err := h.svc.ListChallenges(status)
@@ -140,28 +143,70 @@ func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, chs)
 }
 
+// @Summary	Delete a Challenge by ID
+// @Tags		challenges
+// @ID			delete-challenge
+// @Produce	json
+// @Param		id	path	string	true	"Challenge ID (UUID) to be deleted"
+// @Success	204	"No Content"
+// @Router		/api/v1/challenges/{id} [delete]
+func (h *ChallengeHandler) deleteChallengeById(ctx *gin.Context) {
+	cid, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request",
+		})
+		return
+	}
+	// Delete the Challenge
+	err = h.svc.DeleteChallengeByID(cid)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "error occured while deleting the challenge",
+		})
+		return
+	}
+	ctx.JSON(http.StatusNoContent, err)
+}
+
 // Badges
+
+// @Summary	List Badges by Player ID
+// @ID			list-badges
+// @Tags		badges
+// @Produce	json
+// @Param		player_id	query	string	true	"Player ID (UUID)"
+// @Success	200			{array}	domain.Badge
+// @Router		/api/v1/badges [get]
 func (h *ChallengeHandler) listBadgesByPlayerID(ctx *gin.Context) {
-	pid, err := uuid.Parse(ctx.Param("player_id"))
+	pid, err := uuid.Parse(ctx.Query("player_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
 		return
 	}
-	chs, err := h.svc.ListBadgesByPlayerID(pid)
+	badges, err := h.svc.ListBadgesByPlayerID(pid)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, chs)
+	ctx.JSON(http.StatusOK, badges)
 }
 
 // ChallengeStats
+
+// @Summary	List Stats by Player ID
+// @ID			list-stats
+// @Tags		badges
+// @Produce	json
+// @Param		player_id	query	string	true	"Player ID (UUID)"
+// @Success	200			{array}	domain.ChallengeStats
+// @Router		/api/v1/stats [get]
 func (h *ChallengeHandler) listChallengeStatsByPlayerID(ctx *gin.Context) {
-	pid, err := uuid.Parse(ctx.Param("player_id"))
+	pid, err := uuid.Parse(ctx.Query("player_id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err,

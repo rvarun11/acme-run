@@ -27,6 +27,7 @@ type ChallengeService interface {
 	CreateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
 	GetChallengeByID(cid uuid.UUID) (*domain.Challenge, error)
 	UpdateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+	DeleteChallengeByID(cid uuid.UUID) error
 	ListChallenges(status string) ([]*domain.Challenge, error)
 
 	// Badges

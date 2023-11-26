@@ -19,19 +19,57 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/badges": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "badges"
+                ],
+                "summary": "List Badges by Player ID",
+                "operationId": "list-badges",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Player ID (UUID)",
+                        "name": "player_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Badge"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/challenges": {
             "get": {
                 "produces": [
                     "application/json"
                 ],
-                "summary": "list challenges",
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "List Challenges",
                 "operationId": "list-challenges",
                 "responses": {
                     "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/http.challengeDTO"
+                            }
+                        }
                     }
                 }
             },
@@ -39,14 +77,25 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "update challenge",
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "Update Challenge",
                 "operationId": "update-challenge",
+                "parameters": [
+                    {
+                        "description": "Challenge data",
+                        "name": "challenge",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.challengeDTO"
+                        }
+                    }
+                ],
                 "responses": {
                     "204": {
                         "description": "No Content"
-                    },
-                    "400": {
-                        "description": "Bad Request"
                     }
                 }
             },
@@ -54,17 +103,28 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "create a challenge",
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "Create a Challenge",
                 "operationId": "create-challenge",
+                "parameters": [
+                    {
+                        "description": "Challenge data",
+                        "name": "challenge",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.challengeDTO"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/http.challengeDTO"
                         }
-                    },
-                    "400": {
-                        "description": "Bad Request"
                     }
                 }
             }
@@ -74,20 +134,196 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "get challenge",
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "Get Challenge by ID",
                 "operationId": "get-challenge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Challenge ID (UUID)",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK"
-                    },
-                    "400": {
-                        "description": "Bad Request"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.challengeDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "Delete a Challenge by ID",
+                "operationId": "delete-challenge",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Challenge ID (UUID) to be deleted",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/api/v1/stats": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "badges"
+                ],
+                "summary": "List Stats by Player ID",
+                "operationId": "list-stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Player ID (UUID)",
+                        "name": "player_id",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.ChallengeStats"
+                            }
+                        }
                     }
                 }
             }
         }
     },
     "definitions": {
+        "domain.Badge": {
+            "type": "object",
+            "properties": {
+                "challenge": {
+                    "$ref": "#/definitions/domain.Challenge"
+                },
+                "completedOn": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "playerID": {
+                    "type": "string"
+                },
+                "score": {
+                    "description": "score is the total score obtained by the player when completing the challenge",
+                    "type": "number"
+                }
+            }
+        },
+        "domain.Challenge": {
+            "type": "object",
+            "properties": {
+                "badgeURL": {
+                    "description": "Badge is the logo received when the challenge is completed",
+                    "type": "string"
+                },
+                "createdAt": {
+                    "description": "When the Challenge was Created",
+                    "type": "string"
+                },
+                "criteria": {
+                    "description": "Criteria required to complete the challenge",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.Criteria"
+                        }
+                    ]
+                },
+                "description": {
+                    "description": "Challenge description, eg.",
+                    "type": "string"
+                },
+                "end": {
+                    "description": "end time is the time when the challenge ends",
+                    "type": "string"
+                },
+                "goal": {
+                    "description": "The Goal of the challenge",
+                    "type": "number"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the challenge, eg. HalloweeK 2023",
+                    "type": "string"
+                },
+                "start": {
+                    "description": "start time is the time when the challenge starts",
+                    "type": "string"
+                }
+            }
+        },
+        "domain.ChallengeStats": {
+            "type": "object",
+            "properties": {
+                "challenge": {
+                    "$ref": "#/definitions/domain.Challenge"
+                },
+                "distanceCovered": {
+                    "type": "number"
+                },
+                "enemiesEscaped": {
+                    "type": "integer"
+                },
+                "enemiesFought": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "playerID": {
+                    "type": "string"
+                },
+                "workoutEnd": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Criteria": {
+            "type": "string",
+            "enum": [
+                "DistanceCovered",
+                "Escape",
+                "Fight",
+                "FightMoreThanEscape",
+                "EscapeMoreThanFight"
+            ],
+            "x-enum-varnames": [
+                "DistanceCovered",
+                "EscapeEnemy",
+                "FightEnemy",
+                "FightMoreThanEscape",
+                "EscapeMoreThanFight"
+            ]
+        },
         "http.challengeDTO": {
             "type": "object",
             "properties": {
