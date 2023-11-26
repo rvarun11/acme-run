@@ -10,6 +10,26 @@ import (
 
 // Repository Functions
 
+func (r *Repository) List() ([]*domain.Player, error) {
+	var playersFromDB []postgresPlayer
+	if err := r.db.Find(&playersFromDB).Error; err != nil {
+		return nil, err
+	}
+
+	var players []*domain.Player
+	for _, pp := range playersFromDB {
+		var pu postgresUser
+		if err := r.db.First(&pu, "id = ?", pp.UserID).Error; err != nil {
+			return nil, err
+		}
+
+		player := toAggregate(&pu, &pp)
+		players = append(players, player)
+	}
+
+	return players, nil
+}
+
 func (r *Repository) Create(player *domain.Player) (*domain.Player, error) {
 	pu := &postgresUser{
 		ID:          player.User.ID,
@@ -120,22 +140,7 @@ func (r *Repository) Update(player *domain.Player) (*domain.Player, error) {
 	return player, nil
 }
 
-func (r *Repository) List() ([]*domain.Player, error) {
-	var playersFromDB []postgresPlayer
-	if err := r.db.Find(&playersFromDB).Error; err != nil {
-		return nil, err
-	}
-
-	var players []*domain.Player
-	for _, pp := range playersFromDB {
-		var pu postgresUser
-		if err := r.db.First(&pu, "id = ?", pp.UserID).Error; err != nil {
-			return nil, err
-		}
-
-		player := toAggregate(&pu, &pp)
-		players = append(players, player)
-	}
-
-	return players, nil
+func (r *Repository) Delete(id uuid.UUID) error {
+	// TODO: Can be implemented, if needed
+	return nil
 }

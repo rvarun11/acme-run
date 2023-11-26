@@ -35,7 +35,7 @@ func init() {
 
 	Config = &AppConfiguration{
 		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8000"),
+		Port:     getEnv("PORT", "8010"),
 		Postgres: postgres,
 	}
 }

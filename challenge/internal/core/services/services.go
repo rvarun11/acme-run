@@ -62,6 +62,11 @@ func (svc *ChallengeService) UpdateChallenge(req *domain.Challenge) (*domain.Cha
 	return ch, nil
 }
 
+func (svc *ChallengeService) DeleteChallengeByID(id uuid.UUID) error {
+	// TODO: Can be implemented, if needed
+	return nil
+}
+
 func (svc *ChallengeService) ListChallenges(status string) ([]*domain.Challenge, error) {
 	chs, err := svc.repo.ListChallenges()
 	if err != nil {
