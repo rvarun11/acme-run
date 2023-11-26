@@ -1,6 +1,7 @@
 package main
 
 import (
+	logger "github.com/CAS735-F23/macrun-teamvsl/user/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	amqphandler "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/handler/amqp"
 	http "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/handler/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var cfg *config.AppConfiguration = config.Config
@@ -26,7 +28,10 @@ func main() {
 	peripheralDeviceClient := clients.NewPeripheralDeviceClient()
 	user := clients.NewUserServiceClient()
 
-	workoutAMQPSecondaryHandler, _ := amqpsecondaryadapter.NewPublisher()
+	workoutAMQPSecondaryHandler, err := amqpsecondaryadapter.NewPublisher()
+	if err != nil {
+		logger.Error("publish queue", zap.Error(err))
+	}
 
 	// Initialize Workout service
 	workoutSvc := services.NewWorkoutService(store, peripheralDeviceClient, user, workoutAMQPSecondaryHandler)

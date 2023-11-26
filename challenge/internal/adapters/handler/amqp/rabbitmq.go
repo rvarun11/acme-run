@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
@@ -13,11 +14,11 @@ import (
 )
 
 const (
-	exchangeKind       = "direct"
-	exchangeDurable    = true
-	exchangeAutoDelete = false
-	exchangeInternal   = false
-	exchangeNoWait     = false
+	// exchangeKind       = "direct"
+	// exchangeDurable    = true
+	// exchangeAutoDelete = false
+	// exchangeInternal   = false
+	// exchangeNoWait     = false
 
 	queueDurable    = true
 	queueAutoDelete = false
@@ -31,7 +32,7 @@ const (
 	prefetchSize   = 0
 	prefetchGlobal = false
 
-	consumeAutoAck   = false
+	consumeAutoAck   = true
 	consumeExclusive = false
 	consumeNoLocal   = false
 	consumeNoWait    = false
@@ -40,11 +41,11 @@ const (
 // Images Rabbitmq consumer
 type WorkoutStatsConsumer struct {
 	amqpConn *amqp.Connection
-	svc      services.ChallengeService
+	svc      *services.ChallengeService
 }
 
-// Initialize new RabbitMQ connection
-func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
+func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.ChallengeService) *WorkoutStatsConsumer {
+
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
@@ -52,12 +53,25 @@ func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
 		cfg.Host,
 		cfg.Port,
 	)
-	mq, err := amqp.Dial(conn)
+
+	amqpConn, err := amqp.Dial(conn)
 	if err != nil {
-		return &amqp.Connection{}, err
+		logger.Fatal("Unable to dial connection to RabbitMQ")
+		return nil
 	}
 
-	return mq, nil
+	return &WorkoutStatsConsumer{
+		amqpConn: amqpConn,
+		svc:      challengeSvc,
+	}
+}
+
+func (wsc *WorkoutStatsConsumer) InitAMQP() error {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go wsc.StartConsumer(&wg, 1, "", "WORKOUT_STATS_QUEUE", "", "")
+
+	return nil
 }
 
 // Consume messages
@@ -67,19 +81,19 @@ func (c *WorkoutStatsConsumer) CreateChannel(exchangeName, queueName, bindingKey
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Info("Declaring exchange", zap.String("exchange name", exchangeName))
-	err = ch.ExchangeDeclare(
-		exchangeName,
-		exchangeKind,
-		exchangeDurable,
-		exchangeAutoDelete,
-		exchangeInternal,
-		exchangeNoWait,
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
-	}
+	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	// err = ch.ExchangeDeclare(
+	// 	exchangeName,
+	// 	exchangeKind,
+	// 	exchangeDurable,
+	// 	exchangeAutoDelete,
+	// 	exchangeInternal,
+	// 	exchangeNoWait,
+	// 	nil,
+	// )
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
+	// }
 
 	queue, err := ch.QueueDeclare(
 		queueName,
@@ -94,7 +108,7 @@ func (c *WorkoutStatsConsumer) CreateChannel(exchangeName, queueName, bindingKey
 		return nil, fmt.Errorf("error ch.QueueDeclare %w", err)
 	}
 
-	logger.Info("Declaring queue and binding it to exchange",
+	logger.Debug("Declaring queue and binding it to exchange",
 		zap.String("queue_name", queue.Name),
 		zap.String("exchange_name", exchangeName),
 		zap.Int("message_count", queue.Messages),
@@ -102,18 +116,18 @@ func (c *WorkoutStatsConsumer) CreateChannel(exchangeName, queueName, bindingKey
 		zap.String("binding_key", bindingKey),
 	)
 
-	err = ch.QueueBind(
-		queue.Name,
-		bindingKey,
-		exchangeName,
-		queueNoWait,
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error ch.QueueBind %w", err)
-	}
+	// err = ch.QueueBind(
+	// 	queue.Name,
+	// 	bindingKey,
+	// 	exchangeName,
+	// 	queueNoWait,
+	// 	nil,
+	// )
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error ch.QueueBind %w", err)
+	// }
 
-	logger.Info("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
+	logger.Debug("Queue bound to exchange, starting to consume from queue", zap.String("consumer_tag", consumerTag))
 
 	err = ch.Qos(
 		prefetchCount,  // prefetch count
@@ -128,7 +142,7 @@ func (c *WorkoutStatsConsumer) CreateChannel(exchangeName, queueName, bindingKey
 }
 
 // Start new rabbitmq consumer
-func (c *WorkoutStatsConsumer) StartConsumer(workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+func (c *WorkoutStatsConsumer) StartConsumer(wg *sync.WaitGroup, workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -157,15 +171,15 @@ func (c *WorkoutStatsConsumer) StartConsumer(workerPoolSize int, exchange, queue
 	}
 
 	chanErr := <-ch.NotifyClose(make(chan *amqp.Error))
-	logger.Info("ch.NotifyClose", zap.Error(chanErr))
+	logger.Debug("ch.NotifyClose", zap.Error(chanErr))
 	return chanErr
 }
 
 func (c *WorkoutStatsConsumer) worker(ctx context.Context, deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
-		var csDTO *challengeStatsDTO
-		logger.Info("Received a message: %s", zap.Any("delivery", d.Body))
+		csDTO := &challengeStatsDTO{}
 		err := json.Unmarshal(d.Body, csDTO)
+		logger.Debug("Received a message: %s", zap.Any("delivery", csDTO))
 		if err != nil {
 			logger.Debug("failed to unmarshal %s", zap.Error(err))
 		}

@@ -32,7 +32,6 @@ func (h *ChallengeHandler) InitRouter() {
 
 	// Badges
 	router.GET("/badges", h.listBadgesByPlayerID)
-	router.GET("/stats", h.listChallengeStatsByPlayerID)
 }
 
 // Challenges
@@ -194,31 +193,4 @@ func (h *ChallengeHandler) listBadgesByPlayerID(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, badges)
-}
-
-// ChallengeStats
-
-// @Summary	List Stats by Player ID
-// @ID			list-stats
-// @Tags		badges
-// @Produce	json
-// @Param		player_id	query	string	true	"Player ID (UUID)"
-// @Success	200			{array}	domain.ChallengeStats
-// @Router		/api/v1/stats [get]
-func (h *ChallengeHandler) listChallengeStatsByPlayerID(ctx *gin.Context) {
-	pid, err := uuid.Parse(ctx.Query("player_id"))
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
-		})
-		return
-	}
-	csArr, err := h.svc.ListChallengeStatsByPlayerID(pid)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "error occured while fetching stats for player",
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, csArr)
 }
