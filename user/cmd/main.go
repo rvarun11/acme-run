@@ -3,8 +3,8 @@ package main
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/user/config"
 	"github.com/CAS735-F23/macrun-teamvsl/user/docs"
-	"github.com/CAS735-F23/macrun-teamvsl/user/internal/adapters/handler/http"
-	"github.com/CAS735-F23/macrun-teamvsl/user/internal/adapters/repository/postgres"
+	"github.com/CAS735-F23/macrun-teamvsl/user/internal/adapters/primary/http"
+	"github.com/CAS735-F23/macrun-teamvsl/user/internal/adapters/secondary/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/user/internal/core/services"
 	logger "github.com/CAS735-F23/macrun-teamvsl/user/log"
 	"github.com/gin-gonic/gin"

@@ -1,18 +1,18 @@
 version: "3.8"
 
 services:
-# RabbitMQ
-  # rabbitmq:
-  #   container_name: rabbitmq
-  #   image: rabbitmq:management
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-  #   healthcheck:
-  #     test: rabbitmq-diagnostics check_port_connectivity
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 3
+RabbitMQ
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 3
 
 # User Manager
   user:

@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 )
 
 type Repository struct {
@@ -29,10 +30,15 @@ func NewRepository(cfg *config.Postgres) *Repository {
 		cfg.Encoding,
 	)
 
-	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	logLevel := getLogLevel(cfg.LogLevel)
+
+	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{
+		Logger: gormLogger.Default.LogMode(logLevel),
+	})
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to connect to database", zap.Error(err))
 	}
+
 	db.AutoMigrate(&postgresWorkout{}, &postgresWorkoutOptions{})
 
 	return &Repository{
@@ -395,4 +401,20 @@ func (r *Repository) GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate 
 	}
 
 	return uint16(totalSheltersTaken), nil
+}
+
+// getLogLevel returns the GORM Log Level
+func getLogLevel(l string) gormLogger.LogLevel {
+	switch l {
+	case "silent":
+		return gormLogger.Silent
+	case "info":
+		return gormLogger.Info
+	case "error":
+		return gormLogger.Error
+	case "warn":
+		return gormLogger.Warn
+	default:
+		return gormLogger.Warn
+	}
 }

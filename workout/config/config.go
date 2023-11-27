@@ -18,6 +18,7 @@ type Postgres struct {
 	Password string
 	DB_Name  string
 	Encoding string
+	LogLevel string
 }
 
 type RabbitMQ struct {
@@ -35,6 +36,7 @@ func init() {
 		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
 		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
 		Encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
+		LogLevel: getEnv("POSTGRES_LOG_LEVEL", "warn"),
 	}
 
 	rabbitmq := &RabbitMQ{

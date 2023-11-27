@@ -45,7 +45,6 @@ type WorkoutStatsConsumer struct {
 }
 
 func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.ChallengeService) *WorkoutStatsConsumer {
-
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
