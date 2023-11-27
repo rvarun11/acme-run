@@ -15,10 +15,8 @@ type Publisher struct {
 	amqpConn *amqp.Connection
 }
 
-var cfg *config.RabbitMQ = config.Config.RabbitMQ
-
-// Initialize new RabbitMQ connection
-func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
+// NewPublisher initializes a new Publisher with a RabbitMQ connection
+func NewPublisher(cfg *config.RabbitMQ) *Publisher {
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
@@ -26,22 +24,16 @@ func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
 		cfg.Host,
 		cfg.Port,
 	)
-	mq, err := amqp.Dial(conn)
+
+	amqpConn, err := amqp.Dial(conn)
 	if err != nil {
-		return &amqp.Connection{}, err
+		logger.Fatal("unable to dial connection to RabbitMQ", zap.Error(err))
+		return nil
 	}
 
-	return mq, nil
-}
-
-// NewPublisher initializes a new Publisher with a RabbitMQ connection
-func NewPublisher() (*Publisher, error) {
-	conn, err := NewConnection(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("error creating RabbitMQ connection: %w", err)
+	return &Publisher{
+		amqpConn: amqpConn,
 	}
-
-	return &Publisher{amqpConn: conn}, nil
 }
 
 // PublishWorkoutStats publishes workout stats to the specified RabbitMQ queue

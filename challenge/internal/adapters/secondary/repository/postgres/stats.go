@@ -16,7 +16,6 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Record not found, create new ChallengeStats
 			pcs = postgresChallengeStats{
-				ID:              uuid.New(),
 				PlayerID:        cs.PlayerID,
 				ChallengeID:     cs.Challenge.ID,
 				DistanceCovered: cs.DistanceCovered,
@@ -36,7 +35,6 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 
 	// Increment values in pcs as needed
 	newPCS := &postgresChallengeStats{
-		ID:              pcs.ID,
 		PlayerID:        pcs.PlayerID,
 		ChallengeID:     pcs.ChallengeID,
 		DistanceCovered: pcs.DistanceCovered + cs.DistanceCovered,
@@ -52,42 +50,21 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 	return nil
 }
 
-func (r *Repository) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error) {
-	var pcs []postgresChallengeStats
-	res := r.db.First(&pcs, "player_id = ?", pid)
-	if res.Error != nil {
-		if errors.Is(res.Error, gorm.ErrRecordNotFound) {
-			return []*domain.ChallengeStats{}, nil
-		}
-		return []*domain.ChallengeStats{}, res.Error
-	}
-
-	var csArr []*domain.ChallengeStats
-	for _, pc := range pcs {
-		ch, err := r.GetChallengeByID(pc.ChallengeID)
-		if err != nil {
-			return []*domain.ChallengeStats{}, err
-		}
-		cs := pc.toAggregate(ch)
-		csArr = append(csArr, cs)
-	}
-
-	return csArr, nil
-}
-
 func (r *Repository) ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.ChallengeStats, error) {
 	var pcs []postgresChallengeStats
-	res := r.db.First(&pcs, "challenge_id = ?", cid)
+	res := r.db.Find(&pcs, "challenge_id = ?", cid)
 	if res.Error != nil {
+		logger.Error("unable to fetch challenge stats", zap.Any("error", res.Error))
 		return []*domain.ChallengeStats{}, res.Error
+	}
+
+	ch, err := r.GetChallengeByID(cid)
+	if err != nil {
+		return []*domain.ChallengeStats{}, err
 	}
 
 	var csArr []*domain.ChallengeStats
 	for _, pc := range pcs {
-		ch, err := r.GetChallengeByID(pc.ChallengeID)
-		if err != nil {
-			return []*domain.ChallengeStats{}, err
-		}
 		cs := pc.toAggregate(ch)
 		csArr = append(csArr, cs)
 	}

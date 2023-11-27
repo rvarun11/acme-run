@@ -2,6 +2,7 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
 	"github.com/gin-gonic/gin"
@@ -26,15 +27,35 @@ func (h *ChallengeHandler) InitRouter() {
 	// Challenges
 	router.POST("/challenges", h.createChallenge)
 	router.GET("/challenges/:id", h.getChallengeByID)
-	router.PUT("/challenges", h.updateChallenge)
+	router.PUT("/challenges/:id", h.updateChallenge)
 	router.GET("/challenges", h.listChallenges)
 	router.DELETE("/challenges/:id", h.deleteChallengeById)
+	// Note: This is a temporary API for the purposes of the demo
+	router.PUT("/challenges/:id/end", h.endChallenge)
 
 	// Badges
 	router.GET("/badges", h.listBadgesByPlayerID)
 }
 
 // Challenges
+
+// @Summary	List Challenges
+// @Tags		challenges
+// @ID			list-challenges
+// @Produce	json
+// @Success	200	{array}	http.challengeDTO
+// @Router		/api/v1/challenges [get]
+func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
+	status := ctx.Query("status")
+	chs, err := h.svc.ListChallenges(status)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "unable to fetch list of challenges",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, chs)
+}
 
 // @Summary	Create a Challenge
 // @Tags		challenges
@@ -52,7 +73,6 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 		return
 	}
 	ch, err := h.svc.CreateChallenge(toAggregate(&req))
-	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "unable to create challenge",
@@ -60,6 +80,7 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 		return
 	}
 
+	res := fromAggregate(ch)
 	ctx.JSON(http.StatusCreated, gin.H{
 		"challenge": res,
 		"message":   "New challenge created successfully",
@@ -98,17 +119,26 @@ func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 // @Produce	json
 // @Param		challenge	body	http.challengeDTO	true	"Challenge data"
 // @Success	204
-// @Router		/api/v1/challenges [put]
+// @Router		/api/v1/challenges/{id} [put]
 func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
-	var req *challengeDTO
-	if err := ctx.ShouldBindJSON(req); err != nil {
+	cid, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid request",
+			"error": "invalid challenge id",
 		})
 		return
 	}
 
-	ch, err := h.svc.UpdateChallenge(toAggregate(req))
+	var req challengeDTO
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"message": "invalid body paramaters",
+		})
+		return
+	}
+
+	req.ID = cid
+	ch, err := h.svc.UpdateChallenge(toAggregate(&req))
 	res := fromAggregate(ch)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -122,24 +152,6 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 		"player":  res,
 		"message": "Player updated successfully",
 	})
-}
-
-// @Summary	List Challenges
-// @Tags		challenges
-// @ID			list-challenges
-// @Produce	json
-// @Success	200	{array}	http.challengeDTO
-// @Router		/api/v1/challenges [get]
-func (h *ChallengeHandler) listChallenges(ctx *gin.Context) {
-	status := ctx.Query("status")
-	chs, err := h.svc.ListChallenges(status)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "unable to fetch list of challenges",
-		})
-		return
-	}
-	ctx.JSON(http.StatusOK, chs)
 }
 
 // @Summary	Delete a Challenge by ID
@@ -166,6 +178,42 @@ func (h *ChallengeHandler) deleteChallengeById(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusNoContent, err)
+}
+
+/*
+endChallenges - updates the challenge end time to now & dispatches badges for the challenge
+Note: This is temporary function for the purposes of the demo.
+*/
+func (h *ChallengeHandler) endChallenge(ctx *gin.Context) {
+	// 1. Get Challenge & Update the challenge end time to now.
+	cid, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid request",
+		})
+		return
+	}
+	ch, err := h.svc.GetChallengeByID(cid)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "error occured while fetching challenge",
+		})
+		return
+	}
+	ch.End = time.Now()
+	ch, err = h.svc.UpdateChallenge(ch)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "error occured while updating challenge",
+		})
+		return
+	}
+
+	h.svc.DispatchBadges(ch)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "challenge ended & badges dispatched",
+	})
 }
 
 // Badges

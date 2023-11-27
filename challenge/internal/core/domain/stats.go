@@ -8,7 +8,6 @@ import (
 )
 
 type ChallengeStats struct {
-	ID              uuid.UUID
 	PlayerID        uuid.UUID
 	Challenge       *Challenge
 	DistanceCovered float64
@@ -23,7 +22,6 @@ func NewChallengeStats(ch *Challenge, pid uuid.UUID, dc float64, ef uint8, ee ui
 		return &ChallengeStats{}, err
 	}
 	return &ChallengeStats{
-		ID:              uuid.New(),
 		PlayerID:        pid,
 		Challenge:       ch,
 		DistanceCovered: dc,

@@ -73,32 +73,6 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "challenges"
-                ],
-                "summary": "Update Challenge",
-                "operationId": "update-challenge",
-                "parameters": [
-                    {
-                        "description": "Challenge data",
-                        "name": "challenge",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/http.challengeDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            },
             "post": {
                 "produces": [
                     "application/json"
@@ -157,6 +131,32 @@ const docTemplate = `{
                     }
                 }
             },
+            "put": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "challenges"
+                ],
+                "summary": "Update Challenge",
+                "operationId": "update-challenge",
+                "parameters": [
+                    {
+                        "description": "Challenge data",
+                        "name": "challenge",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.challengeDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            },
             "delete": {
                 "produces": [
                     "application/json"
@@ -178,38 +178,6 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/api/v1/stats": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "badges"
-                ],
-                "summary": "List Stats by Player ID",
-                "operationId": "list-stats",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Player ID (UUID)",
-                        "name": "player_id",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.ChallengeStats"
-                            }
-                        }
                     }
                 }
             }
@@ -277,32 +245,6 @@ const docTemplate = `{
                 },
                 "start": {
                     "description": "start time is the time when the challenge starts",
-                    "type": "string"
-                }
-            }
-        },
-        "domain.ChallengeStats": {
-            "type": "object",
-            "properties": {
-                "challenge": {
-                    "$ref": "#/definitions/domain.Challenge"
-                },
-                "distanceCovered": {
-                    "type": "number"
-                },
-                "enemiesEscaped": {
-                    "type": "integer"
-                },
-                "enemiesFought": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "playerID": {
-                    "type": "string"
-                },
-                "workoutEnd": {
                     "type": "string"
                 }
             }

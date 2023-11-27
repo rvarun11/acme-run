@@ -25,7 +25,7 @@ func (h *PlayerHandler) InitRouter() {
 	router.GET("/players", h.listPlayers)
 	router.POST("/players", h.registerPlayer)
 	router.GET("/players/:id", h.getPlayer)
-	router.PUT("/players", h.updatePlayer)
+	router.PUT("/players/:id", h.updatePlayer)
 	router.DELETE("/players:id", h.deletePlayer)
 }
 
@@ -113,14 +113,22 @@ func (h *PlayerHandler) getPlayer(ctx *gin.Context) {
 // @Success	204
 // @Router		/api/v1/player [put]
 func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {
-	var req playerDTO
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	pid, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request",
 		})
 		return
 	}
 
+	var req playerDTO
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid body parameters",
+		})
+		return
+	}
+	req.ID = pid
 	p, err := h.svc.Update(req.toAggregate())
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
@@ -128,6 +136,7 @@ func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {
 		})
 		return
 	}
+
 	res := fromAggregate(p)
 	ctx.JSON(http.StatusNoContent, gin.H{
 		// 204 returns no body so this can be changed to 200 if body is needed

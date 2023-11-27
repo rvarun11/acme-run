@@ -101,6 +101,7 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 	if err != nil {
 		return &domain.Badge{}, err
 	}
+	logger.Debug("Badge create for challenge stat", zap.Any("stat", cs))
 
 	return badge, nil
 }
@@ -143,38 +144,33 @@ func (svc *ChallengeService) CreateOrUpdateChallengeStats(pid uuid.UUID, dc floa
 	return nil
 }
 
-func (svc *ChallengeService) ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error) {
-	csArr, err := svc.repo.ListChallengeStatsByPlayerID(pid)
-	if err != nil {
-		return []*domain.ChallengeStats{}, err
-	}
-	return csArr, nil
-}
-
 // ActeFinal runs when a challenge ends and creates badges for all the players who met the critera for the challenge
 func (svc *ChallengeService) DispatchBadges(ch *domain.Challenge) {
 	// 1. Fetch Player Challenge Stats
 	csArr, err := svc.repo.ListChallengeStatsByChallengeID(ch.ID)
 	if err != nil {
-		logger.Fatal("error occured while fetching challenge stats for player of a challenge", zap.Any("challenge", ch))
+		logger.Fatal("error occured while fetching challenge stats for players of a challenge", zap.Any("challenge", ch))
 	}
 
 	// 2. Create Badges, if critera is met
 	// var badges []*domain.Badge
+	logger.Debug("Here, I am attempting to create badges for the challenge", zap.String("challenge_name", ch.Name))
 	for _, cs := range csArr {
 		_, err := svc.CreateBadge(cs)
+		logger.Debug("Attempting to create badge for stat", zap.Any("stat", cs))
 		if err != nil {
 			logger.Debug("unable to create badge for challenge stat", zap.Error(err))
 			continue
 		}
 	}
 
-	// 3. (optional) Delete challenges stats for the challenge as it has ended
+	// 3. Delete challenges stats for the challenge as it has ended
 
 }
 
 /*
 This is a function to monitor active challenges and create badges
+- Note: This should be handled by a cron job. When a challenge ends, the badges should be dispatched.
 */
 func (svc *ChallengeService) MonitorChallenges() {
 	ticker := time.NewTicker(10 * time.Second)
