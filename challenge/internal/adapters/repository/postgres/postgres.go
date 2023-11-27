@@ -25,17 +25,17 @@ type postgresChallenge struct {
 }
 
 type postgresBadge struct {
-	ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
-	PlayerID    uuid.UUID `gorm:"not null"`
-	ChallengeID uuid.UUID `gorm:"not null"`
+	// ID          uuid.UUID `gorm:"type:uuid;primaryKey"`
+	PlayerID    uuid.UUID `gorm:"not null;primaryKey"`
+	ChallengeID uuid.UUID `gorm:"not null;primaryKey"`
 	Score       float64
 	CompletedOn time.Time
 }
 
 type postgresChallengeStats struct {
-	ID              uuid.UUID `gorm:"type:uuid;primaryKey"`
-	PlayerID        uuid.UUID `gorm:"not null"`
-	ChallengeID     uuid.UUID `gorm:"not null"`
+	// ID              uuid.UUID `gorm:"type:uuid;primaryKey"`
+	PlayerID        uuid.UUID `gorm:"not null;primaryKey"`
+	ChallengeID     uuid.UUID `gorm:"not null;primaryKey"`
 	DistanceCovered float64
 	EnemiesFought   uint8
 	EnemiesEscaped  uint8
@@ -90,10 +90,10 @@ func (pc *postgresChallenge) toAggregate() *domain.Challenge {
 // Helper function to convert to domain Badge
 func (pb *postgresBadge) toAggregate(ch *domain.Challenge) *domain.Badge {
 	return &domain.Badge{
-		ID:          pb.ID,
 		PlayerID:    pb.PlayerID,
 		Challenge:   ch,
 		CompletedOn: pb.CompletedOn,
+		Score:       pb.Score,
 	}
 }
 

@@ -101,6 +101,7 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 	if err != nil {
 		return &domain.Badge{}, err
 	}
+	logger.Debug("Badge create for challenge stat", zap.Any("stat", cs))
 
 	return badge, nil
 }
@@ -153,8 +154,10 @@ func (svc *ChallengeService) DispatchBadges(ch *domain.Challenge) {
 
 	// 2. Create Badges, if critera is met
 	// var badges []*domain.Badge
+	logger.Debug("Here, I am attempting to create badges for the challenge", zap.String("challenge_name", ch.Name))
 	for _, cs := range csArr {
 		_, err := svc.CreateBadge(cs)
+		logger.Debug("Attempting to create badge for stat", zap.Any("stat", cs))
 		if err != nil {
 			logger.Debug("unable to create badge for challenge stat", zap.Error(err))
 			continue

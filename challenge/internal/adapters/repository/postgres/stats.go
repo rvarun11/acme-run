@@ -16,7 +16,6 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			// Record not found, create new ChallengeStats
 			pcs = postgresChallengeStats{
-				ID:              uuid.New(),
 				PlayerID:        cs.PlayerID,
 				ChallengeID:     cs.Challenge.ID,
 				DistanceCovered: cs.DistanceCovered,
@@ -36,7 +35,6 @@ func (r *Repository) CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) err
 
 	// Increment values in pcs as needed
 	newPCS := &postgresChallengeStats{
-		ID:              pcs.ID,
 		PlayerID:        pcs.PlayerID,
 		ChallengeID:     pcs.ChallengeID,
 		DistanceCovered: pcs.DistanceCovered + cs.DistanceCovered,
