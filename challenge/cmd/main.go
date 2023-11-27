@@ -3,9 +3,9 @@ package main
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/docs"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/handler/amqp"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/handler/http"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/repository/postgres"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/primary/amqp"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/primary/http"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/secondary/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"
 	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/gin-gonic/gin"
@@ -42,11 +42,6 @@ func main() {
 	// Initialize WorkoutStats Consumer
 	statsConsumer := amqp.NewWorkoutStatsConsumer(cfg.RabbitMQ, challengeSvc)
 	statsConsumer.InitAMQP()
-
-	// Initialize badge service
-	// badgeSvc := services.NewBadgeService(store)
-	// badgeHandler := http.NewBadgeHandler(router, *badgeSvc)
-	// badgeHandler.InitRouter()
 
 	// Swagger Support
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port

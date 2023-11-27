@@ -66,12 +66,10 @@ func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.Challe
 	}
 }
 
-func (wsc *WorkoutStatsConsumer) InitAMQP() error {
+func (wsc *WorkoutStatsConsumer) InitAMQP() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	go wsc.StartConsumer(&wg, 1, "", "WORKOUT_STATS_QUEUE", "", "")
-
-	return nil
 }
 
 // Consume messages
@@ -81,7 +79,7 @@ func (c *WorkoutStatsConsumer) CreateChannel(exchangeName, queueName, bindingKey
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	// logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
 	// err = ch.ExchangeDeclare(
 	// 	exchangeName,
 	// 	exchangeKind,
@@ -179,9 +177,9 @@ func (c *WorkoutStatsConsumer) worker(ctx context.Context, deliveries <-chan amq
 	for d := range deliveries {
 		csDTO := &challengeStatsDTO{}
 		err := json.Unmarshal(d.Body, csDTO)
-		logger.Debug("Received a message: %s", zap.Any("delivery", csDTO))
+		// logger.Debug("Received a message: %s", zap.Any("delivery", csDTO))
 		if err != nil {
-			logger.Debug("failed to unmarshal %s", zap.Error(err))
+			logger.Debug("failed to unmarshal", zap.Error(err))
 		}
 		c.svc.CreateOrUpdateChallengeStats(csDTO.PlayerID, csDTO.DistanceCovered, csDTO.EnemiesFought, csDTO.EnemiesEscaped, csDTO.WorkoutEnd)
 	}

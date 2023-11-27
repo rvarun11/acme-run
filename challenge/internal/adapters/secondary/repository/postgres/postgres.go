@@ -6,10 +6,12 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
+	gormLogger "gorm.io/gorm/logger"
 )
 
 type postgresChallenge struct {
@@ -59,10 +61,10 @@ func NewRepository(cfg *config.Postgres) *Repository {
 	logLevel := getLogLevel(cfg.LogLevel)
 
 	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{
-		Logger: logger.Default.LogMode(logLevel),
+		Logger: gormLogger.Default.LogMode(logLevel),
 	})
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to connect to database", zap.Error(err))
 	}
 
 	db.AutoMigrate(&postgresChallenge{}, &postgresBadge{}, &postgresChallengeStats{})
@@ -109,17 +111,17 @@ func (pcs *postgresChallengeStats) toAggregate(ch *domain.Challenge) *domain.Cha
 }
 
 // getLogLevel returns the GORM Log Level
-func getLogLevel(l string) logger.LogLevel {
+func getLogLevel(l string) gormLogger.LogLevel {
 	switch l {
 	case "silent":
-		return logger.Silent
+		return gormLogger.Silent
 	case "info":
-		return logger.Info
+		return gormLogger.Info
 	case "error":
-		return logger.Error
+		return gormLogger.Error
 	case "warn":
-		return logger.Warn
+		return gormLogger.Warn
 	default:
-		return logger.Warn
+		return gormLogger.Warn
 	}
 }
