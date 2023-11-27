@@ -44,23 +44,6 @@ definitions:
         description: start time is the time when the challenge starts
         type: string
     type: object
-  domain.ChallengeStats:
-    properties:
-      challenge:
-        $ref: '#/definitions/domain.Challenge'
-      distanceCovered:
-        type: number
-      enemiesEscaped:
-        type: integer
-      enemiesFought:
-        type: integer
-      id:
-        type: string
-      playerID:
-        type: string
-      workoutEnd:
-        type: string
-    type: object
   domain.Criteria:
     enum:
     - DistanceCovered
@@ -160,23 +143,6 @@ paths:
       summary: Create a Challenge
       tags:
       - challenges
-    put:
-      operationId: update-challenge
-      parameters:
-      - description: Challenge data
-        in: body
-        name: challenge
-        required: true
-        schema:
-          $ref: '#/definitions/http.challengeDTO'
-      produces:
-      - application/json
-      responses:
-        "204":
-          description: No Content
-      summary: Update Challenge
-      tags:
-      - challenges
   /api/v1/challenges/{id}:
     delete:
       operationId: delete-challenge
@@ -212,25 +178,21 @@ paths:
       summary: Get Challenge by ID
       tags:
       - challenges
-  /api/v1/stats:
-    get:
-      operationId: list-stats
+    put:
+      operationId: update-challenge
       parameters:
-      - description: Player ID (UUID)
-        in: query
-        name: player_id
+      - description: Challenge data
+        in: body
+        name: challenge
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/http.challengeDTO'
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/domain.ChallengeStats'
-            type: array
-      summary: List Stats by Player ID
+        "204":
+          description: No Content
+      summary: Update Challenge
       tags:
-      - badges
+      - challenges
 swagger: "2.0"
