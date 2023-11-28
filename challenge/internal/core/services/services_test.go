@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
-	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/repository/postgres"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/adapters/secondary/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/ports"
 	"github.com/CAS735-F23/macrun-teamvsl/challenge/internal/core/services"

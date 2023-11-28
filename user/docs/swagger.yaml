@@ -1,0 +1,143 @@
+definitions:
+  http.playerDTO:
+    properties:
+      created_at:
+        description: CreatedAt is the time when the player registered
+        type: string
+      height:
+        description: Height of the player
+        type: number
+      id:
+        description: ID of the player
+        type: string
+      preference:
+        description: Preference of the player
+        type: string
+      updated_at:
+        description: UpdatedAt is the time when the player last updated the profile
+        type: string
+      user:
+        allOf:
+        - $ref: '#/definitions/http.userDTO'
+        description: User is the root entity of player
+      weight:
+        description: Weight of the player
+        type: number
+      zone_id:
+        description: GeographicalZone is a group of trails in a region
+        type: string
+    type: object
+  http.userDTO:
+    properties:
+      dob:
+        description: DoB
+        type: string
+      email:
+        description: Email
+        type: string
+      id:
+        description: ID is the identifier of the Entity, the ID is shared for all
+          sub domains
+        type: string
+      name:
+        description: Name of the user
+        type: string
+    type: object
+info:
+  contact:
+    email: rajpuv2@mcmaster.ca
+    name: Varun Rajput
+    url: https://github.com/rvarun11
+  description: This provides a description of API endpoints for the Challenge Manager
+  title: User Manager API
+  version: "1.0"
+paths:
+  /api/v1/player:
+    put:
+      operationId: update-challenge
+      parameters:
+      - description: Player data
+        in: body
+        name: player
+        required: true
+        schema:
+          $ref: '#/definitions/http.playerDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update Player
+      tags:
+      - players
+  /api/v1/player/{id}:
+    get:
+      operationId: get-player
+      parameters:
+      - description: Player ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.playerDTO'
+      summary: Get Player by ID
+      tags:
+      - players
+  /api/v1/players:
+    get:
+      operationId: list-players
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/http.playerDTO'
+            type: array
+      summary: List Players
+      tags:
+      - players
+    post:
+      operationId: create-player
+      parameters:
+      - description: Player data
+        in: body
+        name: player
+        required: true
+        schema:
+          $ref: '#/definitions/http.playerDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.playerDTO'
+      summary: Create a Player
+      tags:
+      - players
+  /api/v1/players/{id}:
+    delete:
+      operationId: delete-player
+      parameters:
+      - description: Player ID (UUID) to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a Player by ID
+      tags:
+      - players
+swagger: "2.0"

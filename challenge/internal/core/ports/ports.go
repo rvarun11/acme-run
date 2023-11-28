@@ -27,6 +27,7 @@ type ChallengeService interface {
 	CreateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
 	GetChallengeByID(cid uuid.UUID) (*domain.Challenge, error)
 	UpdateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
+	DeleteChallengeByID(cid uuid.UUID) error
 	ListChallenges(status string) ([]*domain.Challenge, error)
 
 	// Badges
@@ -34,7 +35,6 @@ type ChallengeService interface {
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
 	DispatchBadges(ch *domain.Challenge)
 	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
-	ListChallengeStatsByPlayerID(pid uuid.UUID) error
 }
 
 // type BadgeService interface {
@@ -57,7 +57,6 @@ type ChallengeRepository interface {
 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
 	// ChallengeStats
 	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error
-	ListChallengeStatsByPlayerID(pid uuid.UUID) ([]*domain.ChallengeStats, error)
 	ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.ChallengeStats, error)
 	// ListEligibleChallengeStatsForChallenge(ch *domain.Challenge) ([]*domain.ChallengeStats, error)
 	DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error

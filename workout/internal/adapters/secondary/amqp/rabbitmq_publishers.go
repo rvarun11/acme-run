@@ -15,10 +15,8 @@ type Publisher struct {
 	amqpConn *amqp.Connection
 }
 
-var cfg *config.RabbitMQ = config.Config.RabbitMQ
-
-// Initialize new RabbitMQ connection
-func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
+// NewPublisher initializes a new Publisher with a RabbitMQ connection
+func NewPublisher(cfg *config.RabbitMQ) *Publisher {
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
@@ -26,22 +24,16 @@ func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
 		cfg.Host,
 		cfg.Port,
 	)
-	mq, err := amqp.Dial(conn)
+
+	amqpConn, err := amqp.Dial(conn)
 	if err != nil {
-		return &amqp.Connection{}, err
+		logger.Fatal("unable to dial connection to RabbitMQ", zap.Error(err))
+		return nil
 	}
 
-	return mq, nil
-}
-
-// NewPublisher initializes a new Publisher with a RabbitMQ connection
-func NewPublisher() (*Publisher, error) {
-	conn, err := NewConnection(cfg)
-	if err != nil {
-		return nil, fmt.Errorf("error creating RabbitMQ connection: %w", err)
+	return &Publisher{
+		amqpConn: amqpConn,
 	}
-
-	return &Publisher{amqpConn: conn}, nil
 }
 
 // PublishWorkoutStats publishes workout stats to the specified RabbitMQ queue
@@ -51,6 +43,19 @@ func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 		return fmt.Errorf("failed to open a channel: %w", err)
 	}
 	defer ch.Close()
+
+	// Declare the queue to ensure it exists
+	_, err = ch.QueueDeclare(
+		"WORKOUT_STATS_QUEUE", // queue name
+		true,                  // durable
+		false,                 // delete when unused
+		false,                 // exclusive
+		false,                 // no-wait
+		nil,                   // arguments
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare a queue: %w", err)
+	}
 
 	var challengeStatsDTO = challengeStatsDTO{
 		PlayerID:        workoutStats.PlayerID,
@@ -75,7 +80,7 @@ func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 			Body:        body,
 		},
 	)
-	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", body))
+	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", challengeStatsDTO))
 	if err != nil {
 		return fmt.Errorf("failed to publish a message: %w", err)
 	}

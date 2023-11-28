@@ -8,7 +8,7 @@ import (
 
 func (r *Repository) CreateBadge(b *domain.Badge) (*domain.Badge, error) {
 	pb := &postgresBadge{
-		ID:          b.ID,
+		// ID:          b.ID,
 		PlayerID:    b.PlayerID,
 		ChallengeID: b.Challenge.ID,
 		CompletedOn: b.CompletedOn,

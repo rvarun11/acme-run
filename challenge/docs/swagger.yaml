@@ -1,0 +1,198 @@
+definitions:
+  domain.Badge:
+    properties:
+      challenge:
+        $ref: '#/definitions/domain.Challenge'
+      completedOn:
+        type: string
+      id:
+        type: string
+      playerID:
+        type: string
+      score:
+        description: score is the total score obtained by the player when completing
+          the challenge
+        type: number
+    type: object
+  domain.Challenge:
+    properties:
+      badgeURL:
+        description: Badge is the logo received when the challenge is completed
+        type: string
+      createdAt:
+        description: When the Challenge was Created
+        type: string
+      criteria:
+        allOf:
+        - $ref: '#/definitions/domain.Criteria'
+        description: Criteria required to complete the challenge
+      description:
+        description: Challenge description, eg.
+        type: string
+      end:
+        description: end time is the time when the challenge ends
+        type: string
+      goal:
+        description: The Goal of the challenge
+        type: number
+      id:
+        type: string
+      name:
+        description: Name of the challenge, eg. HalloweeK 2023
+        type: string
+      start:
+        description: start time is the time when the challenge starts
+        type: string
+    type: object
+  domain.Criteria:
+    enum:
+    - DistanceCovered
+    - Escape
+    - Fight
+    - FightMoreThanEscape
+    - EscapeMoreThanFight
+    type: string
+    x-enum-varnames:
+    - DistanceCovered
+    - EscapeEnemy
+    - FightEnemy
+    - FightMoreThanEscape
+    - EscapeMoreThanFight
+  http.challengeDTO:
+    properties:
+      badge_url:
+        type: string
+      created_at:
+        type: string
+      criteria:
+        type: string
+      description:
+        type: string
+      end:
+        type: string
+      goal:
+        type: number
+      id:
+        type: string
+      name:
+        type: string
+      start:
+        type: string
+    type: object
+info:
+  contact:
+    email: rajpuv2@mcmaster.ca
+    name: Varun Rajput
+    url: https://github.com/rvarun11
+  description: This provides a description of API endpoints for the Challenge Manager
+  title: Challenge Manager API
+  version: "1.0"
+paths:
+  /api/v1/badges:
+    get:
+      operationId: list-badges
+      parameters:
+      - description: Player ID (UUID)
+        in: query
+        name: player_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Badge'
+            type: array
+      summary: List Badges by Player ID
+      tags:
+      - badges
+  /api/v1/challenges:
+    get:
+      operationId: list-challenges
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/http.challengeDTO'
+            type: array
+      summary: List Challenges
+      tags:
+      - challenges
+    post:
+      operationId: create-challenge
+      parameters:
+      - description: Challenge data
+        in: body
+        name: challenge
+        required: true
+        schema:
+          $ref: '#/definitions/http.challengeDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.challengeDTO'
+      summary: Create a Challenge
+      tags:
+      - challenges
+  /api/v1/challenges/{id}:
+    delete:
+      operationId: delete-challenge
+      parameters:
+      - description: Challenge ID (UUID) to be deleted
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete a Challenge by ID
+      tags:
+      - challenges
+    get:
+      operationId: get-challenge
+      parameters:
+      - description: Challenge ID (UUID)
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.challengeDTO'
+      summary: Get Challenge by ID
+      tags:
+      - challenges
+    put:
+      operationId: update-challenge
+      parameters:
+      - description: Challenge data
+        in: body
+        name: challenge
+        required: true
+        schema:
+          $ref: '#/definitions/http.challengeDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Update Challenge
+      tags:
+      - challenges
+swagger: "2.0"

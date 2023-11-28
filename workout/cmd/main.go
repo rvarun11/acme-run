@@ -2,20 +2,20 @@ package main
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
-	amqphandler "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/handler/amqp"
-	http "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/handler/http"
+	amqphandler "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/amqp"
+	http "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/http"
 	amqpsecondaryadapter "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/amqp"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/clients"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
-	log "github.com/CAS735-F23/macrun-teamvsl/workout/log"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"github.com/gin-gonic/gin"
 )
 
 var cfg *config.AppConfiguration = config.Config
 
 func main() {
-	log.Info("Workout Service is starting")
+	logger.Info("Workout Service is starting...")
 
 	// Initialize router
 	router := gin.New()
@@ -23,10 +23,12 @@ func main() {
 
 	// Initialize postgres repository
 	store := postgres.NewRepository(cfg.Postgres)
+
+	// Initialize Clients
 	peripheralDeviceClient := clients.NewPeripheralDeviceClient()
 	user := clients.NewUserServiceClient()
 
-	workoutAMQPSecondaryHandler, _ := amqpsecondaryadapter.NewPublisher()
+	workoutAMQPSecondaryHandler := amqpsecondaryadapter.NewPublisher(cfg.RabbitMQ)
 
 	// Initialize Workout service
 	workoutSvc := services.NewWorkoutService(store, peripheralDeviceClient, user, workoutAMQPSecondaryHandler)
