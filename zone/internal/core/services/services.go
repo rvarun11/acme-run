@@ -21,8 +21,6 @@ type ZoneManagerService struct {
 	publisher       ports.AMQPPublisher
 }
 
-// Factory for creating a new ZoneManager
-
 func NewZoneManagerService(rTM ports.ZoneManagerRepository, rT ports.TrailRepository, rS ports.ShelterRepository, rZ ports.ZoneRepository, publisher ports.AMQPPublisher) (*ZoneManagerService, error) {
 	return &ZoneManagerService{
 		repoZoneManager: rTM,

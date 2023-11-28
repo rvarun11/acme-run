@@ -262,6 +262,10 @@ func (repo *TrailRepository) ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail,
 	return domainTrails, nil
 }
 
+func (repo *TrailRepository) DeleteTrailByName(name string) error {
+	return repo.db.Where("trail_name = ?", name).Delete(&postgresTrail{}).Error
+}
+
 // Shelters
 func (repo *ShelterRepository) CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
 	shelter := postgresShelter{
@@ -332,6 +336,10 @@ func (repo *ShelterRepository) ListSheltersByTrailId(tId uuid.UUID) ([]*domain.S
 	return domainShelters, nil
 }
 
+func (repo *ShelterRepository) DeleteShelterByName(name string) error {
+	return repo.db.Where("shelter_name = ?", name).Delete(&postgresShelter{}).Error
+}
+
 // functions for zone
 func (repo *ZoneRepository) CreateZone(name string) (uuid.UUID, error) {
 	zone := postgresZone{
@@ -385,4 +393,8 @@ func (repo *ZoneRepository) List() ([]*domain.Zone, error) {
 	}
 
 	return domainZones, nil
+}
+
+func (repo *ZoneRepository) DeleteZoneByName(name string) error {
+	return repo.db.Where("zone_name = ?", name).Delete(&postgresZone{}).Error
 }
