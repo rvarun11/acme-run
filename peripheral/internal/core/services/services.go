@@ -69,7 +69,7 @@ func (s *PeripheralService) DisconnectPeripheral(wId uuid.UUID) error {
 
 func (s *PeripheralService) GetHRMAvgReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error) {
 	pInstance, err := s.repo.GetByWorkoutId(hId)
-	if err != nil {
+	if err != nil || !pInstance.HRMDev.HRMStatus {
 		return uuid.Nil, time.Time{}, 0, err
 	}
 	return pInstance.HRMId, pInstance.HRMDev.HRateTime, pInstance.HRMDev.AverageHRate, nil
