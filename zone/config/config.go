@@ -29,7 +29,7 @@ type RabbitMQ struct {
 }
 
 type Publish struct {
-	Destination string
+	PublishQueue string
 }
 
 func init() {
@@ -50,7 +50,7 @@ func init() {
 	}
 
 	publish := &Publish{
-		Destination: getEnv("SEND_DESTINATION", "SHELTER_TRAIL_WORKOUT"),
+		PublishQueue: getEnv("SEND_DESTINATION", "SHELTER_TRAIL_WORKOUT"),
 	}
 
 	Config = &AppConfiguration{

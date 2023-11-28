@@ -15,7 +15,7 @@ var cfg *config.RabbitMQ = config.Config.RabbitMQ
 
 // declare the name of the queue that publishing data to
 var cfgPublish *config.Publish = config.Config.Publish
-var destinationQueueName = cfgPublish.Destination
+var destinationQueueName = cfgPublish.PublishQueue
 
 type AMQPPublisher struct {
 	amqpConn *amqp.Connection

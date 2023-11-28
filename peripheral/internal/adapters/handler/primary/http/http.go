@@ -74,7 +74,8 @@ func (handler *HTTPHandler) InitRouter() {
 
 func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 	var req BindPeripheralData
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	var err error
+	if err = ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status": "error", "message": "invalid request",
 		})
@@ -82,10 +83,10 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 	}
 
 	if !h.svc.CheckStatusByHRMId(req.HRMId) {
-		err1 := h.svc.CreatePeripheral(req.PlayerID, req.HRMId)
-		if err1 != nil {
+		err = h.svc.CreatePeripheral(req.PlayerID, req.HRMId)
+		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err1.Error(),
+				"error": err.Error(),
 			})
 			return
 		}
@@ -167,7 +168,8 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
 func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 	var req UnbindPeripheralData
-	if err := ctx.ShouldBindJSON(&req); err != nil {
+	var err error
+	if err = ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": "invalid request",
@@ -175,8 +177,8 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 		return
 	}
 
-	err1 := h.svc.SetLiveStatus(req.WorkoutID, false)
-	if err1 != nil {
+	err = h.svc.SetLiveStatus(req.WorkoutID, false)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status":  "error",
 			"message": "failed to unbind",

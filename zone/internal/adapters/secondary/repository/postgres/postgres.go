@@ -86,8 +86,8 @@ func NewShelterRepository(cfg *config.Postgres) *ShelterRepository {
 
 // Structs for GORM
 type postgresTrail struct {
-	TrailID        uuid.UUID `gorm:"type:uuid;primaryKey"`
-	TrailName      string    `gorm:"type:string;not null"`
+	TrailID        uuid.UUID `gorm:"type:uuid;primaryKey;unique"`
+	TrailName      string    `gorm:"type:string;not null;unique"`
 	ZoneID         uuid.UUID `gorm:"not null"`
 	StartLongitude float64
 	StartLatitude  float64
@@ -97,8 +97,8 @@ type postgresTrail struct {
 }
 
 type postgresShelter struct {
-	ShelterID           uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ShelterName         string    `gorm:"type:string;not null"`
+	ShelterID           uuid.UUID `gorm:"type:uuid;primaryKey;unique"`
+	ShelterName         string    `gorm:"type:string;not null;unique"`
 	ShelterAvailability bool
 	TrailID             uuid.UUID
 	Longitude           float64
@@ -106,8 +106,8 @@ type postgresShelter struct {
 }
 
 type postgresZone struct {
-	ZoneID   uuid.UUID `gorm:"type:uuid;primaryKey"`
-	ZoneName string    `gorm:"type:string;not null"`
+	ZoneID   uuid.UUID `gorm:"type:uuid;primaryKey;unique"`
+	ZoneName string    `gorm:"type:string;not null;unique"`
 }
 
 // Override the TableName method to specify the custom table name for the Trail model
