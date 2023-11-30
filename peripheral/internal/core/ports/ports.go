@@ -9,16 +9,15 @@ import (
 )
 
 var (
-	ErrorListPeripheralSFailed  = errors.New("failed to list Peripherals")
-	ErrorPeripheralNotFound     = errors.New("the Peripheral session not found in repository")
-	ErrorCreatePeripheralFailed = errors.New("failed to add the Peripheral")
-	ErrorUpdatePeripheralFailed = errors.New("failed to update Peripheral")
-	ErrorListPeripheralFailed   = errors.New("failed to list Peripheral")
+	ErrorListPeripheralSFailed   = errors.New("failed to list Peripherals")
+	ErrorPeripheralNotFound      = errors.New("the Peripheral session not found in repository")
+	ErrorCreatePeripheralFailed  = errors.New("failed to add the Peripheral")
+	ErrorUpdatePeripheralFailed  = errors.New("failed to update Peripheral")
+	ErrorListPeripheralFailed    = errors.New("failed to list Peripheral")
+	ErrorUnbindPeripheralFailed  = errors.New("failed to unbind Peripheral")
+	ErrorPeripheralPublishFailed = errors.New("failed to publish Peripheral data to queue")
 )
 
-// LS-TODO: Remove or comment out the unused functions
-
-// LS-TODO: The sergvices should return the domain object with error
 type PeripheralService interface {
 	CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error
 	CheckStatusByHRMId(hId uuid.UUID) bool

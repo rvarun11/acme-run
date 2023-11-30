@@ -27,9 +27,10 @@ func NewPeripheralService(repo ports.PeripheralRepository, handler ports.RabbitM
 func (s *PeripheralService) CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error {
 	p, err := domain.NewPeripheral(pId, hId, uuid.Nil, false, false, false)
 	if err != nil {
-		return err
+		return ports.ErrorCreatePeripheralFailed
 	}
 	s.repo.AddPeripheralIntance(p)
+	log.Info("peripheral instance created")
 	return nil
 }
 
@@ -47,10 +48,9 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
-
 		p, _ := domain.NewPeripheral(pId, hId, wId, connected, true, toShelter)
 		s.repo.AddPeripheralIntance(p)
-		return nil
+
 	}
 
 	pInstance.PlayerId = pId
@@ -58,27 +58,32 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 	pInstance.HRMDev.HRMStatus = connected
 	pInstance.ToShelter = toShelter
 	s.repo.Update(pInstance)
+	log.Info("peripheral binding success", zap.Any("created", true))
 	return nil
 
 }
 
 func (s *PeripheralService) DisconnectPeripheral(wId uuid.UUID) error {
 	err := s.repo.DeletePeripheralInstance(wId)
+	if err != nil {
+		return ports.ErrorUnbindPeripheralFailed
+	}
 	return err
 }
 
 func (s *PeripheralService) GetHRMAvgReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error) {
 	pInstance, err := s.repo.GetByWorkoutId(hId)
 	if err != nil || !pInstance.HRMDev.HRMStatus {
-		return uuid.Nil, time.Time{}, 0, err
+		return uuid.Nil, time.Time{}, 0, ports.ErrorPeripheralNotFound
 	}
+
 	return pInstance.HRMId, pInstance.HRMDev.HRateTime, pInstance.HRMDev.AverageHRate, nil
 }
 
 func (s *PeripheralService) GetHRMReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error) {
 	pInstance, err := s.repo.GetByWorkoutId(hId)
 	if err != nil {
-		return uuid.Nil, time.Time{}, 0, err
+		return uuid.Nil, time.Time{}, 0, ports.ErrorPeripheralNotFound
 	}
 	return pInstance.HRMId, pInstance.HRMDev.HRateTime, pInstance.HRMDev.HRate, nil
 }
@@ -87,7 +92,7 @@ func (s *PeripheralService) SetHeartRateReading(hId uuid.UUID, reading int) erro
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
 		log.Fatal("error updating HRM", zap.Error(err))
-		return err
+		return ports.ErrorPeripheralNotFound
 	}
 	pInstance.SetHRate(reading)
 	s.repo.Update(pInstance)
@@ -97,7 +102,7 @@ func (s *PeripheralService) SetHeartRateReading(hId uuid.UUID, reading int) erro
 func (s *PeripheralService) GetHRMDevStatus(wId uuid.UUID) (bool, error) {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return false, err
+		return false, ports.ErrorPeripheralNotFound
 	}
 	return pInstance.HRMDev.HRMStatus, nil
 }
@@ -105,7 +110,7 @@ func (s *PeripheralService) GetHRMDevStatus(wId uuid.UUID) (bool, error) {
 func (s *PeripheralService) SetHRMDevStatusByHRMId(hId uuid.UUID, code bool) error {
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
-		return err
+		return ports.ErrorPeripheralNotFound
 	}
 	pInstance.HRMDev.HRMStatus = code
 	s.repo.Update(pInstance)
@@ -115,7 +120,7 @@ func (s *PeripheralService) SetHRMDevStatusByHRMId(hId uuid.UUID, code bool) err
 func (s *PeripheralService) SetHRMDevStatus(wId uuid.UUID, code bool) error {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return err
+		return ports.ErrorPeripheralNotFound
 	}
 	pInstance.HRMDev.HRMStatus = code
 	s.repo.Update(pInstance)
@@ -125,7 +130,7 @@ func (s *PeripheralService) SetHRMDevStatus(wId uuid.UUID, code bool) error {
 func (s *PeripheralService) SetGeoLocation(wId uuid.UUID, longitude float64, latitude float64) error {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return err
+		return ports.ErrorPeripheralNotFound
 	}
 	pInstance.SetLocation(longitude, latitude)
 	s.repo.Update(pInstance)
@@ -135,7 +140,7 @@ func (s *PeripheralService) SetGeoLocation(wId uuid.UUID, longitude float64, lat
 func (s *PeripheralService) GetGeoDevStatus(wId uuid.UUID) (bool, error) {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return false, err
+		return false, ports.ErrorPeripheralNotFound
 	}
 	return pInstance.GeoDev.GeoStatus, nil
 }
@@ -143,7 +148,7 @@ func (s *PeripheralService) GetGeoDevStatus(wId uuid.UUID) (bool, error) {
 func (s *PeripheralService) SetGeoDevStatus(wId uuid.UUID, code bool) error {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return err
+		return ports.ErrorPeripheralNotFound
 	}
 	pInstance.GeoDev.GeoStatus = code
 	s.repo.Update(pInstance)
@@ -153,7 +158,7 @@ func (s *PeripheralService) SetGeoDevStatus(wId uuid.UUID, code bool) error {
 func (s *PeripheralService) GetGeoLocation(wId uuid.UUID) (time.Time, float64, float64, uuid.UUID, error) {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return time.Time{}, 0.0, 0.0, uuid.Nil, err
+		return time.Time{}, 0.0, 0.0, uuid.Nil, ports.ErrorPeripheralNotFound
 	}
 	return pInstance.GeoDev.LocationTime, pInstance.GeoDev.Longitude, pInstance.GeoDev.Latitude, pInstance.WorkoutId, nil
 }
@@ -161,7 +166,7 @@ func (s *PeripheralService) GetGeoLocation(wId uuid.UUID) (time.Time, float64, f
 func (s *PeripheralService) GetLiveStatus(wId uuid.UUID) (bool, error) {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return false, err
+		return false, ports.ErrorPeripheralNotFound
 	}
 	return pInstance.LiveStatus, nil
 }
@@ -169,7 +174,7 @@ func (s *PeripheralService) GetLiveStatus(wId uuid.UUID) (bool, error) {
 func (s *PeripheralService) SetLiveStatus(wId uuid.UUID, code bool) error {
 	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
-		return err
+		return ports.ErrorPeripheralNotFound
 	}
 	pInstance.LiveStatus = code
 	s.repo.Update(pInstance)
@@ -180,7 +185,7 @@ func (s *PeripheralService) SendLastLocation(wId uuid.UUID, latitude float64, lo
 	pInstance, _ := s.repo.GetByWorkoutId(wId)
 	err := s.publisher.SendLastLocation(wId, latitude, longitude, time, pInstance.ToShelter)
 	if err != nil {
-		return err
+		return ports.ErrorPeripheralPublishFailed
 	}
 	return nil
 }
