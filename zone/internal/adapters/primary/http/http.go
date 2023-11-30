@@ -49,15 +49,6 @@ func (handler *ZoneManagerServiceHTTPHandler) InitRouter() {
 
 }
 
-func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
-	uuidStr := ctx.Query(paramName)
-	uuidValue, err := uuid.Parse(uuidStr)
-	if err != nil {
-		return uuid.UUID{}, err
-	}
-	return uuidValue, nil
-}
-
 func (s *ZoneManagerServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
