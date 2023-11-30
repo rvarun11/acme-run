@@ -303,7 +303,6 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		log.Info("Peripheral: get hrm reading success")
 		ctx.JSON(http.StatusOK, gin.H{"reading": tLoc})
 	} else {
-		log.Error("Peripheral: failed to read from device failure ", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"status": "error", "message": "reading from device failure",
 		})
