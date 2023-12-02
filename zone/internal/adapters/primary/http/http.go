@@ -7,25 +7,24 @@ import (
 	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/core/services"
-	"github.com/CAS735-F23/macrun-teamvsl/zone/log"
 	"github.com/google/uuid"
 
 	"github.com/gin-gonic/gin"
 )
 
-type ZoneManagerServiceHTTPHandler struct {
+type ZoneServiceHTTPHandler struct {
 	gin *gin.Engine
-	tvc *services.ZoneManagerService
+	tvc *services.ZoneService
 }
 
-func NewZoneManagerServiceHTTPHandler(gin *gin.Engine, tmSvc *services.ZoneManagerService) *ZoneManagerServiceHTTPHandler {
-	return &ZoneManagerServiceHTTPHandler{
+func NewZoneServiceHTTPHandler(gin *gin.Engine, tmSvc *services.ZoneService) *ZoneServiceHTTPHandler {
+	return &ZoneServiceHTTPHandler{
 		gin: gin,
 		tvc: tmSvc,
 	}
 }
 
-func (handler *ZoneManagerServiceHTTPHandler) InitRouter() {
+func (handler *ZoneServiceHTTPHandler) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
 
@@ -49,7 +48,7 @@ func (handler *ZoneManagerServiceHTTPHandler) InitRouter() {
 
 }
 
-func (s *ZoneManagerServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) {
+func (s *ZoneServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	longitudeStr := ctx.Query("longitude")
@@ -97,7 +96,7 @@ func (s *ZoneManagerServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) 
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "no shelter found "})
 		return
 	}
-	log.Info("Zone: cloest shelter info retrieved")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": shelterDataInstance})
 
 }
@@ -116,7 +115,7 @@ func (s *ZoneManagerServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) 
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail [get]
 
-func (s *ZoneManagerServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
+func (s *ZoneServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	zId, errZ := uuid.Parse(zoneIdStr)
@@ -144,7 +143,7 @@ func (s *ZoneManagerServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create trail"})
 		return
 	}
-	log.Info("Zone: trail created")
+
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "trail created successfully", "trail_id": tId})
 
 }
@@ -162,9 +161,7 @@ func (s *ZoneManagerServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id} [put]
-
-func (s *ZoneManagerServiceHTTPHandler) UpdateTrail(ctx *gin.Context) {
-
+func (s *ZoneServiceHTTPHandler) UpdateTrail(ctx *gin.Context) {
 	zoneIdStr := ctx.Param("zone_id")
 	zId, errZ := uuid.Parse(zoneIdStr)
 	if errZ != nil {
@@ -194,7 +191,7 @@ func (s *ZoneManagerServiceHTTPHandler) UpdateTrail(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to update trail"})
 		return
 	}
-	log.Info("Zone: trail updated")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "updated trail"})
 
 }
@@ -211,7 +208,7 @@ func (s *ZoneManagerServiceHTTPHandler) UpdateTrail(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id} [delete]
-func (t *ZoneManagerServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	_, errZ := uuid.Parse(zoneIdStr)
@@ -241,7 +238,7 @@ func (t *ZoneManagerServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to delete trail"})
 		return
 	}
-	log.Info("Zone: trail deleted")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "deleted trail"})
 }
 
@@ -258,8 +255,7 @@ func (t *ZoneManagerServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail [get]
-
-func (t *ZoneManagerServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
 
 	longitudeStr := ctx.Query("longitude")
 	latitudeStr := ctx.Query("latitude")
@@ -286,7 +282,7 @@ func (t *ZoneManagerServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
 	}
 
 	// Respond with the ID of the closest trail
-	log.Info("Zone: cloest shelter id retrieved")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "trail_id": closestTrail})
 }
 
@@ -302,7 +298,7 @@ func (t *ZoneManagerServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id} [get]
-func (t *ZoneManagerServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	_, errZ := uuid.Parse(zoneIdStr)
@@ -329,7 +325,6 @@ func (t *ZoneManagerServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
 		return
 	}
 
-	log.Info("Zone: trail detailed info retrieved")
 	// Respond with the ID of the closest trail
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "start_longitude": trail.StartLongitude, "start_latitude": trail.StartLatitude,
 		"end_longitude": trail.EndLongitude, "end_latitude": trail.EndLatitude})
@@ -350,7 +345,7 @@ func (t *ZoneManagerServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter [post]
 
-func (t *ZoneManagerServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	_, errZ := uuid.Parse(zoneIdStr)
@@ -384,7 +379,7 @@ func (t *ZoneManagerServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to create shelter"})
 		return
 	}
-	log.Info("Zone: shelter created")
+
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "shelter created successfully", "shelter_id": sId})
 }
 
@@ -402,7 +397,7 @@ func (t *ZoneManagerServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter [put]
 
-func (t *ZoneManagerServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	_, errZ := uuid.Parse(zoneIdStr)
@@ -439,7 +434,7 @@ func (t *ZoneManagerServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to update shelter"})
 		return
 	}
-	log.Info("Zone: shelter updated")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "shelter updated successfully"})
 }
 
@@ -457,7 +452,7 @@ func (t *ZoneManagerServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id} [delete]
 
-func (t *ZoneManagerServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	_, errZ := uuid.Parse(zoneIdStr)
@@ -496,7 +491,7 @@ func (t *ZoneManagerServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to create shelter"})
 		return
 	}
-	log.Info("Zone: cloest shelter info retrieved")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "shelter deleted successfully"})
 }
 
@@ -513,7 +508,7 @@ func (t *ZoneManagerServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
 // @Failure 400 {object} ErrorResponse
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id} [get]
-func (t *ZoneManagerServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context) {
+func (t *ZoneServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	_, errZ := uuid.Parse(zoneIdStr)
@@ -548,7 +543,7 @@ func (t *ZoneManagerServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context)
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "failed to retrieve shelter info"})
 		return
 	}
-	log.Info("Zone: shelter location info retrieved")
+
 	// Respond with the ID of the closest trail
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "longitude": shelter.Longitude, "latitude": shelter.Latitude})
 }
@@ -565,7 +560,7 @@ func (t *ZoneManagerServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context)
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone [post]
 
-func (h *ZoneManagerServiceHTTPHandler) CreateZone(ctx *gin.Context) {
+func (h *ZoneServiceHTTPHandler) CreateZone(ctx *gin.Context) {
 	var zoneDataInstance ZoneDTO
 	if err := ctx.ShouldBindJSON(&zoneDataInstance); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
@@ -576,7 +571,7 @@ func (h *ZoneManagerServiceHTTPHandler) CreateZone(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": err.Error()})
 	} else {
 		zIdString := zId.String()
-		log.Info("Zone: zone created")
+
 		ctx.JSON(http.StatusCreated, gin.H{"status": "success", "message": "zone created with id", "zone_id": zIdString})
 	}
 
@@ -595,7 +590,7 @@ func (h *ZoneManagerServiceHTTPHandler) CreateZone(ctx *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id} [put]
 
-func (h *ZoneManagerServiceHTTPHandler) UpdateZone(ctx *gin.Context) {
+func (h *ZoneServiceHTTPHandler) UpdateZone(ctx *gin.Context) {
 	zoneIdStr := ctx.Param("zone_id")
 
 	id, _ := uuid.Parse(zoneIdStr)
@@ -609,7 +604,7 @@ func (h *ZoneManagerServiceHTTPHandler) UpdateZone(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to update shelter"})
 		return
 	}
-	log.Info("Zone: shelter updated")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "updated shelter"})
 }
 
@@ -625,7 +620,7 @@ func (h *ZoneManagerServiceHTTPHandler) UpdateZone(ctx *gin.Context) {
 // @Failure 500 {object} ErrorResponse
 // @Router /api/v1/zone/{zone_id} [delete]
 
-func (h *ZoneManagerServiceHTTPHandler) DeleteZone(ctx *gin.Context) {
+func (h *ZoneServiceHTTPHandler) DeleteZone(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
 	id, err := uuid.Parse(zoneIdStr)
@@ -643,6 +638,6 @@ func (h *ZoneManagerServiceHTTPHandler) DeleteZone(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "failed to delete"})
 		return
 	}
-	log.Info("Zone: zone deleted")
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "deleted zone"})
 }

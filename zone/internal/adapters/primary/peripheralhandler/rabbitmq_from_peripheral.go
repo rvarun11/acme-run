@@ -41,15 +41,15 @@ var cfg *config.RabbitMQ = config.Config.RabbitMQ
 // Location Rabbitmq consumer
 type LocationSubscriber struct {
 	amqpConn *amqp.Connection
-	svc      *services.ZoneManagerService
+	svc      *services.ZoneService
 }
 
 type ZoneManagerAMQPHandler struct {
-	svc                *services.ZoneManagerService
+	svc                *services.ZoneService
 	locationSubscriber *LocationSubscriber
 }
 
-func NewAMQPHandler(ZoneManagerSvc *services.ZoneManagerService) *ZoneManagerAMQPHandler {
+func NewAMQPHandler(ZoneManagerSvc *services.ZoneService) *ZoneManagerAMQPHandler {
 
 	amqpConn_locationSub, err := NewConnection(cfg)
 	if err != nil {

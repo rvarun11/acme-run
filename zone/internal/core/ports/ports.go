@@ -19,7 +19,7 @@ var (
 	ErrorListZoneManagerFailed   = errors.New("listing trails manager failed")
 )
 
-type ZoneManagerService interface {
+type ZoneService interface {
 	CreateZoneManager(wId uuid.UUID) error
 	GetShelterByID(id uuid.UUID) (*domain.Shelter, error)
 	GetTrail(id uuid.UUID) (*domain.Trail, error)

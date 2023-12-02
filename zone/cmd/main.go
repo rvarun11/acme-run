@@ -307,14 +307,14 @@ func main() {
 	workoutDataHandler, _ := workouthandler.NewAMQPPublisher()
 
 	// Initialize the ZoneManager service
-	ZoneManagerService, _ := services.NewZoneManagerService(repo, repoT, repoS, repoZ, workoutDataHandler)
+	ZoneService, _ := services.NewZoneService(repo, repoT, repoS, repoZ, workoutDataHandler)
 
 	// Initialize the HTTP handler with the trail manager service and the RabbitMQ handler
-	ZoneManagerHTTPHandler := httphandler.NewZoneManagerServiceHTTPHandler(router, ZoneManagerService) // Adjusted for package
+	ZoneManagerHTTPHandler := httphandler.NewZoneServiceHTTPHandler(router, ZoneService) // Adjusted for package
 
 	// Set up the HTTP routes
 	ZoneManagerHTTPHandler.InitRouter()
-	phandler := peripheralhandler.NewAMQPHandler(ZoneManagerService)
+	phandler := peripheralhandler.NewAMQPHandler(ZoneService)
 	phandler.InitAMQP()
 
 	// Start the HTTP server
