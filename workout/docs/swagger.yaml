@@ -1,0 +1,287 @@
+definitions:
+  httphandler.StartWorkout:
+    properties:
+      hardcore_mode:
+        description: HardCore Mode of User
+        type: boolean
+      hrm_connected:
+        description: Whether HRM is connected or not
+        type: boolean
+      hrm_id:
+        description: If HRM is connected then HRM ID otherwise garbage
+        type: string
+      player_id:
+        description: PlayerID of the player starting the workout session
+        type: string
+      trail_id:
+        description: TrailID chosen by the Player
+        type: string
+    type: object
+  httphandler.StartWorkoutOption:
+    properties:
+      option:
+        description: WorkoutID for which the workout option is to be stopped
+        type: integer
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/workout:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint starts a new workout session for a player with the
+        given details.
+      operationId: start-workout
+      parameters:
+      - description: Details of the workout to start
+        in: body
+        name: workout
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.StartWorkout'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully started workout session
+        "400":
+          description: Bad Request with error details
+      summary: Start a new workout session
+      tags:
+      - workout
+  /api/v1/workout/{workoutId}:
+    put:
+      consumes:
+      - application/json
+      description: This endpoint stops the workout session for a player based on the
+        provided workout ID.
+      operationId: stop-workout
+      parameters:
+      - description: ID of the workout session to stop
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Successfully stopped workout session
+        "400":
+          description: Bad Request with error details
+      summary: Stop an ongoing workout session
+      tags:
+      - workout
+  /api/v1/workout/{workoutId}/options:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves the available options for a workout session
+        based on the workout ID.
+      operationId: get-workout-options
+      parameters:
+      - description: ID of the workout session
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved workout options
+        "400":
+          description: Bad Request with error details
+      summary: Get workout session options
+      tags:
+      - workout
+  /api/v1/workout/{workoutId}/options/start:
+    post:
+      consumes:
+      - application/json
+      description: This endpoint starts a specific option for an ongoing workout session
+        based on the workout ID and option details.
+      operationId: start-workout-option
+      parameters:
+      - description: ID of the workout session
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      - description: Details of the workout option to start
+        in: body
+        name: option
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.StartWorkoutOption'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully started workout option
+        "400":
+          description: Bad Request with error details
+      summary: Start a workout option
+      tags:
+      - workout
+  /api/v1/workout/{workoutId}/options/stop:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint stops a specific option of an ongoing workout session
+        based on the workout ID.
+      operationId: stop-workout-option
+      parameters:
+      - description: ID of the workout session
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully stopped workout option
+        "400":
+          description: Bad Request with error details
+      summary: Stop a workout option
+      tags:
+      - workout
+  /api/v1/workout/distance:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves the distance covered in a workout session
+        either by workout ID or by player ID within a date range.
+      operationId: get-distance
+      parameters:
+      - description: ID of the workout session
+        in: query
+        name: workoutID
+        type: string
+      - description: ID of the player
+        in: query
+        name: playerID
+        type: string
+      - description: Start date for the range (RFC3339 format)
+        in: query
+        name: startDate
+        type: string
+      - description: End date for the range (RFC3339 format)
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully retrieved distance
+        "400":
+          description: Bad Request with error details
+      summary: Get distance covered in a workout
+      tags:
+      - workout
+  /api/v1/workout/escapes:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves the number of escapes made either by workout
+        ID or between dates for a player.
+      operationId: get-escapes
+      parameters:
+      - description: Workout ID to fetch escapes
+        in: query
+        name: workoutID
+        type: string
+      - description: Player ID to fetch escapes between dates
+        in: query
+        name: playerID
+        type: string
+      - description: Start date for fetching escapes
+        in: query
+        name: startDate
+        type: string
+      - description: End date for fetching escapes
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully retrieved escape count
+        "400":
+          description: Bad Request with error details
+      summary: Get escapes made in a workout
+      tags:
+      - workout
+  /api/v1/workout/fights:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves the number of fights fought either by workout
+        ID or between dates for a player.
+      operationId: get-fights
+      parameters:
+      - description: Workout ID to fetch fights
+        in: query
+        name: workoutID
+        type: string
+      - description: Player ID to fetch fights between dates
+        in: query
+        name: playerID
+        type: string
+      - description: Start date for fetching fights
+        in: query
+        name: startDate
+        type: string
+      - description: End date for fetching fights
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully retrieved fight count
+        "400":
+          description: Bad Request with error details
+      summary: Get fights fought in a workout
+      tags:
+      - workout
+  /api/v1/workout/shelters:
+    get:
+      consumes:
+      - application/json
+      description: This endpoint retrieves the number of shelters taken either by
+        workout ID or between dates for a player.
+      operationId: get-shelters
+      parameters:
+      - description: Workout ID to fetch shelters
+        in: query
+        name: workoutID
+        type: string
+      - description: Player ID to fetch shelters between dates
+        in: query
+        name: playerID
+        type: string
+      - description: Start date for fetching shelters
+        in: query
+        name: startDate
+        type: string
+      - description: End date for fetching shelters
+        in: query
+        name: endDate
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully retrieved shelter count
+        "400":
+          description: Bad Request with error details
+      summary: Get shelters taken in a workout
+      tags:
+      - workout
+swagger: "2.0"

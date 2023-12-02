@@ -40,6 +40,18 @@ func (handler *WorkoutHTTPHandler) InitRouter() {
 	router.GET("workout/fights", handler.GetFights)
 }
 
+// StartWorkout starts a new workout session for a player.
+//
+//	@Summary		Start a new workout session
+//	@Description	This endpoint starts a new workout session for a player with the given details.
+//	@Tags			workout
+//	@ID				start-workout
+//	@Accept			json
+//	@Produce		json
+//	@Param			workout	body	StartWorkout	true	"Details of the workout to start"
+//	@Success		201		"Successfully started workout session"
+//	@Failure		400		"Bad Request with error details"
+//	@Router			/api/v1/workout [post]
 func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 
 	var startWorkout StartWorkout
@@ -74,6 +86,18 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 	})
 }
 
+// StopWorkout stops an ongoing workout session for a player.
+//
+//	@Summary		Stop an ongoing workout session
+//	@Description	This endpoint stops the workout session for a player based on the provided workout ID.
+//	@Tags			workout
+//	@ID				stop-workout
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutId	path	string	true	"ID of the workout session to stop"
+//	@Success		202			"Successfully stopped workout session"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/{workoutId} [put]
 func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutId := ctx.Param("workoutId")
@@ -97,6 +121,18 @@ func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
 	ctx.JSON(http.StatusAccepted, w)
 }
 
+// GetWorkoutOptions retrieves available options for a workout session.
+//
+//	@Summary		Get workout session options
+//	@Description	This endpoint retrieves the available options for a workout session based on the workout ID.
+//	@Tags			workout
+//	@ID				get-workout-options
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutId	path	string	true	"ID of the workout session"
+//	@Success		200			"Successfully retrieved workout options"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/{workoutId}/options [get]
 func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
@@ -120,6 +156,19 @@ func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, workoutOptions)
 }
 
+// StartWorkoutOption starts a specific option for an ongoing workout session.
+//
+//	@Summary		Start a workout option
+//	@Description	This endpoint starts a specific option for an ongoing workout session based on the workout ID and option details.
+//	@Tags			workout
+//	@ID				start-workout-option
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutId	path	string				true	"ID of the workout session"
+//	@Param			option		body	StartWorkoutOption	true	"Details of the workout option to start"
+//	@Success		200			"Successfully started workout option"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/{workoutId}/options/start [post]
 func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
@@ -148,6 +197,18 @@ func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "workout option started successfully"})
 }
 
+// StopWorkoutOption stops a specific option of an ongoing workout session.
+//
+//	@Summary		Stop a workout option
+//	@Description	This endpoint stops a specific option of an ongoing workout session based on the workout ID.
+//	@Tags			workout
+//	@ID				stop-workout-option
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutId	path	string	true	"ID of the workout session"
+//	@Success		200			"Successfully stopped workout option"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/{workoutId}/options/stop [patch]
 func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
@@ -188,6 +249,21 @@ func parseTime(ctx *gin.Context, paramName string, layout string) (time.Time, er
 	return parsedTime, nil
 }
 
+// GetDistance retrieves the distance covered in a workout session.
+//
+//	@Summary		Get distance covered in a workout
+//	@Description	This endpoint retrieves the distance covered in a workout session either by workout ID or by player ID within a date range.
+//	@Tags			workout
+//	@ID				get-distance
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	query	string	false	"ID of the workout session"
+//	@Param			playerID	query	string	false	"ID of the player"
+//	@Param			startDate	query	string	false	"Start date for the range (RFC3339 format)"
+//	@Param			endDate		query	string	false	"End date for the range (RFC3339 format)"
+//	@Success		201			"Successfully retrieved distance"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/distance [get]
 func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 	workoutID, err := parseUUID(ctx, "workoutID")
 	var distance float64
@@ -240,6 +316,21 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 	})
 }
 
+// GetShelters retrieves the number of shelters taken in a workout.
+//
+//	@Summary		Get shelters taken in a workout
+//	@Description	This endpoint retrieves the number of shelters taken either by workout ID or between dates for a player.
+//	@Tags			workout
+//	@ID				get-shelters
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	query	string	false	"Workout ID to fetch shelters"
+//	@Param			playerID	query	string	false	"Player ID to fetch shelters between dates"
+//	@Param			startDate	query	string	false	"Start date for fetching shelters"
+//	@Param			endDate		query	string	false	"End date for fetching shelters"
+//	@Success		201			"Successfully retrieved shelter count"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/shelters [get]
 func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 	var shelterCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
@@ -288,6 +379,21 @@ func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 	})
 }
 
+// GetEscapes retrieves the number of escapes made in a workout.
+//
+//	@Summary		Get escapes made in a workout
+//	@Description	This endpoint retrieves the number of escapes made either by workout ID or between dates for a player.
+//	@Tags			workout
+//	@ID				get-escapes
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	query	string	false	"Workout ID to fetch escapes"
+//	@Param			playerID	query	string	false	"Player ID to fetch escapes between dates"
+//	@Param			startDate	query	string	false	"Start date for fetching escapes"
+//	@Param			endDate		query	string	false	"End date for fetching escapes"
+//	@Success		201			"Successfully retrieved escape count"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/escapes [get]
 func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 	var escapeCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
@@ -336,6 +442,21 @@ func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 	})
 }
 
+// GetFights retrieves the number of fights fought in a workout.
+//
+//	@Summary		Get fights fought in a workout
+//	@Description	This endpoint retrieves the number of fights fought either by workout ID or between dates for a player.
+//	@Tags			workout
+//	@ID				get-fights
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutID	query	string	false	"Workout ID to fetch fights"
+//	@Param			playerID	query	string	false	"Player ID to fetch fights between dates"
+//	@Param			startDate	query	string	false	"Start date for fetching fights"
+//	@Param			endDate		query	string	false	"End date for fetching fights"
+//	@Success		201			"Successfully retrieved fight count"
+//	@Failure		400			"Bad Request with error details"
+//	@Router			/api/v1/workout/fights [get]
 func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 	var fightCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
