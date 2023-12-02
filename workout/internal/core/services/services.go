@@ -260,7 +260,8 @@ func (s *WorkoutService) UpdateDistanceTravelled(workoutID uuid.UUID, latitude f
 			}
 
 			// Update the workout distance
-			workout.DistanceCovered += distanceCovered
+			// Scaling the distance covered for the demo
+			workout.DistanceCovered += distanceCovered * 50000
 
 			// Update the workout in the repository
 			_, err = s.repo.UpdateWorkout(workout)

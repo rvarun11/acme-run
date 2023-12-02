@@ -281,7 +281,7 @@ func TestWorkoutService_UpdateDistanceTravelled(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Assert the distance is as expected
-	assert.InDelta(t, expectedTotalDistance, actualTotalDistance, 0.01, "The actual distance should be close to the expected distance")
+	assert.InDelta(t, expectedTotalDistance*50000, actualTotalDistance, 0.01*50000, "The actual distance should be close to the expected distance")
 }
 
 /*
