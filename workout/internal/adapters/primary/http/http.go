@@ -28,10 +28,11 @@ func (handler *WorkoutHTTPHandler) InitRouter() {
 	router := handler.gin.Group("/api/v1")
 
 	router.POST("/workout", handler.StartWorkout)
-	router.PUT("/workout", handler.StopWorkout)
-	router.GET("/workoutOptions", handler.GetWorkoutOptions)
-	router.POST("/workoutOptions", handler.StartWorkoutOption)
-	router.PUT("/workoutOptions", handler.StopWorkoutOption)
+	router.PUT("/workout/:workoutId", handler.StopWorkout)
+
+	router.GET("/workout/:workoutId/options", handler.GetWorkoutOptions)
+	router.POST("/workout/:workoutId/options", handler.StartWorkoutOption)
+	router.PATCH("/workout/:workoutId/options", handler.StopWorkoutOption)
 
 	router.GET("workout/distance", handler.GetDistance)
 	router.GET("workout/shelters", handler.GetShelters)
@@ -74,19 +75,21 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 }
 
 func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
+	// Retrieve workoutId from the path parameter
+	workoutId := ctx.Param("workoutId")
 
-	var stopWorkout StopWorkout
-	if err := ctx.ShouldBindJSON(&stopWorkout); err != nil {
+	workoutID, err := uuid.Parse(workoutId)
+	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Error": "Invalid Workout ID",
+			"error": "Invalid Workout ID : " + workoutID.String(),
 		})
 		return
 	}
 
-	w, err := h.svc.Stop(stopWorkout.WorkoutID)
+	w, err := h.svc.Stop(workoutID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 		return
 	}
@@ -95,10 +98,13 @@ func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
 }
 
 func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
-	workoutID, err := parseUUID(ctx, "workoutID")
+	// Retrieve workoutId from the path parameter
+	workoutIdStr := ctx.Param("workoutId")
+
+	workoutID, err := uuid.Parse(workoutIdStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Workout ID" + workoutID.String(),
+			"error": "Invalid Workout ID : " + workoutID.String(),
 		})
 		return
 	}
@@ -106,7 +112,7 @@ func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 	workoutOptions, err := h.svc.GetWorkoutOptions(workoutID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 		return
 	}
@@ -115,50 +121,53 @@ func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 }
 
 func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
-	var startWorkout StartWorkoutOption
+	// Retrieve workoutId from the path parameter
+	workoutIdStr := ctx.Param("workoutId")
 
-	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Error": "Bad POST Request",
-		})
-		return
-	}
+	workoutID, err := uuid.Parse(workoutIdStr)
 
-	err := h.svc.StartWorkoutOption(startWorkout.WorkoutID, uint8(startWorkout.Option))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "Invalid Workout ID : " + workoutID.String(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "workout option started successfully",
-	})
+	var startWorkout StartWorkoutOption
+	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"Error": "Bad POST Request"})
+		return
+	}
+
+	err = h.svc.StartWorkoutOption(workoutID, uint8(startWorkout.Option))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "workout option started successfully"})
 }
 
 func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
+	// Retrieve workoutId from the path parameter
+	workoutIdStr := ctx.Param("workoutId")
 
-	var stopWorkoutOption StopWorkoutOption
+	workoutID, err := uuid.Parse(workoutIdStr)
 
-	if err := ctx.ShouldBindJSON(&stopWorkoutOption); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Error": "Bad POST Request",
-		})
-		return
-	}
-
-	err := h.svc.StopWorkoutOption(stopWorkoutOption.WorkoutID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "Invalid Workout ID : " + workoutID.String(),
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Workout option stopped successfully",
-	})
+	err = h.svc.StopWorkoutOption(workoutID)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "Workout option stopped successfully"})
 }
 
 func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
