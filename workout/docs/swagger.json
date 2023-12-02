@@ -270,6 +270,40 @@
                         "description": "Bad Request with error details"
                     }
                 }
+            },
+            "delete": {
+                "description": "This endpoint deletes a workout session based on the provided workout ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workout"
+                ],
+                "summary": "Delete a workout session",
+                "operationId": "delete-workout",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID of the workout session to delete",
+                        "name": "workoutId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully deleted workout session"
+                    },
+                    "400": {
+                        "description": "Bad Request with error details"
+                    },
+                    "404": {
+                        "description": "Workout session not found"
+                    }
+                }
             }
         },
         "/api/v1/workout/{workoutId}/options": {

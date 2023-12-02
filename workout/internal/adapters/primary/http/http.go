@@ -504,3 +504,44 @@ func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 		"fightCount": fightCount,
 	})
 }
+
+// DeleteWorkout deletes a specified workout session.
+//
+//	@Summary		Delete a workout session
+//	@Description	This endpoint deletes a workout session based on the provided workout ID.
+//	@Tags			workout
+//	@ID				delete-workout
+//	@Accept			json
+//	@Produce		json
+//	@Param			workoutId	path	string	true	"ID of the workout session to delete"
+//	@Success		200			"Successfully deleted workout session"
+//	@Failure		400			"Bad Request with error details"
+//	@Failure		404			"Workout session not found"
+//	@Router			/api/v1/workout/{workoutId} [delete]
+func (h *WorkoutHTTPHandler) DeleteWorkout(ctx *gin.Context) {
+	workoutId := ctx.Param("workoutId")
+
+	// Parse the UUID from the workoutId, handle error if invalid
+	_, err := uuid.Parse(workoutId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid Workout ID",
+		})
+		return
+	}
+
+	// TO BE IMPLEMENTED
+	// Call the service layer to delete the workout
+	/*err = h.svc.DeleteWorkout(workoutID)
+	if err != nil {
+		// Assuming the error is because the workout was not found
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": "Workout session not found",
+		})
+		return
+	}*/
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Workout session deleted successfully",
+	})
+}

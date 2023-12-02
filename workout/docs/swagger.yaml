@@ -51,6 +51,30 @@ paths:
       tags:
       - workout
   /api/v1/workout/{workoutId}:
+    delete:
+      consumes:
+      - application/json
+      description: This endpoint deletes a workout session based on the provided workout
+        ID.
+      operationId: delete-workout
+      parameters:
+      - description: ID of the workout session to delete
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully deleted workout session
+        "400":
+          description: Bad Request with error details
+        "404":
+          description: Workout session not found
+      summary: Delete a workout session
+      tags:
+      - workout
     put:
       consumes:
       - application/json
