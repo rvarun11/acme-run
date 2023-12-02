@@ -14,19 +14,15 @@ import (
 )
 
 type ZoneService struct {
-	repoTrail       ports.TrailRepository
-	repoShelter     ports.ShelterRepository
-	repoZone        ports.ZoneRepository
 	repoZoneManager ports.ZoneManagerRepository
+	repoDB          ports.DBRepository
 	publisher       ports.AMQPPublisher
 }
 
-func NewZoneService(rTM ports.ZoneManagerRepository, rT ports.TrailRepository, rS ports.ShelterRepository, rZ ports.ZoneRepository, publisher ports.AMQPPublisher) (*ZoneService, error) {
+func NewZoneService(rTM ports.ZoneManagerRepository, rDB ports.DBRepository, publisher ports.AMQPPublisher) (*ZoneService, error) {
 	return &ZoneService{
 		repoZoneManager: rTM,
-		repoTrail:       rT,
-		repoShelter:     rS,
-		repoZone:        rZ,
+		repoDB:          rDB,
 		publisher:       publisher,
 	}, nil
 }
@@ -50,7 +46,7 @@ func (t *ZoneService) GetZoneManagerByWorkoutId(id uuid.UUID) (*domain.ZoneManag
 }
 
 func (t *ZoneService) CreateTrail(name string, zId uuid.UUID, startLatitude float64, startLongitude float64, endLatitude float64, endLongitude float64) (uuid.UUID, error) {
-	res, err := t.repoTrail.CreateTrail(name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
+	res, err := t.repoDB.CreateTrail(name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -59,7 +55,7 @@ func (t *ZoneService) CreateTrail(name string, zId uuid.UUID, startLatitude floa
 }
 
 func (t *ZoneService) UpdateTrail(tid uuid.UUID, name string, zId uuid.UUID, startLatitude float64, startLongitude float64, endLatitude float64, endLongitude float64) error {
-	err := t.repoTrail.UpdateTrailByID(tid, name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
+	err := t.repoDB.UpdateTrailByID(tid, name, zId, startLatitude, startLongitude, endLatitude, endLongitude)
 	if err != nil {
 		return err
 	}
@@ -68,7 +64,7 @@ func (t *ZoneService) UpdateTrail(tid uuid.UUID, name string, zId uuid.UUID, sta
 }
 
 func (t *ZoneService) DeleteTrail(tId uuid.UUID) error {
-	err := t.repoTrail.DeleteTrailByID(tId)
+	err := t.repoDB.DeleteTrailByID(tId)
 	if err != nil {
 		return err
 	}
@@ -82,13 +78,13 @@ func (t *ZoneService) DisconnectZoneManager(wId uuid.UUID) error {
 }
 
 func (t *ZoneService) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
-	trail, err := t.repoTrail.GetTrailByID(id)
+	trail, err := t.repoDB.GetTrailByID(id)
 	log.Info("Zone: trail detailed info retrieved")
 	return trail, err
 }
 
 func (t *ZoneService) CheckTrail(id uuid.UUID) error {
-	trail, err := t.repoTrail.GetTrailByID(id)
+	trail, err := t.repoDB.GetTrailByID(id)
 	if err != nil || trail.TrailID != id {
 		return err
 	}
@@ -105,7 +101,7 @@ func (t *ZoneService) GetCurrentLocation(wId uuid.UUID) (float64, float64, error
 
 func (t *ZoneService) GetClosestTrail(zId uuid.UUID, currentLongitude float64, currentLatitude float64) (uuid.UUID, error) {
 
-	trails, err := t.repoTrail.ListTrailsByZoneId(zId)
+	trails, err := t.repoDB.ListTrailsByZoneId(zId)
 	if err != nil {
 		return uuid.Nil, err // Handle the error, possibly no trails available or DB error
 	}
@@ -132,7 +128,7 @@ func (t *ZoneService) GetClosestTrail(zId uuid.UUID, currentLongitude float64, c
 }
 
 func (t *ZoneService) CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
-	sId, err := t.repoShelter.CreateShelter(name, tId, availability, lat, long)
+	sId, err := t.repoDB.CreateShelter(name, tId, availability, lat, long)
 	if err != nil {
 		return uuid.Nil, err
 	} else {
@@ -143,7 +139,7 @@ func (t *ZoneService) CreateShelter(name string, tId uuid.UUID, availability boo
 
 func (t *ZoneService) UpdateShelter(id uuid.UUID, name string, tId uuid.UUID, availability bool, lat, long float64) error {
 
-	err := t.repoShelter.UpdateShelterByID(id, tId, name, availability, lat, long)
+	err := t.repoDB.UpdateShelterByID(id, tId, name, availability, lat, long)
 	if err != nil {
 		log.Error("Zone: failed to updater shelter", zap.Error(err))
 		return err
@@ -154,11 +150,11 @@ func (t *ZoneService) UpdateShelter(id uuid.UUID, name string, tId uuid.UUID, av
 }
 
 func (t *ZoneService) DeleteShelter(id uuid.UUID) error {
-	return t.repoShelter.DeleteShelterByID(id)
+	return t.repoDB.DeleteShelterByID(id)
 }
 
 func (t *ZoneService) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
-	shelter, err := t.repoShelter.GetShelterByID(id)
+	shelter, err := t.repoDB.GetShelterByID(id)
 	if err == nil {
 		log.Info("Zone: shelter location info retrieved")
 	} else {
@@ -168,7 +164,7 @@ func (t *ZoneService) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
 }
 
 func (t *ZoneService) CheckShelter(id uuid.UUID) error {
-	s, err := t.repoShelter.GetShelterByID(id)
+	s, err := t.repoDB.GetShelterByID(id)
 	if err != nil || s.ShelterID != id {
 		return err
 	}
@@ -176,7 +172,7 @@ func (t *ZoneService) CheckShelter(id uuid.UUID) error {
 }
 
 func (t *ZoneService) CreateZone(zName string) (uuid.UUID, error) {
-	zId, err := t.repoZone.CreateZone(zName)
+	zId, err := t.repoDB.CreateZone(zName)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -185,7 +181,7 @@ func (t *ZoneService) CreateZone(zName string) (uuid.UUID, error) {
 }
 
 func (t *ZoneService) CheckZone(zId uuid.UUID) error {
-	z, err := t.repoZone.GetZoneByID(zId)
+	z, err := t.repoDB.GetZoneByID(zId)
 
 	if err != nil || z.ZoneID != zId {
 		fmt.Println("z.ZoneID")
@@ -195,7 +191,7 @@ func (t *ZoneService) CheckZone(zId uuid.UUID) error {
 }
 
 func (t *ZoneService) CheckZoneByName(name string) error {
-	z, err := t.repoZone.GetZoneByName(name)
+	z, err := t.repoDB.GetZoneByName(name)
 	if err != nil || z.ZoneName != name {
 		return err
 	}
@@ -203,7 +199,7 @@ func (t *ZoneService) CheckZoneByName(name string) error {
 }
 
 func (t *ZoneService) UpdateZone(zId uuid.UUID, zName string) error {
-	err := t.repoZone.UpdateZone(zId, zName)
+	err := t.repoDB.UpdateZone(zId, zName)
 	if err != nil {
 		return err
 	}
@@ -218,7 +214,7 @@ func (t *ZoneService) DeleteZone(zId uuid.UUID) error {
 		return nil
 	}
 
-	err = t.repoZone.DeleteZone(zId)
+	err = t.repoDB.DeleteZone(zId)
 	if err != nil {
 		return err
 	}
@@ -247,7 +243,7 @@ func (t *ZoneService) UpdateCurrentLocation(wId uuid.UUID, latitude float64, lon
 
 func (t *ZoneService) GetClosestShelter(longitude float64, latitude float64, time time.Time) (uuid.UUID, float64, bool, time.Time, error) {
 
-	shelters, err := t.repoShelter.List()
+	shelters, err := t.repoDB.ListShelters()
 	if err != nil {
 		return uuid.Nil, math.MaxFloat64, false, time, err
 	}
@@ -278,7 +274,7 @@ func (t *ZoneService) GetClosestShelter(longitude float64, latitude float64, tim
 }
 
 func (t *ZoneService) GetClosestShelterInfo(latitude float64, longitude float64) (uuid.UUID, float64, error) {
-	shelters, err := t.repoShelter.List()
+	shelters, err := t.repoDB.ListShelters()
 	if err != nil || len(shelters) == 0 {
 		return uuid.Nil, math.MaxFloat64, err
 	}
@@ -303,7 +299,7 @@ func (t *ZoneService) GetClosestShelterInfo(latitude float64, longitude float64)
 
 // Add this function to the ZoneService type
 func (t *ZoneService) ListZones() ([]*domain.Zone, error) {
-	zones, err := t.repoZone.List()
+	zones, err := t.repoDB.ListZones()
 	if err != nil {
 		return nil, err
 	}

@@ -17,25 +17,21 @@ import (
 var cfg *config.AppConfiguration = config.Config
 
 func main() {
-	log.Info("Trail Service is starting")
+	log.Info("Zone Manager is starting")
 
 	// Initialize router
 	router := gin.New()
 	router.Use(gin.Recovery())
 
-	// initialize a database for test purposes
-
 	// Initialize the repository
 	repo := repository.NewMemoryRepository()
-	repoS := postgres.NewShelterRepository(cfg.Postgres)
-	repoT := postgres.NewTrailRepository(cfg.Postgres)
-	repoZ := postgres.NewZoneRepository(cfg.Postgres)
+	repoDB := postgres.NewDBRepository(cfg.Postgres)
 
 	// Initialize the publisher for the zone managaer to send the shelter info to the queue
 	workoutDataHandler, _ := workouthandler.NewAMQPPublisher()
 
 	// Initialize the ZoneManager service
-	ZoneService, _ := services.NewZoneService(repo, repoT, repoS, repoZ, workoutDataHandler)
+	ZoneService, _ := services.NewZoneService(repo, repoDB, workoutDataHandler)
 
 	// Initialize the HTTP handler with the trail manager service and the RabbitMQ handler
 	ZoneManagerHTTPHandler := httphandler.NewZoneServiceHTTPHandler(router, ZoneService) // Adjusted for package

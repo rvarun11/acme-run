@@ -33,38 +33,33 @@ type ZoneService interface {
 	GetTrailInfo(ctx *gin.Context)
 }
 
-type TrailRepository interface {
-	CreateTrail(name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error)
-	UpdateTrailByID(id uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) error
-	DeleteTrailByID(id uuid.UUID) error
-	GetTrailByID(id uuid.UUID) (*domain.Trail, error)
-	List() ([]*domain.Trail, error)
-	ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail, error)
-}
-
-type ShelterRepository interface {
-	CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error)
-	UpdateShelterByID(id uuid.UUID, tId uuid.UUID, name string, availability bool, lat, long float64) error
-	DeleteShelterByID(id uuid.UUID) error
-	GetShelterByID(id uuid.UUID) (*domain.Shelter, error)
-	List() ([]*domain.Shelter, error)
-	ListSheltersByTrailId(tId uuid.UUID) ([]*domain.Shelter, error)
-}
-
-type ZoneRepository interface {
-	CreateZone(name string) (uuid.UUID, error)
-	UpdateZone(id uuid.UUID, name string) error
-	DeleteZone(id uuid.UUID) error
-	GetZoneByID(id uuid.UUID) (*domain.Zone, error)
-	GetZoneByName(name string) (*domain.Zone, error)
-	List() ([]*domain.Zone, error)
-}
-
 type ZoneManagerRepository interface {
 	GetByWorkoutId(wId uuid.UUID) (*domain.ZoneManager, error)
 	Update(t domain.ZoneManager) error
 	DeleteZoneManagerInstance(wId uuid.UUID) error
 	AddZoneManagerIntance(t domain.ZoneManager) error
+}
+type DBRepository interface {
+	CreateZone(name string) (uuid.UUID, error)
+	UpdateZone(id uuid.UUID, name string) error
+	DeleteZone(id uuid.UUID) error
+	GetZoneByID(id uuid.UUID) (*domain.Zone, error)
+	GetZoneByName(name string) (*domain.Zone, error)
+	ListZones() ([]*domain.Zone, error)
+
+	CreateTrail(name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error)
+	UpdateTrailByID(id uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) error
+	DeleteTrailByID(id uuid.UUID) error
+	GetTrailByID(id uuid.UUID) (*domain.Trail, error)
+	ListTrails() ([]*domain.Trail, error)
+	ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail, error)
+
+	CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error)
+	UpdateShelterByID(id uuid.UUID, tId uuid.UUID, name string, availability bool, lat, long float64) error
+	DeleteShelterByID(id uuid.UUID) error
+	GetShelterByID(id uuid.UUID) (*domain.Shelter, error)
+	ListShelters() ([]*domain.Shelter, error)
+	ListSheltersByTrailId(tId uuid.UUID) ([]*domain.Shelter, error)
 }
 
 type AMQPPublisher interface {

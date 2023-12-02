@@ -16,13 +16,11 @@ var cfg *config.AppConfiguration = config.Config
 
 func TestZoneService_CreateZoneManager(t *testing.T) {
 
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
 
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	wId := uuid.New()
 	zoneManagerID, err := service.CreateZoneManager(wId)
@@ -36,13 +34,11 @@ func TestZoneService_CreateZoneManager(t *testing.T) {
 
 func TestZoneService_CreateTrail(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
 
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	trailName := "Test Trail"
 	zoneID := uuid.New()
@@ -57,12 +53,10 @@ func TestZoneService_CreateTrail(t *testing.T) {
 
 func TestZoneService_CreateShelter(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	shelterName := "Test Shelter"
 	trailID := uuid.New() // Assuming this trail already exists in your test setup
@@ -78,12 +72,10 @@ func TestZoneService_CreateShelter(t *testing.T) {
 
 func TestZoneService_UpdateTrail(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	// Create a trail first
 	trailName := "Original Trail Name"
@@ -96,19 +88,17 @@ func TestZoneService_UpdateTrail(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Retrieve the updated trail and verify the changes
-	updatedTrail, err := trailRepo.GetTrailByID(trailID)
+	updatedTrail, err := dbRepo.GetTrailByID(trailID)
 	assert.NoError(t, err)
 	assert.Equal(t, updatedName, updatedTrail.TrailName)
 }
 
 func TestZoneService_DeleteTrail(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	// Create a trail first
 	trailName := "Test Trail"
@@ -120,18 +110,16 @@ func TestZoneService_DeleteTrail(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Try to retrieve the deleted trail and expect an error
-	_, err = trailRepo.GetTrailByID(trailID)
+	_, err = dbRepo.GetTrailByID(trailID)
 	assert.Error(t, err)
 }
 
 func TestZoneService_GetTrailByID(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	// Create a trail first
 	trailName := "Test Trail"
@@ -147,19 +135,17 @@ func TestZoneService_GetTrailByID(t *testing.T) {
 }
 func TestZoneService_AddDuplicateTrail(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	trailName := "Unique Trail Name"
 	zoneID := uuid.New()
 
 	// Clean up before and after test
-	defer trailRepo.DeleteTrailByName(trailName)
-	trailRepo.DeleteTrailByName(trailName)
+	defer dbRepo.DeleteTrailByName(trailName)
+	dbRepo.DeleteTrailByName(trailName)
 
 	// Add the trail for the first time
 	_, err := service.CreateTrail(trailName, zoneID, 0.0, 0.0, 1.0, 1.0)
@@ -174,19 +160,17 @@ func TestZoneService_AddDuplicateTrail(t *testing.T) {
 
 func TestZoneService_AddDuplicateShelter(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	shelterName := "Unique Shelter Name"
 	trailID := uuid.New() // Assuming this trail already exists
 
 	// Clean up before and after test
-	defer shelterRepo.DeleteShelterByName(shelterName)
-	shelterRepo.DeleteShelterByName(shelterName)
+	defer dbRepo.DeleteShelterByName(shelterName)
+	dbRepo.DeleteShelterByName(shelterName)
 
 	// Add the shelter for the first time
 	_, err := service.CreateShelter(shelterName, trailID, true, 0.0, 0.0)
@@ -201,18 +185,16 @@ func TestZoneService_AddDuplicateShelter(t *testing.T) {
 
 func TestZoneService_AddDuplicateZone(t *testing.T) {
 	// Initialize repositories and service as above
-	trailRepo := postgres.NewTrailRepository(cfg.Postgres)
-	shelterRepo := postgres.NewShelterRepository(cfg.Postgres)
-	zoneRepo := postgres.NewZoneRepository(cfg.Postgres)
+	dbRepo := postgres.NewDBRepository(cfg.Postgres)
 	zoneManagerRepo := repository.NewMemoryRepository()
 	publisherMock := workouthandler.NewAMQPPublisherMock()
-	service, _ := services.NewZoneService(zoneManagerRepo, trailRepo, shelterRepo, zoneRepo, publisherMock)
+	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	zoneName := "Unique Zone Name"
 
 	// Clean up before and after test
-	defer zoneRepo.DeleteZoneByName(zoneName)
-	zoneRepo.DeleteZoneByName(zoneName)
+	defer dbRepo.DeleteZoneByName(zoneName)
+	dbRepo.DeleteZoneByName(zoneName)
 
 	// Add the zone for the first time
 	_, err := service.CreateZone(zoneName)
