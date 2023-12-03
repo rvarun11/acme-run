@@ -1,7 +1,9 @@
 package services_test
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/CAS735-F23/macrun-teamvsl/zone/config"
 	repository "github.com/CAS735-F23/macrun-teamvsl/zone/internal/adapters/secondary/repository/memory"
@@ -13,6 +15,19 @@ import (
 )
 
 var cfg *config.AppConfiguration = config.Config
+
+func randomString(length int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	seed := rand.NewSource(time.Now().UnixNano())
+	randGen := rand.New(seed)
+
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[randGen.Intn(len(charset))]
+	}
+
+	return string(b)
+}
 
 func TestZoneService_CreateZoneManager(t *testing.T) {
 
@@ -28,8 +43,6 @@ func TestZoneService_CreateZoneManager(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotEqual(t, uuid.Nil, zoneManagerID)
 
-	// Additional logic to verify the ZoneManager in the database
-	// ...
 }
 
 func TestZoneService_CreateTrail(t *testing.T) {
@@ -40,7 +53,7 @@ func TestZoneService_CreateTrail(t *testing.T) {
 
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
-	trailName := "Test Trail"
+	trailName := randomString(10)
 	zoneID := uuid.New()
 	startLatitude, startLongitude, endLatitude, endLongitude := 0.0, 0.0, 1.0, 1.0
 
@@ -48,6 +61,8 @@ func TestZoneService_CreateTrail(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEqual(t, uuid.Nil, trailID)
+
+	service.DeleteTrail(trailID)
 
 }
 
@@ -58,7 +73,7 @@ func TestZoneService_CreateShelter(t *testing.T) {
 	publisherMock := workouthandler.NewAMQPPublisherMock()
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
-	shelterName := "Test Shelter"
+	shelterName := randomString(10)
 	trailID := uuid.New() // Assuming this trail already exists in your test setup
 	availability := true
 	lat, long := 40.7128, -74.0060
@@ -67,6 +82,7 @@ func TestZoneService_CreateShelter(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.NotEqual(t, uuid.Nil, shelterID)
+	service.DeleteShelter(shelterID)
 
 }
 
@@ -78,11 +94,11 @@ func TestZoneService_UpdateTrail(t *testing.T) {
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	// Create a trail first
-	trailName := "Original Trail Name"
+	trailName := "Original Trail Name " + randomString(5)
 	zoneID := uuid.New()
 	trailID, _ := service.CreateTrail(trailName, zoneID, 0.0, 0.0, 1.0, 1.0)
 
-	updatedName := "Updated Trail Name"
+	updatedName := "Updated Trail Name " + randomString(5)
 	err := service.UpdateTrail(trailID, updatedName, zoneID, 0.0, 0.0, 1.0, 1.0)
 
 	assert.NoError(t, err)
@@ -101,7 +117,7 @@ func TestZoneService_DeleteTrail(t *testing.T) {
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	// Create a trail first
-	trailName := "Test Trail"
+	trailName := "Test Trail " + randomString(5)
 	zoneID := uuid.New()
 	trailID, _ := service.CreateTrail(trailName, zoneID, 0.0, 0.0, 1.0, 1.0)
 
@@ -122,7 +138,7 @@ func TestZoneService_GetTrailByID(t *testing.T) {
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
 	// Create a trail first
-	trailName := "Test Trail"
+	trailName := randomString(10)
 	zoneID := uuid.New()
 	trailID, _ := service.CreateTrail(trailName, zoneID, 0.0, 0.0, 1.0, 1.0)
 
@@ -132,6 +148,7 @@ func TestZoneService_GetTrailByID(t *testing.T) {
 	assert.NotNil(t, retrievedTrail)
 	assert.Equal(t, trailID, retrievedTrail.TrailID)
 	assert.Equal(t, trailName, retrievedTrail.TrailName)
+	service.DeleteTrail(trailID)
 }
 func TestZoneService_AddDuplicateTrail(t *testing.T) {
 	// Initialize repositories and service as above
@@ -140,7 +157,7 @@ func TestZoneService_AddDuplicateTrail(t *testing.T) {
 	publisherMock := workouthandler.NewAMQPPublisherMock()
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
-	trailName := "Unique Trail Name"
+	trailName := "Unique Trail Name " + randomString(5)
 	zoneID := uuid.New()
 
 	// Clean up before and after test
@@ -148,7 +165,7 @@ func TestZoneService_AddDuplicateTrail(t *testing.T) {
 	dbRepo.DeleteTrailByName(trailName)
 
 	// Add the trail for the first time
-	_, err := service.CreateTrail(trailName, zoneID, 0.0, 0.0, 1.0, 1.0)
+	trailID, err := service.CreateTrail(trailName, zoneID, 0.0, 0.0, 1.0, 1.0)
 	assert.NoError(t, err)
 
 	// Attempt to add the same trail again
@@ -156,6 +173,7 @@ func TestZoneService_AddDuplicateTrail(t *testing.T) {
 
 	// Assert that an error is returned due to the duplicate name
 	assert.Error(t, err, "Expected an error for duplicate trail creation, but got none")
+	service.DeleteTrail(trailID)
 }
 
 func TestZoneService_AddDuplicateShelter(t *testing.T) {
@@ -165,7 +183,7 @@ func TestZoneService_AddDuplicateShelter(t *testing.T) {
 	publisherMock := workouthandler.NewAMQPPublisherMock()
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
-	shelterName := "Unique Shelter Name"
+	shelterName := "Unique Shelter Name " + randomString(5)
 	trailID := uuid.New() // Assuming this trail already exists
 
 	// Clean up before and after test
@@ -173,7 +191,7 @@ func TestZoneService_AddDuplicateShelter(t *testing.T) {
 	dbRepo.DeleteShelterByName(shelterName)
 
 	// Add the shelter for the first time
-	_, err := service.CreateShelter(shelterName, trailID, true, 0.0, 0.0)
+	shelterID, err := service.CreateShelter(shelterName, trailID, true, 0.0, 0.0)
 	assert.NoError(t, err)
 
 	// Attempt to add the same shelter again
@@ -181,6 +199,7 @@ func TestZoneService_AddDuplicateShelter(t *testing.T) {
 
 	// Assert that an error is returned due to the duplicate name
 	assert.Error(t, err)
+	service.DeleteShelter(shelterID)
 }
 
 func TestZoneService_AddDuplicateZone(t *testing.T) {
@@ -190,14 +209,14 @@ func TestZoneService_AddDuplicateZone(t *testing.T) {
 	publisherMock := workouthandler.NewAMQPPublisherMock()
 	service, _ := services.NewZoneService(zoneManagerRepo, dbRepo, publisherMock)
 
-	zoneName := "Unique Zone Name"
+	zoneName := "Unique Zone Name " + randomString(5)
 
 	// Clean up before and after test
 	defer dbRepo.DeleteZoneByName(zoneName)
 	dbRepo.DeleteZoneByName(zoneName)
 
 	// Add the zone for the first time
-	_, err := service.CreateZone(zoneName)
+	zoneID, err := service.CreateZone(zoneName)
 	assert.NoError(t, err)
 
 	// Attempt to add the same zone again
@@ -205,4 +224,5 @@ func TestZoneService_AddDuplicateZone(t *testing.T) {
 
 	// Assert that an error is returned due to the duplicate name
 	assert.Error(t, err)
+	service.DeleteZone(zoneID)
 }
