@@ -188,13 +188,13 @@ func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 		return
 	}
 
-	err = h.svc.StartWorkoutOption(workoutID, uint8(startWorkout.Option))
+	option, err := h.svc.StartWorkoutOption(workoutID, startWorkout.Option)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "workout option started successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"message": option + " started successfully"})
 }
 
 // StopWorkoutOption stops a specific option of an ongoing workout session.
@@ -222,13 +222,13 @@ func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
 		return
 	}
 
-	err = h.svc.StopWorkoutOption(workoutID)
+	option, err := h.svc.StopWorkoutOption(workoutID)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "Workout option stopped successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"message": option + " stopped successfully"})
 }
 
 func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {

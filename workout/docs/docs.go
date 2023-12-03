@@ -457,7 +457,7 @@ const docTemplate = `{
             "properties": {
                 "option": {
                     "description": "WorkoutID for which the workout option is to be stopped",
-                    "type": "integer"
+                    "type": "string"
                 }
             }
         }

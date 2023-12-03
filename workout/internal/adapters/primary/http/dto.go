@@ -17,7 +17,7 @@ type StartWorkout struct {
 
 type StartWorkoutOption struct {
 	// WorkoutID for which the workout option is to be stopped
-	Option uint8 `json:"option"`
+	Option string `json:"option"`
 }
 
 type StopWorkoutOption struct {
