@@ -9,22 +9,710 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-        "contact": {},
+        "contact": {
+            "name": "Liuyin Shi",
+            "url": "https://github.com/XIAOKAOBO",
+            "email": "shil9\u003e@mcmaster.ca"
+        },
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
-    "paths": {}
+    "paths": {
+        "/api/v1/geo_reading": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Get Geo device reading",
+                "operationId": "get-geo-reading",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Geo device reading",
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.LastLocation"
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Failed to get Geo device",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Set Geo device reading",
+                "operationId": "set-geo-reading",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Latitude value",
+                        "name": "latitude",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Longitude value",
+                        "name": "longitude",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: Geo reading set and location sent",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/geo_status": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Get Geo device status",
+                "operationId": "get-geo-status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, geo running: Geo device status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Cannot get Geo status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Set Geo device status",
+                "operationId": "set-geo-status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Geo device status code (true/false)",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/hrm_reading": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Set HRM device reading",
+                "operationId": "set-hrm-reading",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "HRM ID",
+                        "name": "hrm_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Current HRM reading",
+                        "name": "current_reading",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: HRM reading updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/hrm_status": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Get HRM device status",
+                "operationId": "get-hrm-status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: HRM device status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Failed to get HRM status",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Set HRM device status",
+                "operationId": "set-hrm-status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "HRM device status code (true/false)",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: HRM device status updated",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/peripheral": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Unbind peripheral data from a workout",
+                "operationId": "unbind-peripheral",
+                "parameters": [
+                    {
+                        "description": "Unbind Peripheral Data",
+                        "name": "unbindData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.UnbindPeripheralData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: Unbind the data",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Failed to unbind",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Connect to HRM device and bind it to a workout",
+                "operationId": "bind-peripheral",
+                "parameters": [
+                    {
+                        "description": "Bind Peripheral Data",
+                        "name": "bindData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.BindPeripheralData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: Binding workout done",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: error message",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/peripheral/hrm": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Disconnect HRM device",
+                "operationId": "disconnect-hrm",
+                "parameters": [
+                    {
+                        "description": "Disconnect Peripheral Data",
+                        "name": "disconnectData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.BindPeripheralData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: Disconnected HRM",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Cannot disconnect HRM",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Connect to HRM device",
+                "operationId": "connect-hrm",
+                "parameters": [
+                    {
+                        "description": "Connect Peripheral Data",
+                        "name": "connectData",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.BindPeripheralData"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "connect to hrm success: true",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "boolean"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "error: Cannot connect to HRM",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/peripheral/hrm/{workout_id}": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "peripheral"
+                ],
+                "summary": "Get HRM reading data",
+                "operationId": "get-hrm-reading",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Workout ID",
+                        "name": "workout_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Type of HRM reading (avg/normal)",
+                        "name": "type",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "HRM reading data",
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.LastHR"
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Invalid request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Reading from device failure",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "httphandler.BindPeripheralData": {
+            "type": "object",
+            "properties": {
+                "hrm_connected": {
+                    "description": "HRM Connected or not",
+                    "type": "boolean"
+                },
+                "hrm_id": {
+                    "description": "if HRM Connected is false then no HRM mock",
+                    "type": "string"
+                },
+                "player_id": {
+                    "description": "PlayerID",
+                    "type": "string"
+                },
+                "send_live_location_to_trail_manager": {
+                    "description": "Do we need live location? based on Hardcore mode",
+                    "type": "boolean"
+                },
+                "trail_id": {
+                    "description": "Trail for this workout",
+                    "type": "string"
+                },
+                "workout_id": {
+                    "description": "WorkoutID for the workout to be stopped",
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.LastHR": {
+            "type": "object",
+            "properties": {
+                "heart_rate": {
+                    "description": "Latitude of the Player",
+                    "type": "integer"
+                },
+                "hrm_id": {
+                    "type": "string"
+                },
+                "time_of_reading": {
+                    "description": "Time of reading",
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.LastLocation": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "description": "Latitude of the Player",
+                    "type": "number"
+                },
+                "longitude": {
+                    "description": "Longitude of the Player",
+                    "type": "number"
+                },
+                "time_of_location": {
+                    "description": "Time of location",
+                    "type": "string"
+                },
+                "workout_id": {
+                    "description": "WorkoutID for which the Shelter Availability is there or not",
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.UnbindPeripheralData": {
+            "type": "object",
+            "properties": {
+                "workout_id": {
+                    "description": "WorkoutID for the workout to be stopped",
+                    "type": "string"
+                }
+            }
+        }
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-	Version:          "",
+	Version:          "1.0",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
+	Title:            "Peripheral Service API",
+	Description:      "This provides a description of API endpoints for the Peripheral Service",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

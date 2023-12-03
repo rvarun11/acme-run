@@ -73,6 +73,7 @@ func (handler *HTTPHandler) InitRouter() {
 }
 
 // ConnectHRM connects to a Heart Rate Monitor (HRM) device.
+//
 //	@Summary	Connect to HRM device
 //	@Tags		peripheral
 //	@ID			connect-hrm
@@ -114,6 +115,7 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 }
 
 // DisconnectHRM disconnects a Heart Rate Monitor (HRM) device.
+//
 //	@Summary	Disconnect HRM device
 //	@Tags		peripheral
 //	@ID			disconnect-hrm
@@ -151,6 +153,7 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 }
 
 // BindPeripheralToData connects to an HRM device and binds it to a workout
+//
 //	@Summary	Connect to HRM device and bind it to a workout
 //	@Tags		peripheral
 //	@ID			bind-peripheral
@@ -200,6 +203,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 }
 
 // UnbindPeripheralToData unbinds peripheral data from a workout.
+//
 //	@Summary	Unbind peripheral data from a workout
 //	@Tags		peripheral
 //	@ID			unbind-peripheral
@@ -242,6 +246,7 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 }
 
 // getHRMReading retrieves Heart Rate Monitor (HRM) reading data.
+//
 //	@Summary	Get HRM reading data
 //	@Tags		peripheral
 //	@ID			get-hrm-reading
@@ -252,7 +257,7 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 //	@Success	200			{object}	LastHR				"HRM reading data"
 //	@Failure	400			{object}	map[string]string	"status: error, message: Invalid request"
 //	@Failure	500			{object}	map[string]string	"status: error, message: Reading from device failure"
-//	@Router		/api/v1/peripheral/hrm/{workout_id}?type={type} [get]
+//	@Router		/api/v1/peripheral/hrm/{workout_id} [get]
 func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 	wId, err1 := parseUUID(ctx, "workout_id")
 	if err1 != nil {
@@ -310,6 +315,7 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 }
 
 // GetHRMStatus retrieves the Heart Rate Monitor (HRM) device status for a workout.
+//
 //	@Summary	Get HRM device status
 //	@Tags		peripheral
 //	@ID			get-hrm-status
@@ -338,6 +344,7 @@ func (h *HTTPHandler) GetHRMStatus(ctx *gin.Context) {
 }
 
 // SetHRMStatus sets the Heart Rate Monitor (HRM) device status for a workout.
+//
 //	@Summary	Set HRM device status
 //	@Tags		peripheral
 //	@ID			set-hrm-status
@@ -372,6 +379,7 @@ func (h *HTTPHandler) SetHRMStatus(ctx *gin.Context) {
 }
 
 // SetHRMReading sets the Heart Rate Monitor (HRM) device reading from a smartwatch.
+//
 //	@Summary	Set HRM device reading
 //	@Tags		peripheral
 //	@ID			set-hrm-reading
@@ -412,6 +420,7 @@ func (h *HTTPHandler) SetHRMReading(ctx *gin.Context) {
 }
 
 // GetGeoStatus retrieves the Geographic (Geo) device status for a workout.
+//
 //	@Summary	Get Geo device status
 //	@Tags		peripheral
 //	@ID			get-geo-status
@@ -438,6 +447,7 @@ func (h *HTTPHandler) GetGeoStatus(ctx *gin.Context) {
 }
 
 // SetGeoStatus sets the Geographic (Geo) device status for a workout.
+//
 //	@Summary	Set Geo device status
 //	@Tags		peripheral
 //	@ID			set-geo-status
@@ -470,6 +480,7 @@ func (h *HTTPHandler) SetGeoStatus(ctx *gin.Context) {
 }
 
 // SetGeoReading sets the Geographic (Geo) device reading for a workout.
+//
 //	@Summary	Set Geo device reading
 //	@Tags		peripheral
 //	@ID			set-geo-reading
@@ -519,6 +530,7 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 }
 
 // GetGeoReading retrieves the Geographic (Geo) device reading for a workout.
+//
 //	@Summary	Get Geo device reading
 //	@Tags		peripheral
 //	@ID			get-geo-reading
@@ -527,7 +539,7 @@ func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 //	@Param		workout_id	path		string				true	"Workout ID"	format(uuid)
 //	@Success	200			{object}	LastLocation		"Geo device reading"
 //	@Failure	400			{object}	map[string]string	"status: error, message: Failed to get Geo device"
-//	@Router		/api/v1/geo_reading[get]
+//	@Router		/api/v1/geo_reading [get]
 func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
 	wId, err := parseUUID(ctx, "workout_id")
 	if err != nil {

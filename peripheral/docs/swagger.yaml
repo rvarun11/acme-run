@@ -1,4 +1,469 @@
+definitions:
+  httphandler.BindPeripheralData:
+    properties:
+      hrm_connected:
+        description: HRM Connected or not
+        type: boolean
+      hrm_id:
+        description: if HRM Connected is false then no HRM mock
+        type: string
+      player_id:
+        description: PlayerID
+        type: string
+      send_live_location_to_trail_manager:
+        description: Do we need live location? based on Hardcore mode
+        type: boolean
+      trail_id:
+        description: Trail for this workout
+        type: string
+      workout_id:
+        description: WorkoutID for the workout to be stopped
+        type: string
+    type: object
+  httphandler.LastHR:
+    properties:
+      heart_rate:
+        description: Latitude of the Player
+        type: integer
+      hrm_id:
+        type: string
+      time_of_reading:
+        description: Time of reading
+        type: string
+    type: object
+  httphandler.LastLocation:
+    properties:
+      latitude:
+        description: Latitude of the Player
+        type: number
+      longitude:
+        description: Longitude of the Player
+        type: number
+      time_of_location:
+        description: Time of location
+        type: string
+      workout_id:
+        description: WorkoutID for which the Shelter Availability is there or not
+        type: string
+    type: object
+  httphandler.UnbindPeripheralData:
+    properties:
+      workout_id:
+        description: WorkoutID for the workout to be stopped
+        type: string
+    type: object
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: shil9>@mcmaster.ca
+    name: Liuyin Shi
+    url: https://github.com/XIAOKAOBO
+  description: This provides a description of API endpoints for the Peripheral Service
+  title: Peripheral Service API
+  version: "1.0"
+paths:
+  /api/v1/geo_reading:
+    get:
+      consumes:
+      - application/json
+      operationId: get-geo-reading
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Geo device reading
+          schema:
+            $ref: '#/definitions/httphandler.LastLocation'
+        "400":
+          description: 'status: error, message: Failed to get Geo device'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Geo device reading
+      tags:
+      - peripheral
+    put:
+      consumes:
+      - application/json
+      operationId: set-geo-reading
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      - description: Latitude value
+        in: query
+        name: latitude
+        required: true
+        type: string
+      - description: Longitude value
+        in: query
+        name: longitude
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: Geo reading set and location sent'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Set Geo device reading
+      tags:
+      - peripheral
+  /api/v1/geo_status:
+    get:
+      consumes:
+      - application/json
+      operationId: get-geo-status
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, geo running: Geo device status'
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: 'status: error, message: Cannot get Geo status'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get Geo device status
+      tags:
+      - peripheral
+    put:
+      consumes:
+      - application/json
+      operationId: set-geo-status
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      - description: Geo device status code (true/false)
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Set Geo device status
+      tags:
+      - peripheral
+  /api/v1/hrm_reading:
+    put:
+      consumes:
+      - application/json
+      operationId: set-hrm-reading
+      parameters:
+      - description: HRM ID
+        format: uuid
+        in: path
+        name: hrm_id
+        required: true
+        type: string
+      - description: Current HRM reading
+        in: query
+        name: current_reading
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: HRM reading updated'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Set HRM device reading
+      tags:
+      - peripheral
+  /api/v1/hrm_status:
+    get:
+      consumes:
+      - application/json
+      operationId: get-hrm-status
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: HRM device status'
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: 'status: error, message: Failed to get HRM status'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get HRM device status
+      tags:
+      - peripheral
+    put:
+      consumes:
+      - application/json
+      operationId: set-hrm-status
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      - description: HRM device status code (true/false)
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: HRM device status updated'
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Set HRM device status
+      tags:
+      - peripheral
+  /api/v1/peripheral:
+    post:
+      consumes:
+      - application/json
+      operationId: bind-peripheral
+      parameters:
+      - description: Bind Peripheral Data
+        in: body
+        name: bindData
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.BindPeripheralData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: Binding workout done'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: error message'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Connect to HRM device and bind it to a workout
+      tags:
+      - peripheral
+    put:
+      consumes:
+      - application/json
+      operationId: unbind-peripheral
+      parameters:
+      - description: Unbind Peripheral Data
+        in: body
+        name: unbindData
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.UnbindPeripheralData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: Unbind the data'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed to unbind'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Unbind peripheral data from a workout
+      tags:
+      - peripheral
+  /api/v1/peripheral/hrm:
+    post:
+      consumes:
+      - application/json
+      operationId: connect-hrm
+      parameters:
+      - description: Connect Peripheral Data
+        in: body
+        name: connectData
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.BindPeripheralData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'connect to hrm success: true'
+          schema:
+            additionalProperties:
+              type: boolean
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'error: Cannot connect to HRM'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Connect to HRM device
+      tags:
+      - peripheral
+    put:
+      consumes:
+      - application/json
+      operationId: disconnect-hrm
+      parameters:
+      - description: Disconnect Peripheral Data
+        in: body
+        name: disconnectData
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.BindPeripheralData'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: Disconnected HRM'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Cannot disconnect HRM'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Disconnect HRM device
+      tags:
+      - peripheral
+  /api/v1/peripheral/hrm/{workout_id}:
+    get:
+      consumes:
+      - application/json
+      operationId: get-hrm-reading
+      parameters:
+      - description: Workout ID
+        format: uuid
+        in: path
+        name: workout_id
+        required: true
+        type: string
+      - description: Type of HRM reading (avg/normal)
+        in: query
+        name: type
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: HRM reading data
+          schema:
+            $ref: '#/definitions/httphandler.LastHR'
+        "400":
+          description: 'status: error, message: Invalid request'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Reading from device failure'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get HRM reading data
+      tags:
+      - peripheral
 swagger: "2.0"
