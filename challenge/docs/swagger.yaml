@@ -5,8 +5,6 @@ definitions:
         $ref: '#/definitions/domain.Challenge'
       completedOn:
         type: string
-      id:
-        type: string
       playerID:
         type: string
       score:
