@@ -68,14 +68,14 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	var req challengeDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid request parameters",
 		})
 		return
 	}
 	ch, err := h.svc.CreateChallenge(toAggregate(&req))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "unable to create challenge",
+			"error": "unable to create challenge, something occured",
 		})
 		return
 	}
@@ -83,7 +83,7 @@ func (h *ChallengeHandler) createChallenge(ctx *gin.Context) {
 	res := fromAggregate(ch)
 	ctx.JSON(http.StatusCreated, gin.H{
 		"challenge": res,
-		"message":   "New challenge created successfully",
+		"message":   "new challenge created successfully",
 	})
 }
 
@@ -98,7 +98,7 @@ func (h *ChallengeHandler) getChallengeByID(ctx *gin.Context) {
 	cid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid challenge id",
 		})
 		return
 	}
@@ -132,7 +132,7 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 	var req challengeDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"message": "invalid body paramaters",
+			"message": "invalid request paramaters",
 		})
 		return
 	}
@@ -149,8 +149,8 @@ func (h *ChallengeHandler) updateChallenge(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusNoContent, gin.H{
 		// 204 returns no body so this can be changed to 200 if body is needed/
-		"player":  res,
-		"message": "Player updated successfully",
+		"challenge": res,
+		"message":   "challenge updated successfully",
 	})
 }
 
@@ -165,7 +165,7 @@ func (h *ChallengeHandler) deleteChallengeById(ctx *gin.Context) {
 	cid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid challenge id",
 		})
 		return
 	}
@@ -189,7 +189,7 @@ func (h *ChallengeHandler) endChallenge(ctx *gin.Context) {
 	cid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid challenge id",
 		})
 		return
 	}
@@ -209,10 +209,10 @@ func (h *ChallengeHandler) endChallenge(ctx *gin.Context) {
 		return
 	}
 
-	h.svc.DispatchBadges(ch)
+	h.svc.AssignBadges(ch)
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "challenge ended & badges dispatched",
+		"message": "challenge ended & badges assigned",
 	})
 }
 

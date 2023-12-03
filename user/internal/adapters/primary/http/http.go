@@ -59,7 +59,7 @@ func (h *PlayerHandler) registerPlayer(ctx *gin.Context) {
 	var req playerDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid request parameters",
 		})
 		return
 	}
@@ -74,7 +74,7 @@ func (h *PlayerHandler) registerPlayer(ctx *gin.Context) {
 
 	res := fromAggregate(player)
 	ctx.JSON(http.StatusCreated, gin.H{
-		"message": "New player created successfully",
+		"message": "new player created successfully",
 		"player":  res,
 	})
 }
@@ -116,7 +116,7 @@ func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {
 	pid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid player id",
 		})
 		return
 	}
@@ -124,7 +124,7 @@ func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {
 	var req playerDTO
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid body parameters",
+			"error": "invalid request parameters",
 		})
 		return
 	}
@@ -141,7 +141,7 @@ func (h *PlayerHandler) updatePlayer(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, gin.H{
 		// 204 returns no body so this can be changed to 200 if body is needed
 		"player":  res,
-		"message": "Player updated successfully",
+		"message": "player updated successfully",
 	})
 }
 
@@ -156,7 +156,7 @@ func (h *PlayerHandler) deletePlayer(ctx *gin.Context) {
 	pid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request",
+			"error": "invalid player id",
 		})
 		return
 	}
