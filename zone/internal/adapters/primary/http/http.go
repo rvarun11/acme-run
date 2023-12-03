@@ -102,18 +102,18 @@ func (s *ZoneServiceHTTPHandler) GetClosestShelterInfo(ctx *gin.Context) {
 }
 
 // GetClosestTrail godoc
-// @Summary Get the closest trail
-// @Description Get the closest trail based on given longitude and latitude
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param longitude query float64 true "Longitude"
-// @Param latitude query float64 true "Latitude"
-// @Success 200 {object} Trail
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail [get]
+//	@Summary		Get the closest trail
+//	@Description	Get the closest trail based on given longitude and latitude
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string	true	"Zone ID"
+//	@Param			longitude	query		float64	true	"Longitude"
+//	@Param			latitude	query		float64	true	"Latitude"
+//	@Success		200			{object}	Trail
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail [get]
 
 func (s *ZoneServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
 
@@ -149,18 +149,18 @@ func (s *ZoneServiceHTTPHandler) CreateTrail(ctx *gin.Context) {
 }
 
 // UpdateTrail godoc
-// @Summary Update a trail
-// @Description Update details of an existing trail
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Param trail body TrailDTO true "Updated Trail Data"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id} [put]
+//	@Summary		Update a trail
+//	@Description	Update details of an existing trail
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string		true	"Zone ID"
+//	@Param			trail_id	path		string		true	"Trail ID"
+//	@Param			trail		body		TrailDTO	true	"Updated Trail Data"
+//	@Success		200			{object}	SuccessResponse
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id} [put]
 func (s *ZoneServiceHTTPHandler) UpdateTrail(ctx *gin.Context) {
 	zoneIdStr := ctx.Param("zone_id")
 	zId, errZ := uuid.Parse(zoneIdStr)
@@ -197,17 +197,17 @@ func (s *ZoneServiceHTTPHandler) UpdateTrail(ctx *gin.Context) {
 }
 
 // DeleteTrail godoc
-// @Summary Delete a specific trail
-// @Description Delete a trail from the zone by its ID
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id} [delete]
+//	@Summary		Delete a specific trail
+//	@Description	Delete a trail from the zone by its ID
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string	true	"Zone ID"
+//	@Param			trail_id	path		string	true	"Trail ID"
+//	@Success		200			{object}	SuccessResponse
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id} [delete]
 func (t *ZoneServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
@@ -243,18 +243,18 @@ func (t *ZoneServiceHTTPHandler) DeleteTrail(ctx *gin.Context) {
 }
 
 // GetClosestTrail godoc
-// @Summary Get the closest trail
-// @Description Get the closest trail based on given longitude and latitude
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param longitude query float64 true "Longitude"
-// @Param latitude query float64 true "Latitude"
-// @Success 200 {object} Trail
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail [get]
+//	@Summary		Get the closest trail
+//	@Description	Get the closest trail based on given longitude and latitude
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string	true	"Zone ID"
+//	@Param			longitude	query		float64	true	"Longitude"
+//	@Param			latitude	query		float64	true	"Latitude"
+//	@Success		200			{object}	Trail
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail [get]
 func (t *ZoneServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
 
 	longitudeStr := ctx.Query("longitude")
@@ -287,17 +287,17 @@ func (t *ZoneServiceHTTPHandler) GetClosestTrail(ctx *gin.Context) {
 }
 
 // GetTrailLocationInfo godoc
-// @Summary Get location information of a specific trail
-// @Description Retrieve detailed location information of a trail by its ID
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Success 200 {object} TrailLocationInfo
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id} [get]
+//	@Summary		Get location information of a specific trail
+//	@Description	Retrieve detailed location information of a trail by its ID
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string	true	"Zone ID"
+//	@Param			trail_id	path		string	true	"Trail ID"
+//	@Success		200			{object}	TrailLocationInfo
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id} [get]
 func (t *ZoneServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
@@ -332,18 +332,18 @@ func (t *ZoneServiceHTTPHandler) GetTrailLocationInfo(ctx *gin.Context) {
 
 // shelters
 // CreateShelter godoc
-// @Summary Create a shelter
-// @Description Create a new shelter associated with a trail
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Param shelter body ShelterDTO true "Shelter Data"
-// @Success 201 {object} ShelterCreationResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter [post]
+//	@Summary		Create a shelter
+//	@Description	Create a new shelter associated with a trail
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string		true	"Zone ID"
+//	@Param			trail_id	path		string		true	"Trail ID"
+//	@Param			shelter		body		ShelterDTO	true	"Shelter Data"
+//	@Success		201			{object}	ShelterCreationResponse
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id}/shelter [post]
 
 func (t *ZoneServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
 
@@ -384,18 +384,18 @@ func (t *ZoneServiceHTTPHandler) CreateShelter(ctx *gin.Context) {
 }
 
 // UpdateShelter godoc
-// @Summary Update a shelter
-// @Description Update details of an existing shelter
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Param shelter body ShelterDTO true "Updated Shelter Data"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter [put]
+//	@Summary		Update a shelter
+//	@Description	Update details of an existing shelter
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string		true	"Zone ID"
+//	@Param			trail_id	path		string		true	"Trail ID"
+//	@Param			shelter		body		ShelterDTO	true	"Updated Shelter Data"
+//	@Success		200			{object}	SuccessResponse
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id}/shelter [put]
 
 func (t *ZoneServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
 
@@ -439,18 +439,18 @@ func (t *ZoneServiceHTTPHandler) UpdateShelter(ctx *gin.Context) {
 }
 
 // DeleteShelter godoc
-// @Summary Delete a shelter
-// @Description Delete an existing shelter
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Param shelter_id path string true "Shelter ID"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id} [delete]
+//	@Summary		Delete a shelter
+//	@Description	Delete an existing shelter
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string	true	"Zone ID"
+//	@Param			trail_id	path		string	true	"Trail ID"
+//	@Param			shelter_id	path		string	true	"Shelter ID"
+//	@Success		200			{object}	SuccessResponse
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id} [delete]
 
 func (t *ZoneServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
 
@@ -496,18 +496,18 @@ func (t *ZoneServiceHTTPHandler) DeleteShelter(ctx *gin.Context) {
 }
 
 // GetShelterLocationInfo godoc
-// @Summary Get location information of a specific shelter
-// @Description Retrieve detailed location information of a shelter by its ID
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param trail_id path string true "Trail ID"
-// @Param shelter_id path string true "Shelter ID"
-// @Success 200 {object} ShelterLocationInfo
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id} [get]
+//	@Summary		Get location information of a specific shelter
+//	@Description	Retrieve detailed location information of a shelter by its ID
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id		path		string	true	"Zone ID"
+//	@Param			trail_id	path		string	true	"Trail ID"
+//	@Param			shelter_id	path		string	true	"Shelter ID"
+//	@Success		200			{object}	ShelterLocationInfo
+//	@Failure		400			{object}	ErrorResponse
+//	@Failure		500			{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id} [get]
 func (t *ZoneServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context) {
 
 	zoneIdStr := ctx.Param("zone_id")
@@ -549,16 +549,16 @@ func (t *ZoneServiceHTTPHandler) GetShelterLocationInfo(ctx *gin.Context) {
 }
 
 // CreateZone godoc
-// @Summary Create a zone
-// @Description Create a new zone
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone body ZoneDTO true "Zone Data"
-// @Success 201 {object} ZoneCreationResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone [post]
+//	@Summary		Create a zone
+//	@Description	Create a new zone
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone	body		ZoneDTO	true	"Zone Data"
+//	@Success		201		{object}	ZoneCreationResponse
+//	@Failure		400		{object}	ErrorResponse
+//	@Failure		500		{object}	ErrorResponse
+//	@Router			/api/v1/zone [post]
 
 func (h *ZoneServiceHTTPHandler) CreateZone(ctx *gin.Context) {
 	var zoneDataInstance ZoneDTO
@@ -578,17 +578,17 @@ func (h *ZoneServiceHTTPHandler) CreateZone(ctx *gin.Context) {
 }
 
 // UpdateZone godoc
-// @Summary Update a zone
-// @Description Update details of an existing zone
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Param zone body ZoneDTO true "Updated Zone Data"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id} [put]
+//	@Summary		Update a zone
+//	@Description	Update details of an existing zone
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id	path		string	true	"Zone ID"
+//	@Param			zone	body		ZoneDTO	true	"Updated Zone Data"
+//	@Success		200		{object}	SuccessResponse
+//	@Failure		400		{object}	ErrorResponse
+//	@Failure		500		{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id} [put]
 
 func (h *ZoneServiceHTTPHandler) UpdateZone(ctx *gin.Context) {
 	zoneIdStr := ctx.Param("zone_id")
@@ -609,16 +609,16 @@ func (h *ZoneServiceHTTPHandler) UpdateZone(ctx *gin.Context) {
 }
 
 // DeleteZone godoc
-// @Summary Delete a zone
-// @Description Delete an existing zone
-// @Tags zone
-// @Accept json
-// @Produce json
-// @Param zone_id path string true "Zone ID"
-// @Success 200 {object} SuccessResponse
-// @Failure 400 {object} ErrorResponse
-// @Failure 500 {object} ErrorResponse
-// @Router /api/v1/zone/{zone_id} [delete]
+//	@Summary		Delete a zone
+//	@Description	Delete an existing zone
+//	@Tags			zone
+//	@Accept			json
+//	@Produce		json
+//	@Param			zone_id	path		string	true	"Zone ID"
+//	@Success		200		{object}	SuccessResponse
+//	@Failure		400		{object}	ErrorResponse
+//	@Failure		500		{object}	ErrorResponse
+//	@Router			/api/v1/zone/{zone_id} [delete]
 
 func (h *ZoneServiceHTTPHandler) DeleteZone(ctx *gin.Context) {
 
