@@ -16,6 +16,7 @@ var (
 	ErrorActiveWorkoutAlreadyExists = errors.New("active workout already exists")
 	ErrorUpdateWorkoutFailed        = errors.New("failed to update workout")
 	ErrorWorkoutOptionUnavailable   = errors.New("workout option unavailable")
+	ErrorWorkoutOptionInvalid       = errors.New("workout option invalid")
 	ErrInvalidWorkout               = errors.New("no workout_id matched")
 	ErrWorkoutOptionAlreadyActive   = errors.New("workout option is already active")
 	ErrWorkoutOptionAlreadyInActive = errors.New("no workout option is active")
@@ -29,8 +30,8 @@ type WorkoutService interface {
 	StopWorkout(workout domain.Workout) (*domain.Workout, error)
 
 	GetWorkoutOptions(workoutID uuid.UUID) (uint8, error)
-	StartWorkoutOption(workoutID uuid.UUID, workoutType uint8) error
-	StopWorkoutOption(workoutID uuid.UUID) error
+	StartWorkoutOption(workoutID uuid.UUID, option string) (string, error)
+	StopWorkoutOption(workoutID uuid.UUID) (string, error)
 
 	UpdateDistanceTravelled(workoutID uuid.UUID, latitude float64, longitude float64, timeOfLocation time.Time) error
 	UpdateShelter(workoutID uuid.UUID, DistanceToShelter float64) error

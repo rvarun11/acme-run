@@ -10,6 +10,10 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
 	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"github.com/gin-gonic/gin"
+
+	"github.com/CAS735-F23/macrun-teamvsl/workout/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 var cfg *config.AppConfiguration = config.Config
@@ -40,5 +44,10 @@ func main() {
 
 	go workoutAMQPHandler.InitAMQP()
 	// Start Server
+
+	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	router.Run(":" + cfg.Port)
 }
