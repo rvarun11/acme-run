@@ -3,7 +3,7 @@ package domain
 import (
 	"time"
 
-	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
+	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )

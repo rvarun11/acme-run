@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo -e "\e[1mTest Information:\e[0m The test suite focuses exclusively on critical functionalities essential for key scenarios."
-echo -e "\e[1mRunning unit and integration tests. Note: Some integration tests may have longer execution times, so your patience is appreciated.\e[0m"
+echo -e "\e[1mIt includes both unit and integration tests for all services. Please note that some tests may have longer execution times, so your patience is appreciated.\e[0m"
 echo -e "\n"
 
 for dir in */; do
