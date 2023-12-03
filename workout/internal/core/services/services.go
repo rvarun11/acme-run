@@ -214,6 +214,7 @@ func getRandomOptionString() string {
 
 func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, distance_to_shleter float64) []domain.WorkoutOptionLink {
 	var links []domain.WorkoutOptionLink // A slice to hold ordered links
+	optionStringForFE := getRandomOptionString()
 	for _, option := range optionsOrder {
 		var optionName string
 		var optionString string
@@ -229,7 +230,7 @@ func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, 
 			continue
 		}
 		if option == EscapeBit || option == FightBit {
-			optionString = getRandomOptionString()
+			optionString = optionStringForFE
 		}
 		linkName := "option=" + optionName + " :: " + optionString
 		linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workoutID)
