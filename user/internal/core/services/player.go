@@ -39,7 +39,8 @@ func (s *PlayerService) Register(req *domain.Player) (*domain.Player, error) {
 	if err != nil {
 		return &domain.Player{}, ports.ErrorCreatePlayerFailed
 	}
-	logger.Info("New player registered successfully", zap.String("player", player.User.Name))
+
+	logger.Info("new player registered successfully", zap.String("player", player.User.Name))
 	return player, nil
 }
 
@@ -48,7 +49,7 @@ func (s *PlayerService) Get(id uuid.UUID) (*domain.Player, error) {
 	if err != nil {
 		return &domain.Player{}, err
 	}
-	logger.Info("Retrieved player", zap.String("name", player.User.Name))
+	logger.Info("retrieved player successfully", zap.String("name", player.User.Name))
 	return player, nil
 }
 
@@ -66,6 +67,8 @@ func (s *PlayerService) Update(req *domain.Player) (*domain.Player, error) {
 	if err != nil {
 		return &domain.Player{}, err
 	}
+
+	logger.Info("updated player successfully", zap.String("name", player.User.Name))
 	return player, nil
 }
 
