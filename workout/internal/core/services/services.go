@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -135,7 +136,7 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	logger.Info("Workout started with ", zap.String("workoutID", workout.WorkoutID.String()))
 
 	// Generate and return the link to the workout options
-	linkURL := fmt.Sprintf("/api/v1/workoutOptions?workoutID=%s", workout.WorkoutID)
+	linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workout.WorkoutID)
 	return linkURL, nil // Return nil explicitly to indicate no error occurred
 }
 
@@ -206,23 +207,33 @@ func computeOptionsOrder(pworkoutOptions *domain.WorkoutOptions) []uint8 {
 	return order
 }
 
+func getRandomOptionString() string {
+	options := []string{"Grumpy Prof", "Enraged Beavers"}
+	return options[rand.Intn(len(options))]
+}
+
 func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, distance_to_shleter float64) []domain.WorkoutOptionLink {
 	var links []domain.WorkoutOptionLink // A slice to hold ordered links
-
+	optionStringForFE := getRandomOptionString()
 	for _, option := range optionsOrder {
 		var optionName string
+		var optionString string
 		switch option {
 		case ShelterBit:
-			optionName = "Distance to Shelter = " + strconv.FormatFloat(distance_to_shleter, 'f', -1, 64) + " : "
+			optionName = "shelter"
+			optionString = "Distance to Shelter = " + strconv.FormatFloat(distance_to_shleter, 'f', -1, 64)
 		case FightBit:
-			optionName = "Fight"
+			optionName = "fight"
 		case EscapeBit:
-			optionName = "Escape"
+			optionName = "escape"
 		default:
 			continue
 		}
-		linkName := "option" + optionName
-		linkURL := fmt.Sprintf("/startWorkoutOption?workoutID=%s&option=%d", workoutID, option)
+		if option == EscapeBit || option == FightBit {
+			optionString = optionStringForFE
+		}
+		linkName := "option=" + optionName + " :: " + optionString
+		linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workoutID)
 		links = append(links, domain.WorkoutOptionLink{Name: linkName, URL: linkURL})
 	}
 
@@ -304,21 +315,33 @@ func (s *WorkoutService) UpdateShelter(workoutID uuid.UUID, DistanceToShelter fl
 	return nil // Return nil to indicate success
 }
 
-func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uint8) error {
+func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, option string) (string, error) {
 	// Get the workout options from the repository
 	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
-		return err // Propagate the error from the repository
+		return "", err // Propagate the error from the repository
+	}
+
+	var workoutType uint8
+
+	if option == "shelter" {
+		workoutType = 0
+	} else if option == "fight" {
+		workoutType = 1
+	} else if option == "escape" {
+		workoutType = 2
+	} else {
+		return "", ports.ErrorWorkoutOptionInvalid
 	}
 
 	// Check if the workout option is already active
 	if workoutOptions.IsWorkoutOptionActive {
-		return ports.ErrWorkoutOptionAlreadyActive
+		return "", ports.ErrWorkoutOptionAlreadyActive
 	}
 
 	// Check if shelter is available or not
 	if workoutType == 0 && workoutOptions.WorkoutOptionsAvailable&1 == 0 {
-		return ports.ErrorWorkoutOptionUnavailable
+		return "", ports.ErrorWorkoutOptionUnavailable
 	}
 
 	// Update the workout option to make it active (you need to set appropriate fields)
@@ -329,31 +352,31 @@ func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, workoutType uin
 	_, err = s.repo.UpdateWorkoutOptions(workoutOptions)
 
 	if err != nil {
-		return err // Propagate the error from the repository
+		return "", err // Propagate the error from the repository
 	}
 	logger.Info("Workout option started", zap.String("workoutID", workoutOptions.WorkoutID.String()), zap.String("optionType", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
-	return nil // Return nil to indicate success
+	return getWorkoutType(workoutOptions.CurrentWorkoutOption), nil // Return nil to indicate success
 }
 
-func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
+func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) (string, error) {
 	// Get the workout from the repository
 	workout, err := s.repo.GetWorkout(workoutID)
 	if err != nil {
 		logger.Debug("failed to get workout for stopping options", zap.String("workoutID", workoutID.String()), zap.Error(err))
-		return fmt.Errorf("failed to get workout %s for stopping options: %w", workoutID, err)
+		return "", fmt.Errorf("failed to get workout %s for stopping options: %w", workoutID, err)
 	}
 
 	// Get the workout options from the repository
 	workoutOptions, err := s.repo.GetWorkoutOptions(workoutID)
 	if err != nil {
 		logger.Debug("failed to get workout options for workout", zap.String("workoutID", workoutID.String()), zap.Error(err))
-		return fmt.Errorf("failed to get workout options for workout %s: %w", workoutID, err)
+		return "", fmt.Errorf("failed to get workout options for workout %s: %w", workoutID, err)
 	}
 
 	// Check if the workout option is already inactive
 	if !workoutOptions.IsWorkoutOptionActive {
 		logger.Debug("workout option already inactive", zap.String("workoutID", workoutID.String()))
-		return ports.ErrWorkoutOptionAlreadyInActive
+		return "", ports.ErrWorkoutOptionAlreadyInActive
 	}
 
 	// Update the Shelters, Fights and Escapes
@@ -366,6 +389,7 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	}
 	workoutType := getWorkoutType(workoutOptions.CurrentWorkoutOption) // Assuming getWorkoutType is a valid function
 
+	returnOption := getWorkoutType(workoutOptions.CurrentWorkoutOption)
 	// Update the workout option to make it inactive
 	workoutOptions.IsWorkoutOptionActive = false
 	workoutOptions.CurrentWorkoutOption = -1
@@ -374,20 +398,20 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) error {
 	_, err = s.repo.UpdateWorkoutOptions(workoutOptions)
 	if err != nil {
 		logger.Debug("failed to update workout options on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
-		return fmt.Errorf("failed to update workout options for workout %s on stop: %w", workoutID, err)
+		return "", fmt.Errorf("failed to update workout options for workout %s on stop: %w", workoutID, err)
 	}
 
 	// Update the workout in the repository
 	_, err = s.repo.UpdateWorkout(workout)
 	if err != nil {
 		logger.Debug("failed to update workout on stop", zap.String("workoutID", workoutID.String()), zap.Error(err))
-		return fmt.Errorf("failed to update workout %s on stop: %w", workoutID, err)
+		return "", fmt.Errorf("failed to update workout %s on stop: %w", workoutID, err)
 	}
 
 	// Log the successful stopping of the workout option
 	logger.Info("Workout option stopped", zap.String("workoutID", workoutID.String()), zap.String("optionType", workoutType))
 
-	return nil
+	return returnOption, nil
 }
 
 func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
