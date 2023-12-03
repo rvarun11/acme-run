@@ -48,7 +48,7 @@ func (s *PlayerService) Get(id uuid.UUID) (*domain.Player, error) {
 	if err != nil {
 		return &domain.Player{}, err
 	}
-	// logger.Info("")
+	logger.Info("Retrieved player", zap.String("name", player.User.Name))
 	return player, nil
 }
 
