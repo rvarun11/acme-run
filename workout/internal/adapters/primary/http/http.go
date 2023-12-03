@@ -168,7 +168,7 @@ func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 //	@Param			option		body	StartWorkoutOption	true	"Details of the workout option to start"
 //	@Success		200			"Successfully started workout option"
 //	@Failure		400			"Bad Request with error details"
-//	@Router			/api/v1/workout/{workoutId}/options/start [post]
+//	@Router			/api/v1/workout/{workoutId}/options [post]
 func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
@@ -208,7 +208,7 @@ func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 //	@Param			workoutId	path	string	true	"ID of the workout session"
 //	@Success		200			"Successfully stopped workout option"
 //	@Failure		400			"Bad Request with error details"
-//	@Router			/api/v1/workout/{workoutId}/options/stop [patch]
+//	@Router			/api/v1/workout/{workoutId}/options [patch]
 func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")

@@ -348,9 +348,7 @@ const docTemplate = `{
                         "description": "Bad Request with error details"
                     }
                 }
-            }
-        },
-        "/api/v1/workout/{workoutId}/options/start": {
+            },
             "post": {
                 "description": "This endpoint starts a specific option for an ongoing workout session based on the workout ID and option details.",
                 "consumes": [
@@ -390,9 +388,7 @@ const docTemplate = `{
                         "description": "Bad Request with error details"
                     }
                 }
-            }
-        },
-        "/api/v1/workout/{workoutId}/options/stop": {
+            },
             "patch": {
                 "description": "This endpoint stops a specific option of an ongoing workout session based on the workout ID.",
                 "consumes": [

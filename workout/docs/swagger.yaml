@@ -120,7 +120,28 @@ paths:
       summary: Get workout session options
       tags:
       - workout
-  /api/v1/workout/{workoutId}/options/start:
+    patch:
+      consumes:
+      - application/json
+      description: This endpoint stops a specific option of an ongoing workout session
+        based on the workout ID.
+      operationId: stop-workout-option
+      parameters:
+      - description: ID of the workout session
+        in: path
+        name: workoutId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully stopped workout option
+        "400":
+          description: Bad Request with error details
+      summary: Stop a workout option
+      tags:
+      - workout
     post:
       consumes:
       - application/json
@@ -147,29 +168,6 @@ paths:
         "400":
           description: Bad Request with error details
       summary: Start a workout option
-      tags:
-      - workout
-  /api/v1/workout/{workoutId}/options/stop:
-    patch:
-      consumes:
-      - application/json
-      description: This endpoint stops a specific option of an ongoing workout session
-        based on the workout ID.
-      operationId: stop-workout-option
-      parameters:
-      - description: ID of the workout session
-        in: path
-        name: workoutId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully stopped workout option
-        "400":
-          description: Bad Request with error details
-      summary: Stop a workout option
       tags:
       - workout
   /api/v1/workout/distance:
