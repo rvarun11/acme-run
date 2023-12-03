@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/zone/config"
+	"github.com/CAS735-F23/macrun-teamvsl/zone/docs"
 	httphandler "github.com/CAS735-F23/macrun-teamvsl/zone/internal/adapters/primary/http"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/adapters/primary/peripheralhandler"
 	repository "github.com/CAS735-F23/macrun-teamvsl/zone/internal/adapters/secondary/repository/memory"
@@ -11,13 +12,25 @@ import (
 	log "github.com/CAS735-F23/macrun-teamvsl/zone/log"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 )
 
 var cfg *config.AppConfiguration = config.Config
 
+// @title Zone Service API
+// @version 1.0
+// @description This provides a description of API endpoints for the zone
+
+// @contact.name Liuyin Shi
+// @contact.url    https://github.com/XIAOKAOBO
+// @contact.email shil9@mcmaster.ca
+
+// @query.collection.format multi
+
 func main() {
-	log.Info("Zone Manager is starting")
+	log.Info("Zone Service is starting")
 
 	// Initialize router
 	router := gin.New()
@@ -43,6 +56,11 @@ func main() {
 
 	// Start the HTTP server
 	err := router.Run(":" + cfg.Port)
+
+	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
 	if err != nil {
 		log.Fatal("Failed to run the server", zap.Error(err))
 	}
