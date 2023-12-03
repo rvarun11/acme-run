@@ -31,7 +31,7 @@ func (h *ChallengeHandler) InitRouter() {
 	router.GET("/challenges", h.listChallenges)
 	router.DELETE("/challenges/:id", h.deleteChallengeById)
 	// Note: This is a temporary API for the purposes of the demo
-	router.PUT("/challenges/:id/end", h.endChallenge)
+	router.PATCH("/challenges/:id", h.endChallenge)
 
 	// Badges
 	router.GET("/badges", h.listBadgesByPlayerID)
