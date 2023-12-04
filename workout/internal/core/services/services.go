@@ -31,21 +31,21 @@ type ActiveWorkoutsHeartRate struct {
 
 type WorkoutService struct {
 	repo                       ports.WorkoutRepository
-	peripheral                 ports.PeripheralDeviceClient
+	peripheral                 ports.PeripheralClient
 	user                       ports.UserServiceClient
-	publisher                  ports.Publisher
+	WorkoutStatsPublisher      ports.WorkoutStatsPublisher
 	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
 	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
 	activePlayers              map[uuid.UUID]bool
 }
 
 // Factory for creating a new WorkoutService
-func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralDeviceClient, user ports.UserServiceClient, publisher ports.Publisher) *WorkoutService {
+func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralClient, user ports.UserServiceClient, WorkoutStatsPublisher ports.WorkoutStatsPublisher) *WorkoutService {
 	return &WorkoutService{
 		repo:                       repo,
 		peripheral:                 peripheral,
 		user:                       user,
-		publisher:                  publisher,
+		WorkoutStatsPublisher:      WorkoutStatsPublisher,
 		activeWorkoutsLastLocation: make(map[uuid.UUID]ActiveWorkoutsLastLocation),
 		activeWorkoutsHeartRate:    make(map[uuid.UUID]ActiveWorkoutsHeartRate),
 		activePlayers:              make(map[uuid.UUID]bool),
@@ -98,7 +98,7 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	shelterNeeded := !workout.HardcoreMode
 
 	err = s.peripheral.BindPeripheralData(workout.TrailID, workout.PlayerID, workout.WorkoutID, HRMID, HRMConnected, shelterNeeded)
-	logger.Info("Peripheral bounded to ", zap.String("workoutID", workout.WorkoutID.String()))
+	logger.Info("peripheral bounded", zap.String("workout_id", workout.WorkoutID.String()))
 	if err != nil {
 		logger.Debug("failed to bind peripheral data", zap.String("HRMID", HRMID.String()), zap.Error(err))
 		return "", fmt.Errorf("failed to bind HRM device %s for workout %s: %w", HRMID, workout.WorkoutID, err)
@@ -133,7 +133,7 @@ func (s *WorkoutService) Start(workout *domain.Workout, HRMID uuid.UUID, HRMConn
 	}
 
 	// Log the successful creation of the workout
-	logger.Info("Workout started with ", zap.String("workoutID", workout.WorkoutID.String()))
+	logger.Info("workout started", zap.String("workout_id", workout.WorkoutID.String()))
 
 	// Generate and return the link to the workout options
 	linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workout.WorkoutID)
@@ -165,9 +165,9 @@ func (s *WorkoutService) GetWorkoutOptions(workoutID uuid.UUID) ([]domain.Workou
 	links := generateStartWorkoutOptionLinks(workoutID, optionsOrder, pworkoutOptions.DistanceToShelter)
 	var options string
 	for _, link := range links {
-		options = options + link.Name + ", "
+		options = options + link.Option + ", "
 	}
-	logger.Info("Workout options computed : " + options)
+	logger.Info("workout options computed", zap.String("options", options))
 
 	return links, nil
 }
@@ -215,7 +215,7 @@ func getRandomOptionString() string {
 func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, distance_to_shleter float64) []domain.WorkoutOptionLink {
 	var links []domain.WorkoutOptionLink // A slice to hold ordered links
 	optionStringForFE := getRandomOptionString()
-	for _, option := range optionsOrder {
+	for i, option := range optionsOrder {
 		var optionName string
 		var optionString string
 		switch option {
@@ -232,9 +232,8 @@ func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, 
 		if option == EscapeBit || option == FightBit {
 			optionString = optionStringForFE
 		}
-		linkName := "option=" + optionName + " :: " + optionString
 		linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workoutID)
-		links = append(links, domain.WorkoutOptionLink{Name: linkName, URL: linkURL})
+		links = append(links, domain.WorkoutOptionLink{Option: optionName, URL: linkURL, Description: optionString, Rank: uint(i)})
 	}
 
 	return links
@@ -354,7 +353,7 @@ func (s *WorkoutService) StartWorkoutOption(workoutID uuid.UUID, option string) 
 	if err != nil {
 		return "", err // Propagate the error from the repository
 	}
-	logger.Info("Workout option started", zap.String("workoutID", workoutOptions.WorkoutID.String()), zap.String("optionType", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
+	logger.Info("workout option started", zap.String("workout_id", workoutOptions.WorkoutID.String()), zap.String("option_type", getWorkoutType(workoutOptions.CurrentWorkoutOption)))
 	return getWorkoutType(workoutOptions.CurrentWorkoutOption), nil // Return nil to indicate success
 }
 
@@ -409,7 +408,7 @@ func (s *WorkoutService) StopWorkoutOption(workoutID uuid.UUID) (string, error) 
 	}
 
 	// Log the successful stopping of the workout option
-	logger.Info("Workout option stopped", zap.String("workoutID", workoutID.String()), zap.String("optionType", workoutType))
+	logger.Info("workout option stopped", zap.String("workout_id", workoutID.String()), zap.String("option_type", workoutType))
 
 	return returnOption, nil
 }
@@ -440,13 +439,13 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 		// need not return the error
 	}
 
-	s.publisher.PublishWorkoutStats(tempWorkout)
+	s.WorkoutStatsPublisher.PublishWorkoutStats(tempWorkout)
 
 	// Remove the workout from active workouts tracking
 	delete(s.activeWorkoutsLastLocation, tempWorkout.WorkoutID)
 	delete(s.activeWorkoutsHeartRate, tempWorkout.WorkoutID)
 	delete(s.activePlayers, tempWorkout.PlayerID)
-	logger.Info("Workout stopped", zap.String("workoutID", tempWorkout.WorkoutID.String()))
+	logger.Info("workout stopped", zap.String("workout_id", tempWorkout.WorkoutID.String()))
 
 	// Unbind peripheral data associated with the workout
 	err = s.peripheral.UnbindPeripheralData(tempWorkout.WorkoutID)
@@ -454,7 +453,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 		logger.Debug("failed to unbind peripheral data on stop", zap.String("workoutID", tempWorkout.WorkoutID.String()), zap.Error(err))
 		return nil, fmt.Errorf("failed to unbind peripheral data on stop")
 	}
-	logger.Info("Peripheral unbinded from ", zap.String("workoutID", tempWorkout.WorkoutID.String()))
+	logger.Info("peripheral unbounded", zap.String("workout_id", tempWorkout.WorkoutID.String()))
 
 	return tempWorkout, nil
 }

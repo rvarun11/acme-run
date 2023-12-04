@@ -193,9 +193,6 @@ const docTemplate = `{
                 "completedOn": {
                     "type": "string"
                 },
-                "id": {
-                    "type": "string"
-                },
                 "playerID": {
                     "type": "string"
                 },

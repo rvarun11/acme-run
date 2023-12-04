@@ -6,9 +6,6 @@ COPY . .
 
 RUN go get -d -v ./...
 
-RUN go build -o hrm ./cmd
+RUN go build -o peripheral ./cmd
 
-# TODO: See if you need to expose the port or not
-EXPOSE 8004
-
-CMD ["./peripheral"]
+CMD ["sh", "-c", "./run_tests.sh && ./peripheral"]

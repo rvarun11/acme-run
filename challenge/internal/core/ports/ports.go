@@ -31,14 +31,15 @@ type ChallengeService interface {
 	ListChallenges(status string) ([]*domain.Challenge, error)
 
 	// Badges
-	CreateBadge(cid uuid.UUID, pid uuid.UUID) error
-	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
-	DispatchBadges(ch *domain.Challenge)
-	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
+	BadgeService
 }
 
-// type BadgeService interface {
-// }
+type BadgeService interface {
+	CreateBadge(cid uuid.UUID, pid uuid.UUID) error
+	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
+	AssignBadges(ch *domain.Challenge)
+	SubscribeToActiveChallenges(cs *domain.ChallengeStats) error
+}
 
 // type StatsTrackerService interface {
 // }
@@ -51,15 +52,9 @@ type ChallengeRepository interface {
 	GetChallengeByID(cid uuid.UUID) (*domain.Challenge, error)
 	UpdateChallenge(ch *domain.Challenge) (*domain.Challenge, error)
 	ListChallenges() ([]*domain.Challenge, error)
+
 	// Badges
-	CreateBadge(b *domain.Badge) (*domain.Badge, error)
-	ListBadges() ([]*domain.Badge, error)
-	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
-	// ChallengeStats
-	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error
-	ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.ChallengeStats, error)
-	// ListEligibleChallengeStatsForChallenge(ch *domain.Challenge) ([]*domain.ChallengeStats, error)
-	DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error
+	BadgeRepository
 }
 
 // type ChallengeRepository interface {
@@ -69,10 +64,16 @@ type ChallengeRepository interface {
 // 	ListChallenges() ([]*domain.Challenge, error)
 // }
 
-// type BadgeRepository interface {
-// 	CreateBadge(b *domain.Badge) (*domain.Badge, error)
-// 	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Challenge, error)
-// }
+type BadgeRepository interface {
+	CreateBadge(b *domain.Badge) (*domain.Badge, error)
+	ListBadges() ([]*domain.Badge, error)
+	ListBadgesByPlayerID(pid uuid.UUID) ([]*domain.Badge, error)
+	// ChallengeStats
+	CreateOrUpdateChallengeStats(cs *domain.ChallengeStats) error
+	ListChallengeStatsByChallengeID(cid uuid.UUID) ([]*domain.ChallengeStats, error)
+	// ListEligibleChallengeStatsForChallenge(ch *domain.Challenge) ([]*domain.ChallengeStats, error)
+	DeleteChallengeStats(pid uuid.UUID, cid uuid.UUID) error
+}
 
 // type StatsTrackerRepository interface {
 // 	// CreateTracker(ws *domain.WorkoutStats) error

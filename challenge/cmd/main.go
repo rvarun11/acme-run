@@ -25,7 +25,7 @@ var cfg *config.AppConfiguration = config.Config
 
 // @query.collection.format multi
 func main() {
-	logger.Info("Challenge Manager is starting...")
+	logger.Info("challenge manager is starting...")
 
 	// Initialize router
 	router := gin.Default()
@@ -36,14 +36,14 @@ func main() {
 
 	// Initialize challenge service
 	challengeSvc := services.NewChallengeService(store)
-	challengeHandler := http.NewChallengeHandler(router, challengeSvc)
-	challengeHandler.InitRouter()
+	ChallengeHandler := http.NewChallengeHandler(router, challengeSvc)
+	ChallengeHandler.InitRouter()
 
-	// Initialize WorkoutStats Consumer
-	statsConsumer := amqp.NewWorkoutStatsConsumer(cfg.RabbitMQ, challengeSvc)
-	statsConsumer.InitAMQP()
+	// Initialize workout stats consumer
+	workoutStatsConsumer := amqp.NewWorkoutStatsConsumer(cfg.RabbitMQ, challengeSvc)
+	workoutStatsConsumer.InitAMQP()
 
-	// Swagger Support
+	// Swagger support
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

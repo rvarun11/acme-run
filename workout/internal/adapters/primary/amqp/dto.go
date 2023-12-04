@@ -1,4 +1,4 @@
-package amqphandler
+package amqp
 
 import (
 	"time"

@@ -24,7 +24,7 @@ var cfg *config.AppConfiguration = config.Config
 
 // @query.collection.format multi
 func main() {
-	logger.Info("User Manager is starting...")
+	logger.Info("user manager is starting...")
 
 	// Initialize router
 	router := gin.Default()

@@ -11,19 +11,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type WorkoutHTTPHandler struct {
+type WorkoutHanlder struct {
 	gin *gin.Engine
 	svc *services.WorkoutService
 }
 
-func NewWorkoutHTTPHandler(gin *gin.Engine, workoutSvc *services.WorkoutService) *WorkoutHTTPHandler {
-	return &WorkoutHTTPHandler{
+func NewWorkoutHanlder(gin *gin.Engine, workoutSvc *services.WorkoutService) *WorkoutHanlder {
+	return &WorkoutHanlder{
 		gin: gin,
 		svc: workoutSvc,
 	}
 }
 
-func (handler *WorkoutHTTPHandler) InitRouter() {
+func (handler *WorkoutHanlder) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
 
@@ -52,12 +52,12 @@ func (handler *WorkoutHTTPHandler) InitRouter() {
 //	@Success		201		"Successfully started workout session"
 //	@Failure		400		"Bad Request with error details"
 //	@Router			/api/v1/workout [post]
-func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
+func (h *WorkoutHanlder) StartWorkout(ctx *gin.Context) {
 
 	var startWorkout StartWorkout
 	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"Error": err.Error(),
+			"error": "invalid request parameters",
 		})
 		return
 	}
@@ -66,7 +66,7 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "new workout could not be created",
 		})
 		return
 	}
@@ -74,15 +74,17 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 	linkURL, err := h.svc.Start(&workout, startWorkout.HRMId, startWorkout.HRMConnected)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"id":                   workout.WorkoutID,
-		"workout options link": linkURL,
-		"message":              "New workout created successfully",
+		"message":    "new workout created successfully",
+		"workout_id": workout.WorkoutID,
+		"links": gin.H{
+			"workout_options": linkURL,
+		},
 	})
 }
 
@@ -98,14 +100,14 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 //	@Success		202			"Successfully stopped workout session"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId} [put]
-func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
+func (h *WorkoutHanlder) StopWorkout(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutId := ctx.Param("workoutId")
 
 	workoutID, err := uuid.Parse(workoutId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Workout ID : " + workoutID.String(),
+			"error": "invalid workout id",
 		})
 		return
 	}
@@ -133,14 +135,14 @@ func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
 //	@Success		200			"Successfully retrieved workout options"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId}/options [get]
-func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetWorkoutOptions(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
 
 	workoutID, err := uuid.Parse(workoutIdStr)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Workout ID : " + workoutID.String(),
+			"error": "invalid workout id",
 		})
 		return
 	}
@@ -169,7 +171,7 @@ func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 //	@Success		200			"Successfully started workout option"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId}/options [post]
-func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
+func (h *WorkoutHanlder) StartWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
 
@@ -177,24 +179,27 @@ func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Workout ID : " + workoutID.String(),
+			"error": "invalid workout id",
 		})
 		return
 	}
 
 	var startWorkout StartWorkoutOption
 	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"Error": "Bad POST Request"})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "invalid request parameters"})
 		return
 	}
 
 	option, err := h.svc.StartWorkoutOption(workoutID, startWorkout.Option)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": option + " started successfully"})
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "workout option started successfully",
+		"option":  option,
+	})
 }
 
 // StopWorkoutOption stops a specific option of an ongoing workout session.
@@ -209,7 +214,7 @@ func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 //	@Success		200			"Successfully stopped workout option"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId}/options [patch]
-func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
+func (h *WorkoutHanlder) StopWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
 
@@ -217,18 +222,21 @@ func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
 
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Workout ID : " + workoutID.String(),
+			"error": "invalid workout id",
 		})
 		return
 	}
 
 	option, err := h.svc.StopWorkoutOption(workoutID)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": option + " stopped successfully"})
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "workout option stopped successfully",
+		"option":  option,
+	})
 }
 
 func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
@@ -264,7 +272,7 @@ func parseTime(ctx *gin.Context, paramName string, layout string) (time.Time, er
 //	@Success		201			"Successfully retrieved distance"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/distance [get]
-func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetDistance(ctx *gin.Context) {
 	workoutID, err := parseUUID(ctx, "workoutID")
 	var distance float64
 
@@ -272,7 +280,7 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 		distance, err = h.svc.GetDistanceById(workoutID)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -280,7 +288,7 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 		playerID, err := parseUUID(ctx, "playerID")
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid player ID",
+				"error": "invalid player id",
 			})
 			return
 		}
@@ -288,7 +296,7 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 		startDate, err := parseTime(ctx, "startDate", time.RFC3339)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid startDate",
+				"error": "invalid start date",
 			})
 			return
 		}
@@ -296,7 +304,7 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 		endDate, err := parseTime(ctx, "endDate", time.RFC3339)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid endDate",
+				"error": "invalid end date",
 			})
 			return
 		}
@@ -304,15 +312,15 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 		distance, err = h.svc.GetDistanceCoveredBetweenDates(playerID, startDate, endDate)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"workoutID":       workoutID,
-		"distanceCovered": distance,
+		"workout_id":       workoutID,
+		"distance_covered": distance,
 	})
 }
 
@@ -331,7 +339,7 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 //	@Success		201			"Successfully retrieved shelter count"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/shelters [get]
-func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetShelters(ctx *gin.Context) {
 	var shelterCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -342,7 +350,7 @@ func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 		shelterCount, err = h.svc.GetSheltersTakenById(workoutID)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -353,7 +361,7 @@ func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 
 		if startDateErr != nil || endDateErr != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid startDate or endDate",
+				"error": "invalid start date or end date",
 			})
 			return
 		}
@@ -362,20 +370,20 @@ func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 		shelterCount, err = h.svc.GetSheltersTakenBetweenDates(playerID, startDate, endDate)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 	} else {
 		// Handle the case where neither workoutID nor playerID is provided
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid workoutID or playerID",
+			"error": "invalid workout id or player id",
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"shelterCount": shelterCount,
+		"shelter_count": shelterCount,
 	})
 }
 
@@ -394,7 +402,7 @@ func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 //	@Success		201			"Successfully retrieved escape count"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/escapes [get]
-func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetEscapes(ctx *gin.Context) {
 	var escapeCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -405,7 +413,7 @@ func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 		escapeCount, err = h.svc.GetEscapesMadeById(workoutID)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -416,7 +424,7 @@ func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 
 		if startDateErr != nil || endDateErr != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid startDate or endDate",
+				"error": "invalid start date or end date",
 			})
 			return
 		}
@@ -432,13 +440,13 @@ func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 	} else {
 		// Handle the case where neither workoutID nor playerID is provided
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid workoutID or playerID",
+			"error": "invalid workout id or player id",
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"escapeCount": escapeCount,
+		"escape_count": escapeCount,
 	})
 }
 
@@ -457,7 +465,7 @@ func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 //	@Success		201			"Successfully retrieved fight count"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/fights [get]
-func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetFights(ctx *gin.Context) {
 	var fightCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -468,7 +476,7 @@ func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 		fightCount, err = h.svc.GetFightsFoughtById(workoutID)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -479,7 +487,7 @@ func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 
 		if startDateErr != nil || endDateErr != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "Invalid startDate or endDate",
+				"error": "invalid start date or end date",
 			})
 			return
 		}
@@ -488,20 +496,20 @@ func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 		fightCount, err = h.svc.GetFightsFoughtBetweenDates(playerID, startDate, endDate)
 		if err != nil {
 			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 	} else {
 		// Handle the case where neither workoutID nor playerID is provided
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid workoutID or playerID",
+			"error": "invalid workout id or player id",
 		})
 		return
 	}
 
 	ctx.JSON(http.StatusCreated, gin.H{
-		"fightCount": fightCount,
+		"fight_count": fightCount,
 	})
 }
 
@@ -518,14 +526,14 @@ func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 //	@Failure		400			"Bad Request with error details"
 //	@Failure		404			"Workout session not found"
 //	@Router			/api/v1/workout/{workoutId} [delete]
-func (h *WorkoutHTTPHandler) DeleteWorkout(ctx *gin.Context) {
+func (h *WorkoutHanlder) DeleteWorkout(ctx *gin.Context) {
 	workoutId := ctx.Param("workoutId")
 
 	// Parse the UUID from the workoutId, handle error if invalid
 	_, err := uuid.Parse(workoutId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": "Invalid Workout ID",
+			"error": "invalid workout id",
 		})
 		return
 	}
@@ -542,6 +550,6 @@ func (h *WorkoutHTTPHandler) DeleteWorkout(ctx *gin.Context) {
 	}*/
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"message": "Workout session deleted successfully",
+		"message": "workout session deleted successfully",
 	})
 }
