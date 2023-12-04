@@ -132,6 +132,15 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 		return
 
 	}
+	hrmStatus, err := h.svc.GetHRMDevStatusByHRMId(hrmId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to disconnect to hrm, bad hrm request"})
+		return
+	}
+	if !hrmStatus {
+		ctx.JSON(http.StatusOK, gin.H{"message": "hrm already disconnected"})
+		return
+	}
 
 	err2 := h.svc.SetHRMDevStatusByHRMId(hrmId, false)
 	if err2 != nil {
