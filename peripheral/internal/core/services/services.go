@@ -30,7 +30,7 @@ func (s *PeripheralService) CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error
 		return ports.ErrorCreatePeripheralFailed
 	}
 	s.repo.AddPeripheralIntance(p)
-	log.Info("peripheral instance created")
+	log.Debug("peripheral instance created")
 	return nil
 }
 
@@ -48,7 +48,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
-		log.Info("creating a instance")
+		log.Debug("creating a instance")
 		p, _ := domain.NewPeripheral(pId, hId, wId, connected, true, toShelter)
 		s.repo.AddPeripheralIntance(p)
 		pInstance, _ = s.repo.GetByHRMId(hId)
@@ -59,7 +59,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 	pInstance.HRMDev.HRMStatus = connected
 	pInstance.ToShelter = toShelter
 	s.repo.Update(pInstance)
-	log.Info("peripheral binding success", zap.Any("created", true))
+	log.Debug("peripheral binding success", zap.Any("created", true))
 	return nil
 
 }
@@ -67,7 +67,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 func (s *PeripheralService) DisconnectPeripheral(wId uuid.UUID) error {
 	err := s.repo.DeletePeripheralInstance(wId)
 	if err != nil {
-		return ports.ErrorUnbindPeripheralFailed
+		return ports.ErrorPeripheralNotFound
 	}
 	return err
 }
@@ -81,8 +81,8 @@ func (s *PeripheralService) GetHRMAvgReading(hId uuid.UUID) (uuid.UUID, time.Tim
 	return pInstance.HRMId, pInstance.HRMDev.HRateTime, pInstance.HRMDev.AverageHRate, nil
 }
 
-func (s *PeripheralService) GetHRMReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error) {
-	pInstance, err := s.repo.GetByWorkoutId(hId)
+func (s *PeripheralService) GetHRMReading(wId uuid.UUID) (uuid.UUID, time.Time, int, error) {
+	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
 		return uuid.Nil, time.Time{}, 0, ports.ErrorPeripheralNotFound
 	}

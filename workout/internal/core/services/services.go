@@ -421,6 +421,11 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 		return nil, fmt.Errorf("failed to get workout %s for stopping: %w", id, err)
 	}
 
+	if tempWorkout.IsCompleted {
+		logger.Debug("workout already completed", zap.String("workout_id", tempWorkout.WorkoutID.String()))
+		return nil, ports.ErrWorkoutAlreadyCompleted
+	}
+
 	// Set the workout as completed and mark the end time
 	tempWorkout.EndedAt = time.Now()
 	tempWorkout.IsCompleted = true

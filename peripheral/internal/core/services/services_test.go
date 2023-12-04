@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/rabbitmq"
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/repository"
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/primary/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/clients"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/repository"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/ports"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/stretchr/testify/assert"
@@ -143,7 +143,7 @@ func TestCheckStatusByHRMId(t *testing.T) {
 
 	// Now check the status
 	status := service.CheckStatusByHRMId(hId)
-	assert.False(t, status)
+	assert.True(t, status)
 
 	// Check status for non-existing peripheral
 	status = service.CheckStatusByHRMId(uuid.New())
@@ -253,7 +253,7 @@ func TestGetHRMReading(t *testing.T) {
 	_ = service.BindPeripheral(pId, wId, hId, true, true)
 	_ = service.SetHeartRateReading(hId, reading)
 
-	hrmId, timeRead, currentReading, err := service.GetHRMReading(hId)
+	hrmId, timeRead, currentReading, err := service.GetHRMReading(wId)
 	assert.NoError(t, err)
 	assert.Equal(t, hId, hrmId)
 	assert.Equal(t, reading, currentReading)
