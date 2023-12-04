@@ -48,9 +48,10 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
+		log.Info("creating a instance")
 		p, _ := domain.NewPeripheral(pId, hId, wId, connected, true, toShelter)
 		s.repo.AddPeripheralIntance(p)
-
+		pInstance, _ = s.repo.GetByHRMId(hId)
 	}
 
 	pInstance.PlayerId = pId

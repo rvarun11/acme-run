@@ -259,8 +259,8 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMAvgReading(wId)
 		if err != nil {
 			log.Error("Peripheral: failed to read from device failure ", zap.Error(err))
-			ctx.JSON(http.StatusBadRequest, gin.H{
-				"error": "reading from device failure: " + err.Error(),
+			ctx.JSON(http.StatusOK, gin.H{
+				"message": "heart rate record not found",
 			})
 			return
 		}
@@ -496,6 +496,10 @@ func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, tLoc)
 }
 
+/*
+NOTE: StartBackgroundMockReading for mocking/simulating external fitness devices:
+It uses the APIs provided by the Peripheral Service to generate heartrate & geo data
+*/
 func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 context.Context, wId uuid.UUID, hId uuid.UUID, longitudeStart float64, latitudeStart float64, longitudeEnd float64, latitudeEnd float64) {
 	go func() {
 		startLong := longitudeStart
@@ -555,7 +559,7 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 
 					randomInteger := rand.Intn(maxHR-minHR+1) + minHR
 					currentReadingStr := fmt.Sprintf("%d", randomInteger)
-					baseURL := "http://localhost:8004/api/v1/hrm_reading"
+					baseURL := "http://localhost:8004/api/v1/hrm/" + hId.String()
 					params := url.Values{}
 					params.Add("hrm_id", hId.String())
 					fmt.Println(currentReadingStr)
