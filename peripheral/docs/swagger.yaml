@@ -46,7 +46,7 @@ info:
   title: Peripheral Service API
   version: "1.0"
 paths:
-  /api/v1/geo/:workout_id:
+  /api/v1/geo/:geo_id:
     put:
       consumes:
       - application/json
@@ -55,7 +55,7 @@ paths:
       - description: Workout ID
         format: uuid
         in: path
-        name: workout_id
+        name: geo_id
         required: true
         type: string
       - description: Latitude value
@@ -75,7 +75,7 @@ paths:
           description: ' message, geo reading set and location sent'
         "400":
           description: error message with details
-      summary: Set Geo device reading
+      summary: Set live location (geo reading)
       tags:
       - peripheral
   /api/v1/hrm/:hrm_id:
@@ -132,7 +132,7 @@ paths:
           description: binding workout done
         "400":
           description: error unbind with message
-      summary: Connect to HRM device and bind it to a workout
+      summary: Bind peripheral to a workout
       tags:
       - peripheral
     put:
@@ -242,7 +242,7 @@ paths:
             additionalProperties:
               type: string
             type: object
-      summary: Get HRM reading data
+      summary: Get average heart rate
       tags:
       - peripheral
 swagger: "2.0"

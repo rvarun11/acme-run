@@ -19,7 +19,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/api/v1/geo/:workout_id": {
+        "/api/v1/geo/:geo_id": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -30,14 +30,14 @@ const docTemplate = `{
                 "tags": [
                     "peripheral"
                 ],
-                "summary": "Set Geo device reading",
+                "summary": "Set live location (geo reading)",
                 "operationId": "set-geo-reading",
                 "parameters": [
                     {
                         "type": "string",
                         "format": "uuid",
                         "description": "Workout ID",
-                        "name": "workout_id",
+                        "name": "geo_id",
                         "in": "path",
                         "required": true
                     },
@@ -164,7 +164,7 @@ const docTemplate = `{
                 "tags": [
                     "peripheral"
                 ],
-                "summary": "Connect to HRM device and bind it to a workout",
+                "summary": "Bind peripheral to a workout",
                 "operationId": "bind-peripheral",
                 "parameters": [
                     {
@@ -272,7 +272,7 @@ const docTemplate = `{
                 "tags": [
                     "peripheral"
                 ],
-                "summary": "Get HRM reading data",
+                "summary": "Get average heart rate",
                 "operationId": "get-hrm-reading",
                 "parameters": [
                     {

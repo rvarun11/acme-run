@@ -63,7 +63,7 @@ func (handler *HTTPHandler) InitRouter() {
 	router.GET("/peripheral/hrm", handler.getHRMReading)
 
 	router.PUT("/hrm/:hrm_id", handler.SetHRMReading)
-	router.PUT("/geo/:workout_id", handler.SetGeoReading)
+	router.PUT("/geo/:geo_id", handler.SetGeoReading)
 
 }
 
@@ -74,7 +74,7 @@ func (handler *HTTPHandler) InitRouter() {
 //	@ID			connect-hrm
 //	@Accept		json
 //	@Produce	json
-//	@Param		connectData	body		BindPeripheralData	true	"Connect Peripheral Data"
+//	@Param		connectData	body	BindPeripheralData	true	"Connect Peripheral Data"
 //	@Success	200			"connect to hrm success: true"
 //	@Failure	400			"Bad Request with error details"
 //	@Failure	500			"Internal error with error details"
@@ -116,7 +116,7 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 //	@ID			disconnect-hrm
 //	@Accept		json
 //	@Produce	json
-//	@Param		disconnectData	body		BindPeripheralData	true	"Disconnect Peripheral Data"
+//	@Param		disconnectData	body	BindPeripheralData	true	"Disconnect Peripheral Data"
 //	@Success	200				"disconnected HRM"
 //	@Failure	400				"error invalid request"
 //	@Failure	500				"cannot disconnect HRM"
@@ -145,12 +145,12 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 
 // BindPeripheralToData connects to an HRM device and binds it to a workout
 //
-//	@Summary	Connect to HRM device and bind it to a workout
+//	@Summary	Bind peripheral to a workout
 //	@Tags		peripheral
 //	@ID			bind-peripheral
 //	@Accept		json
 //	@Produce	json
-//	@Param		bindData	body		BindPeripheralData	true	"Bind Peripheral Data"
+//	@Param		bindData	body	BindPeripheralData	true	"Bind Peripheral Data"
 //	@Success	200			"binding workout done"
 //	@Failure	400			"error unbind with message"
 //	@Router		/api/v1/peripheral [post]
@@ -198,7 +198,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 //	@ID			unbind-peripheral
 //	@Accept		json
 //	@Produce	json
-//	@Param		unbindData	body		UnbindPeripheralData	true	"Unbind Peripheral Data"
+//	@Param		unbindData	body	UnbindPeripheralData	true	"Unbind Peripheral Data"
 //	@Success	200			"success message: Unbind the data"
 //	@Failure	400			"error message: invalid request with details"
 //	@Failure	500			"error message: with details"
@@ -233,7 +233,7 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 
 // getHRMReading retrieves Heart Rate Monitor (HRM) reading data.
 //
-//	@Summary	Get HRM reading data
+//	@Summary	Get average heart rate
 //	@Tags		peripheral
 //	@ID			get-hrm-reading
 //	@Accept		json
@@ -425,17 +425,17 @@ func (h *HTTPHandler) SetGeoStatus(ctx *gin.Context) {
 
 // SetGeoReading sets the Geographic (Geo) device reading for a workout.
 //
-//	@Summary	Set Geo device reading
+//	@Summary	Set live location (geo reading)
 //	@Tags		peripheral
 //	@ID			set-geo-reading
 //	@Accept		json
 //	@Produce	json
-//	@Param		workout_id	path		string				true	"Workout ID"	format(uuid)
-//	@Param		latitude	query		string				true	"Latitude value"
-//	@Param		longitude	query		string				true	"Longitude value"
+//	@Param		geo_id		path	string	true	"Workout ID"	format(uuid)
+//	@Param		latitude	query	string	true	"Latitude value"
+//	@Param		longitude	query	string	true	"Longitude value"
 //	@Success	200			" message, geo reading set and location sent"
 //	@Failure	400			"error message with details"
-//	@Router		/api/v1/geo/:workout_id [put]
+//	@Router		/api/v1/geo/:geo_id [put]
 func (h *HTTPHandler) SetGeoReading(ctx *gin.Context) {
 
 	workoutIdStr := ctx.Param("workout_id")
