@@ -1,4 +1,4 @@
-package peripheralhandler
+package amqp
 
 import (
 	"time"

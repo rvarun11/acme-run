@@ -33,19 +33,19 @@ type WorkoutService struct {
 	repo                       ports.WorkoutRepository
 	peripheral                 ports.PeripheralClient
 	user                       ports.UserServiceClient
-	WorkoutStatsPublisher      ports.WorkoutStatsPublisher
+	workoutStatsPublisher      ports.WorkoutStatsPublisher
 	activeWorkoutsLastLocation map[uuid.UUID]ActiveWorkoutsLastLocation
 	activeWorkoutsHeartRate    map[uuid.UUID]ActiveWorkoutsHeartRate
 	activePlayers              map[uuid.UUID]bool
 }
 
 // Factory for creating a new WorkoutService
-func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralClient, user ports.UserServiceClient, WorkoutStatsPublisher ports.WorkoutStatsPublisher) *WorkoutService {
+func NewWorkoutService(repo ports.WorkoutRepository, peripheral ports.PeripheralClient, user ports.UserServiceClient, workoutStatsPublisher ports.WorkoutStatsPublisher) *WorkoutService {
 	return &WorkoutService{
 		repo:                       repo,
 		peripheral:                 peripheral,
 		user:                       user,
-		WorkoutStatsPublisher:      WorkoutStatsPublisher,
+		workoutStatsPublisher:      workoutStatsPublisher,
 		activeWorkoutsLastLocation: make(map[uuid.UUID]ActiveWorkoutsLastLocation),
 		activeWorkoutsHeartRate:    make(map[uuid.UUID]ActiveWorkoutsHeartRate),
 		activePlayers:              make(map[uuid.UUID]bool),
@@ -233,7 +233,7 @@ func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, 
 			optionString = optionStringForFE
 		}
 		linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workoutID)
-		links = append(links, domain.WorkoutOptionLink{Option: optionName, URL: linkURL, Description: optionString, Rank: uint(i)})
+		links = append(links, domain.WorkoutOptionLink{Option: optionName, URL: linkURL, Description: optionString, Rank: uint(i + 1)})
 	}
 
 	return links
@@ -444,7 +444,7 @@ func (s *WorkoutService) Stop(id uuid.UUID) (*domain.Workout, error) {
 		// need not return the error
 	}
 
-	s.WorkoutStatsPublisher.PublishWorkoutStats(tempWorkout)
+	s.workoutStatsPublisher.PublishWorkoutStats(tempWorkout)
 
 	// Remove the workout from active workouts tracking
 	delete(s.activeWorkoutsLastLocation, tempWorkout.WorkoutID)

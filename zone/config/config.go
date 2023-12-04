@@ -9,7 +9,6 @@ type AppConfiguration struct {
 	Port     string
 	Postgres *Postgres
 	RabbitMQ *RabbitMQ
-	Publish  *Publish
 }
 
 type Postgres struct {
@@ -19,17 +18,16 @@ type Postgres struct {
 	Password string
 	DB_Name  string
 	Encoding string
+	LogLevel string
 }
 
 type RabbitMQ struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-}
-
-type Publish struct {
-	PublishQueue string
+	Host                     string
+	Port                     string
+	User                     string
+	Password                 string
+	ShelterDistancePublisher string
+	LiveLocationConsumer     string
 }
 
 func init() {
@@ -40,25 +38,23 @@ func init() {
 		Password: getEnv("POSTGRES_PASSWORD", "postgres"),
 		DB_Name:  getEnv("POSTGRES_DB", "postgres"),
 		Encoding: getEnv("POSTGRES_ENCODING", "UTF8"),
+		LogLevel: getEnv("POSTGRES_LOG_LEVEL", "warn"),
 	}
 
 	rabbitmq := &RabbitMQ{
-		Host:     getEnv("RABBITMQ_HOSTNAME", "localhost"),
-		Port:     getEnv("RABBITMQ_PORT", "5672"),
-		User:     getEnv("RABBITMQ_USER", "guest"),
-		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
-	}
-
-	publish := &Publish{
-		PublishQueue: getEnv("SEND_DESTINATION", "SHELTER_TRAIL_WORKOUT"),
+		Host:                     getEnv("RABBITMQ_HOSTNAME", "localhost"),
+		Port:                     getEnv("RABBITMQ_PORT", "5672"),
+		User:                     getEnv("RABBITMQ_USER", "guest"),
+		Password:                 getEnv("RABBITMQ_PASSWORD", "guest"),
+		ShelterDistancePublisher: getEnv("SHELTER_DISTANCE_PUBLISHER", "SHELTER_TRAIL_WORKOUT"),
+		LiveLocationConsumer:     getEnv("LIVE_LOCATION_CONSUMER", "LOCATION_PERIPHERL_TRAIL_MANAGER"),
 	}
 
 	Config = &AppConfiguration{
 		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8005"),
+		Port:     getEnv("PORT", "8011"),
 		Postgres: postgres,
 		RabbitMQ: rabbitmq,
-		Publish:  publish,
 	}
 }
 

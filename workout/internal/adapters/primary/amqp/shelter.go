@@ -54,19 +54,19 @@ func (c *ShelterDistanceConsumer) CreateChannel(exchangeName, queueName, binding
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	/*logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
-	err = ch.ExchangeDeclare(
-		exchangeName,
-		exchangeKind,
-		exchangeDurable,
-		exchangeAutoDelete,
-		exchangeInternal,
-		exchangeNoWait,
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
-	}*/
+	// logger.Debug("declaring exchange", zap.String("exchange name", exchangeName))
+	// err = ch.ExchangeDeclare(
+	// 	exchangeName,
+	// 	exchangeKind,
+	// 	exchangeDurable,
+	// 	exchangeAutoDelete,
+	// 	exchangeInternal,
+	// 	exchangeNoWait,
+	// 	nil,
+	// )
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
+	// }
 
 	queue, err := ch.QueueDeclare(
 		queueName,

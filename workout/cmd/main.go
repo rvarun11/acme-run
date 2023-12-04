@@ -29,10 +29,10 @@ func main() {
 	store := postgres.NewRepository(cfg.Postgres)
 
 	// Initialize clients
-	peripheralClient := clients.NewPeripheralClient()
-	userClient := clients.NewUserServiceClient()
+	peripheralClient := clients.NewPeripheralClient(cfg.PeripheralClient)
+	userClient := clients.NewUserServiceClient(cfg.UserClient)
 
-	// Initialize WorkoutStatsPublishers
+	// Initialize workout stats publisher
 	workoutStatsWorkoutStatsPublisher := amqpSecondary.NewWorkoutStatsPublisher(cfg.RabbitMQ)
 
 	// Initialize workout service

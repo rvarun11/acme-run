@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
 	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
@@ -493,6 +494,8 @@ func (h *HTTPHandler) GetGeoReading(ctx *gin.Context) {
 NOTE: StartBackgroundMockReading for mocking/simulating external fitness devices:
 It uses the APIs provided by the Peripheral Service to generate heartrate & geo data
 */
+var port string = config.Config.Port
+
 func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 context.Context, wId uuid.UUID, hId uuid.UUID, longitudeStart float64, latitudeStart float64, longitudeEnd float64, latitudeEnd float64) {
 	go func() {
 		startLong := longitudeStart
@@ -552,7 +555,7 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 
 					randomInteger := rand.Intn(maxHR-minHR+1) + minHR
 					currentReadingStr := fmt.Sprintf("%d", randomInteger)
-					baseURL := "http://localhost:8004/api/v1/hrm/" + hId.String()
+					baseURL := "http://localhost:" + port + "/api/v1/hrm/" + hId.String()
 					params := url.Values{}
 					params.Add("hrm_id", hId.String())
 					fmt.Println(currentReadingStr)

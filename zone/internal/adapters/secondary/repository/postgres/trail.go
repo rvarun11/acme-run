@@ -14,7 +14,7 @@ func (postgresTrail) TableName() string {
 
 // Repository Functions
 
-func (repo *DBRepository) CreateTrail(name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error) {
+func (repo *Repository) CreateTrail(name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) (uuid.UUID, error) {
 	trail := postgresTrail{
 		TrailID:        uuid.New(),
 		TrailName:      name,
@@ -31,21 +31,7 @@ func (repo *DBRepository) CreateTrail(name string, zId uuid.UUID, startLat, star
 	return trail.TrailID, nil
 }
 
-func toTrailPostgres(trail *domain.Trail) *postgresTrail {
-
-	return &postgresTrail{
-		TrailID:        trail.TrailID,
-		TrailName:      trail.TrailName,
-		ZoneID:         trail.ZoneID,
-		StartLongitude: trail.StartLongitude,
-		StartLatitude:  trail.StartLatitude,
-		EndLongitude:   trail.EndLongitude,
-		EndLatitude:    trail.EndLatitude,
-		CreatedAt:      trail.CreatedAt,
-	}
-}
-
-func (repo *DBRepository) UpdateTrailByID(id uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) error {
+func (repo *Repository) UpdateTrailByID(id uuid.UUID, name string, zId uuid.UUID, startLat, startLong, endLat, endLong float64) error {
 	return repo.db.Model(&postgresTrail{}).Where("trail_id = ?", id).Updates(postgresTrail{
 		TrailName:      name,
 		ZoneID:         zId,
@@ -56,11 +42,11 @@ func (repo *DBRepository) UpdateTrailByID(id uuid.UUID, name string, zId uuid.UU
 	}).Error
 }
 
-func (repo *DBRepository) DeleteTrailByID(id uuid.UUID) error {
+func (repo *Repository) DeleteTrailByID(id uuid.UUID) error {
 	return repo.db.Delete(&postgresTrail{}, "trail_id = ?", id).Error
 }
 
-func (repo *DBRepository) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
+func (repo *Repository) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
 	var trail postgresTrail
 	if err := repo.db.Where("trail_id = ?", id).First(&trail).Error; err != nil {
 		return nil, err // remove the domain.Trail type
@@ -68,7 +54,7 @@ func (repo *DBRepository) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
 	return trail.toAggregate(), nil
 }
 
-func (repo *DBRepository) ListTrails() ([]*domain.Trail, error) {
+func (repo *Repository) ListTrails() ([]*domain.Trail, error) {
 	var postgresTrails []postgresTrail
 	if err := repo.db.Find(&postgresTrails).Error; err != nil {
 		return nil, err
@@ -82,7 +68,7 @@ func (repo *DBRepository) ListTrails() ([]*domain.Trail, error) {
 
 	return domainTrails, nil
 }
-func (repo *DBRepository) ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail, error) {
+func (repo *Repository) ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail, error) {
 	var postgresTrails []postgresTrail
 	if err := repo.db.Where("zone_id = ?", zId).Find(&postgresTrails).Error; err != nil {
 		return nil, err
@@ -96,6 +82,6 @@ func (repo *DBRepository) ListTrailsByZoneId(zId uuid.UUID) ([]*domain.Trail, er
 	return domainTrails, nil
 }
 
-func (repo *DBRepository) DeleteTrailByName(name string) error {
+func (repo *Repository) DeleteTrailByName(name string) error {
 	return repo.db.Where("trail_name = ?", name).Delete(&postgresTrail{}).Error
 }
