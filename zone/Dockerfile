@@ -6,8 +6,6 @@ COPY . .
 
 RUN go get -d -v ./...
 
-RUN go build -o trail ./cmd
+RUN go build -o zone ./cmd
 
-EXPOSE 8001
-
-CMD ["./trail"]
+CMD ["./zone"]

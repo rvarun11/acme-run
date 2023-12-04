@@ -8,5 +8,4 @@ RUN go get -d -v ./...
 
 RUN go build -o challenge ./cmd
 
-# CMD ["sh", "-c", "./run_tests.sh && ./challenge"]
-CMD ["sh", "-c", "./challenge"]
+CMD ["./challenge"]

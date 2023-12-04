@@ -7,16 +7,17 @@ import (
 
 	// "log"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/google/uuid"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
 )
 
-const (
-	lastLocationQueueName        = "LOCATION_PERIPHERAL_WORKOUT"
-	lastLocationToTrailQueueName = "LOCATION_PERIPHERL_TRAIL_MANAGER"
+var (
+	cfg                          *config.AppConfiguration = config.Config
+	lastLocationQueueName                                 = cfg.RabbitMQ.WorkoutLocationPublisher
+	lastLocationToTrailQueueName                          = cfg.RabbitMQ.ZoneLocationPublisher
 )
 
 const (
@@ -27,10 +28,10 @@ const (
 )
 
 type RabbitMQHandler struct {
-	peripheralService *services.PeripheralService
-	amqpURL           string
-	connection        *amqp.Connection
-	channel           *amqp.Channel
+	// peripheralService *services.PeripheralService
+	amqpURL    string
+	connection *amqp.Connection
+	channel    *amqp.Channel
 }
 
 func NewRabbitMQHandler(amqpURL string) (*RabbitMQHandler, error) {

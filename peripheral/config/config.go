@@ -25,6 +25,8 @@ type RabbitMQ struct {
 	Port     string
 	User     string
 	Password string
+	WorkoutLocationPublisher string
+	ZoneLocationPublisher string
 }
 
 func init() {
@@ -42,6 +44,8 @@ func init() {
 		Port:     getEnv("RABBITMQ_PORT", "5672"),
 		User:     getEnv("RABBITMQ_USER", "guest"),
 		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
+		WorkoutLocationPublisher: getEnv("RABBITMQ_WORKOUT_LOCATION_PUBLISHER", "location_peripheral_workout_queue"),
+		ZoneLocationPublisher: getEnv("RABBITMQ_ZONE_LOCATION_PUBLISHER", "location_peripheral_zone_queue"),
 	}
 
 	Config = &AppConfiguration{

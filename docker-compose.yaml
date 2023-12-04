@@ -78,6 +78,9 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASSWORD=guest
+      - RABBIT_LOCATION_CONSUMER=location_peripheral_zone_queue
+      - RABBITMQ_SHELTER_DISTANCE_PUBLISHER=shelter_zone_workout_queue
+
     depends_on:
       db:
         condition: service_healthy
@@ -99,6 +102,8 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASSWORD=guest
+      - RABBIT_WORKOUT_LOCATION_PUBLISHER=location_peripheral_workout_queue
+      - RABBITMQ_ZONE_LOCATION_PUBLISHER=location_peripheral_zone_queue
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -126,6 +131,9 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASSWORD=guest
+      - RABBITMQ_SHELTER_DISTANCE_CONSUMER=shelter_zone_workout_queue
+      - RABBITMQ_LOCATION_CONSUMER=location_peripheral_workout_queue
+      - RABBITMQ_WORKOUT_STATS_PUBLISHER=stats_workout_challenge_queue
     depends_on:
       db:
         condition: service_healthy
@@ -137,7 +145,7 @@ services:
         condition: service_started
 
 
-#Challenge Manager
+# Challenge Manager
   challenge:
     container_name: challenge
     build: ./challenge
@@ -159,6 +167,7 @@ services:
       - RABBITMQ_PORT=5672
       - RABBITMQ_USER=guest
       - RABBITMQ_PASSWORD=guest
+      - RABBITMQ_WORKOUT_STATS_CONSUMER=stats_workout_challenge_queue
     depends_on:
       db:
         condition: service_healthy

@@ -46,8 +46,8 @@ func init() {
 		Port:                     getEnv("RABBITMQ_PORT", "5672"),
 		User:                     getEnv("RABBITMQ_USER", "guest"),
 		Password:                 getEnv("RABBITMQ_PASSWORD", "guest"),
-		ShelterDistancePublisher: getEnv("SHELTER_DISTANCE_PUBLISHER", "SHELTER_TRAIL_WORKOUT"),
-		LiveLocationConsumer:     getEnv("LIVE_LOCATION_CONSUMER", "LOCATION_PERIPHERL_TRAIL_MANAGER"),
+		ShelterDistancePublisher: getEnv("RABBITMQ_SHELTER_DISTANCE_PUBLISHER", "shelter_zone_workout_queue"),
+		LiveLocationConsumer:     getEnv("RABBITMQ_LOCATION_CONSUMER", "location_peripheral_zone_queue"),
 	}
 
 	Config = &AppConfiguration{
