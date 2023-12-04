@@ -117,7 +117,7 @@ func (s *PeripheralService) GetHRMDevStatusByPlayerId(pId uuid.UUID) (bool, erro
 }
 
 func (s *PeripheralService) GetHRMDevStatusByHRMId(hId uuid.UUID) (bool, error) {
-	pInstance, err := s.repo.GetByPlayerId(hId)
+	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
 		return false, ports.ErrorPeripheralNotFound
 	}
