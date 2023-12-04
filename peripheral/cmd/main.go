@@ -10,7 +10,7 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
 	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/primary/http"
-	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/primary/rabbitmq"
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/amqp"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/clients"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/repository"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
