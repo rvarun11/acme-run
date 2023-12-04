@@ -53,7 +53,6 @@ type LocationSubscriber struct {
 }
 
 type WorkoutAMQPHandler struct {
-	svc                *services.WorkoutService
 	locationSubscriber *LocationSubscriber
 	shelterSubscriber  *ShelterSubscriber
 }
@@ -78,7 +77,6 @@ func NewAMQPHandler(workoutSvc *services.WorkoutService) *WorkoutAMQPHandler {
 	}
 
 	return &WorkoutAMQPHandler{
-		svc:                workoutSvc,
 		locationSubscriber: &locationSubscriber,
 		shelterSubscriber:  &shelterSubscriber,
 	}
