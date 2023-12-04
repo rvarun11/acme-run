@@ -11,11 +11,14 @@ import (
 )
 
 type PeripheralClientImpl struct {
+	clientURL string
 }
 
 // Factory for creating a NewPeripheralClient
-func NewPeripheralClient() *PeripheralClientImpl {
-	return &PeripheralClientImpl{}
+func NewPeripheralClient(cfg string) *PeripheralClientImpl {
+	return &PeripheralClientImpl{
+		clientURL: cfg,
+	}
 }
 
 func (p *PeripheralClientImpl) BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
@@ -34,7 +37,7 @@ func (p *PeripheralClientImpl) BindPeripheralData(trailID uuid.UUID, playerID uu
 		return err
 	}
 
-	url := "http://localhost:8004/api/v1/peripheral"
+	url := p.clientURL + "/api/v1/peripheral"
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(bindPayload))
 
 	if err != nil {
@@ -64,7 +67,7 @@ func (p *PeripheralClientImpl) UnbindPeripheralData(workoutID uuid.UUID) error {
 		return err
 	}
 
-	url := "http://localhost:8004/api/v1/peripheral"
+	url := p.clientURL + "/api/v1/peripheral"
 	req, err := http.NewRequest("PUT", url, bytes.NewBuffer(unbindPayload))
 	if err != nil {
 		return err
@@ -87,7 +90,7 @@ func (p *PeripheralClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (u
 		return 0, errors.New("invalid workout ID")
 	}
 
-	url := "http://localhost:8004/api/v1/peripheral/hrm?workout_id=" + workoutID.String() + "&type=avg"
+	url := p.clientURL + "/api/v1/peripheral/hrm?workout_id=" + workoutID.String() + "&type=avg"
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return 0, err

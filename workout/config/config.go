@@ -5,10 +5,12 @@ import "os"
 var Config *AppConfiguration
 
 type AppConfiguration struct {
-	Mode     string
-	Port     string
-	Postgres *Postgres
-	RabbitMQ *RabbitMQ
+	Mode             string
+	Port             string
+	Postgres         *Postgres
+	RabbitMQ         *RabbitMQ
+	PeripheralClient string
+	UserClient       string
 }
 
 type Postgres struct {
@@ -53,10 +55,12 @@ func init() {
 	}
 
 	Config = &AppConfiguration{
-		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8013"),
-		Postgres: postgres,
-		RabbitMQ: rabbitmq,
+		Mode:             getEnv("MODE", "dev"),
+		Port:             getEnv("PORT", "8013"),
+		Postgres:         postgres,
+		RabbitMQ:         rabbitmq,
+		UserClient:       getEnv("USER_CLIENT_URL", "http://localhost:8010"),
+		PeripheralClient: getEnv("PERIPHERAL_CLIENT_URL", "http://localhost:8012"),
 	}
 }
 
