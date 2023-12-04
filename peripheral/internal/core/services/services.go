@@ -30,7 +30,7 @@ func (s *PeripheralService) CreatePeripheral(pId uuid.UUID, hId uuid.UUID) error
 		return ports.ErrorCreatePeripheralFailed
 	}
 	s.repo.AddPeripheralIntance(p)
-	log.Info("peripheral instance created")
+	log.Debug("peripheral instance created")
 	return nil
 }
 
@@ -48,7 +48,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 
 	pInstance, err := s.repo.GetByHRMId(hId)
 	if err != nil {
-		log.Info("creating a instance")
+		log.Debug("creating a instance")
 		p, _ := domain.NewPeripheral(pId, hId, wId, connected, true, toShelter)
 		s.repo.AddPeripheralIntance(p)
 		pInstance, _ = s.repo.GetByHRMId(hId)
@@ -59,7 +59,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 	pInstance.HRMDev.HRMStatus = connected
 	pInstance.ToShelter = toShelter
 	s.repo.Update(pInstance)
-	log.Info("peripheral binding success", zap.Any("created", true))
+	log.Debug("peripheral binding success", zap.Any("created", true))
 	return nil
 
 }
