@@ -30,11 +30,11 @@ TestWorkoutService_StartAndStop:
 func TestWorkoutService_StartAndStop(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -58,7 +58,7 @@ func TestWorkoutService_StartAndStop(t *testing.T) {
 	// Test the Stop function
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)
 
-	if len(publisherMock.PublishedWorkouts) == 0 {
+	if len(WorkoutStatsPublisherMock.PublishedWorkouts) == 0 {
 		t.Errorf("Expected PublishWorkoutStats to be called, but it wasn't")
 	}
 
@@ -81,11 +81,11 @@ TestWorkoutService_StartWorkoutTwice:
 func TestWorkoutService_StartWorkoutTwice(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -124,11 +124,11 @@ TestWorkoutService_HardcoreModeNoShelter:
 func TestWorkoutService_HardcoreModeNoShelter(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -167,11 +167,11 @@ TestWorkoutService_WorkoutOptionsStartMultipleTimesStop:
 func TestWorkoutService_WorkoutOptionsStartMultipleTimesStop(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -228,11 +228,11 @@ TestWorkoutService_UpdateDistanceTravelled:
 func TestWorkoutService_UpdateDistanceTravelled(t *testing.T) {
 	// Mock setup
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -294,11 +294,11 @@ TestWorkoutProcess_Shelters:
 func TestWorkoutProcess_Shelters(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -347,11 +347,11 @@ TestWorkoutService_HardcoreMode:
 func TestWorkoutService_HardcoreMode(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -405,11 +405,11 @@ TestWorkoutService_InitialWorkoutOptionsIfCardio:
 func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -471,11 +471,11 @@ TestWorkoutService_InitialWorkoutOptionsIfCardio:
 func TestWorkoutService_WorkoutOptionsIfCardio(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -550,11 +550,11 @@ TestWorkoutService_InitialWorkoutOptionsIfStrength:
 func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -605,11 +605,11 @@ TestWorkoutService_InitialWorkoutOptionsIfStrength:
 func TestWorkoutService_WorkoutOptionsIfStrength(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()
@@ -683,11 +683,11 @@ TestWorkoutService_DistanceToShelterUpdatesTest:
 func TestWorkoutService_DistanceToShelterUpdatesTest(t *testing.T) {
 	// Initialize the mocks and the service
 	userClientMock := clients.NewUserServiceClientMock()
-	peripheralClientMock := clients.NewPeripheralDeviceClientMock()
-	publisherMock := amqpsecondaryadapter.NewMockPublisher()
+	peripheralClientMock := clients.NewPeripheralClientMock()
+	WorkoutStatsPublisherMock := amqpsecondaryadapter.NewMockWorkoutStatsPublisher()
 	store := postgres.NewRepository(cfg.Postgres)
 
-	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, publisherMock)
+	service := services.NewWorkoutService(store, peripheralClientMock, userClientMock, WorkoutStatsPublisherMock)
 
 	// Setup test data
 	playerID := uuid.New()

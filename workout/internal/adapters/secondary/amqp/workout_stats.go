@@ -1,4 +1,4 @@
-package amqphandler
+package amqp
 
 import (
 	"encoding/json"
@@ -11,12 +11,38 @@ import (
 	"go.uber.org/zap"
 )
 
-type Publisher struct {
+const (
+	// exchangeKind       = "direct"
+	// exchangeDurable    = true
+	// exchangeAutoDelete = false
+	// exchangeInternal   = false
+	// exchangeNoWait     = false
+
+	queueDurable    = true
+	queueAutoDelete = false
+	queueExclusive  = false
+	queueNoWait     = false
+
+	// publishMandatory = false
+	// publishImmediate = false
+
+	// prefetchCount  = 1
+	// prefetchSize   = 0
+	// prefetchGlobal = false
+
+	// consumeAutoAck   = true
+	// consumeExclusive = false
+	// consumeNoLocal   = false
+	// consumeNoWait    = false
+)
+
+type WorkoutStatsPublisher struct {
 	amqpConn *amqp.Connection
+	config   *config.RabbitMQ
 }
 
-// NewPublisher initializes a new Publisher with a RabbitMQ connection
-func NewPublisher(cfg *config.RabbitMQ) *Publisher {
+// NewWorkoutStatsPublisher initializes a new WorkoutStatsPublisher with a RabbitMQ connection
+func NewWorkoutStatsPublisher(cfg *config.RabbitMQ) *WorkoutStatsPublisher {
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
@@ -31,13 +57,14 @@ func NewPublisher(cfg *config.RabbitMQ) *Publisher {
 		return nil
 	}
 
-	return &Publisher{
+	return &WorkoutStatsPublisher{
+		config:   cfg,
 		amqpConn: amqpConn,
 	}
 }
 
 // PublishWorkoutStats publishes workout stats to the specified RabbitMQ queue
-func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
+func (pub *WorkoutStatsPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 	ch, err := pub.amqpConn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open a channel: %w", err)
@@ -46,12 +73,12 @@ func (pub *Publisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 
 	// Declare the queue to ensure it exists
 	_, err = ch.QueueDeclare(
-		"WORKOUT_STATS_QUEUE", // queue name
-		true,                  // durable
-		false,                 // delete when unused
-		false,                 // exclusive
-		false,                 // no-wait
-		nil,                   // arguments
+		pub.config.WorkoutStatsPublisher, // queue name
+		queueDurable,                     // durable
+		queueAutoDelete,                  // delete when unused
+		queueExclusive,                   // exclusive
+		queueNoWait,                      // no-wait
+		nil,                              // arguments
 	)
 	if err != nil {
 		return fmt.Errorf("failed to declare a queue: %w", err)
