@@ -5,5 +5,5 @@ use (
 	./user
 	./workout
 	./peripheral
-	./trail
+	./zone
 )

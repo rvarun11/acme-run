@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/docs"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
 	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/http"
 	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/rabbitmq"
@@ -12,10 +16,20 @@ import (
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var cfg *config.AppConfiguration = config.Config
 
+// @title Peripheral Service API
+// @version 1.0
+// @description This provides a description of API endpoints for the Peripheral Service
+
+// @contact.name Liuyin Shi
+// @contact.url    https://github.com/XIAOKAOBO
+// @contact.email shil9>@mcmaster.ca
+
+// @query.collection.format multi
 func main() {
 	log.Info("Peripheral Service is starting")
 
@@ -50,88 +64,13 @@ func main() {
 
 	// Set up the HTTP routes
 	peripheralHTTPHandler.InitRouter()
-
+	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Start the HTTP server
 	err := router.Run(":" + cfg.Port)
 	if err != nil {
-		// log.Fatal("Failed to run the server: %v", err)
+		log.Fatal("Failed to run the server: %v", zap.Error(err))
 	}
+
 }
-
-// package main
-
-// import (
-// 	"flag"
-// 	"fmt"
-// 	"os"
-// 	"sync"
-
-// 	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/adapters/handler"
-// 	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/adapters/repository"
-// 	"github.com/CAS735-F23/macrun-teamvsl/hrm/internal/core/services"
-// 	"github.com/gin-gonic/gin"
-// )
-
-// var (
-// 	repo = flag.String("db", "postgres", "Database for storing messages")
-// 	//    redisHost   = "localhost:6379"
-// 	//    httpHandler *handler.HTTPHandler
-// 	svc *services.HRMService
-// )
-
-// func main() {
-// 	// flag.Parse()
-
-// 	fmt.Printf("Application running using %s\n", *repo)
-// 	switch *repo {
-// 	// note: we can have other repositories like redis, mysql, etc
-// 	//    case "redis":
-// 	//        store := repository.NewMessengerRedisRepository(redisHost)
-// 	//        svc = services.NewMessengerService(store)
-// 	default:
-// 		store := repository.NewMemoryRepository()
-// 		svc = services.NewHRMService(store)
-// 	}
-// 	var wg sync.WaitGroup
-// 	wg.Add(2)
-
-// 	go InitRabbitMQ(&wg)
-// 	go svc.SendHRM(&wg)
-// 	InitRoutes()
-
-// 	wg.Wait()
-// }
-
-// func InitRabbitMQ(wg *sync.WaitGroup) {
-// 	defer wg.Done()
-// 	cfg := NewConfig()
-// 	handler.HRMWorkoutBinder(*svc, cfg.RABBITMQ_URL)
-// }
-
-// func InitRoutes() {
-// 	router := gin.Default()
-// 	handler := handler.NewHTTPHandler(*svc)
-// 	router.POST("/hrms", handler.ConnectHRM)
-// 	// TODO: Implement when needed
-// 	// router.PUT("/player", handler.UpdatePlayer)
-// 	router.Run(":8004")
-
-// }
-
-// // TODO: Handle service configurations properly
-// type Config struct {
-// 	RABBITMQ_URL string
-// }
-
-// func NewConfig() Config {
-// 	return Config{
-// 		RABBITMQ_URL: getEnv("RABBITMQ_URL", "amqp://guest:guest@localhost:5672/"),
-// 	}
-// }
-
-// func getEnv(key, defaultValue string) string {
-// 	if value, exists := os.LookupEnv(key); exists {
-// 		return value
-// 	}
-// 	return defaultValue
-// }

@@ -268,12 +268,12 @@ func TestGetHRMDevStatus(t *testing.T) {
 	service := services.NewPeripheralService(repo, rabbitMQHandlerMock, zoneClientMock)
 
 	hId := uuid.New()
-	wId := uuid.New()
-	_ = service.CreatePeripheral(wId, hId)
+	pId := uuid.New()
+	_ = service.CreatePeripheral(pId, hId)
 	status := true
 	_ = service.SetHRMDevStatusByHRMId(hId, status)
 
-	retrievedStatus, err := service.GetHRMDevStatus(wId)
+	retrievedStatus, err := service.GetHRMDevStatusByPlayerId(pId)
 	assert.NoError(t, err)
 	assert.Equal(t, status, retrievedStatus)
 }
@@ -316,9 +316,11 @@ func TestSetGeoLocation(t *testing.T) {
 
 	wId := uuid.New()
 	hId := uuid.New()
+	pId := uuid.New()
 	longitude := 40.712776
 	latitude := -74.005974
-	_ = service.CreatePeripheral(wId, hId)
+	_ = service.CreatePeripheral(pId, hId)
+	service.BindPeripheral(pId, wId, hId, true, false)
 
 	err := service.SetGeoLocation(wId, longitude, latitude)
 	assert.NoError(t, err)
@@ -337,7 +339,10 @@ func TestGetGeoDevStatus(t *testing.T) {
 
 	wId := uuid.New()
 	hId := uuid.New()
-	_ = service.CreatePeripheral(wId, hId)
+	pId := uuid.New()
+
+	_ = service.CreatePeripheral(pId, hId)
+	service.BindPeripheral(pId, wId, hId, true, false)
 	status := true
 	_ = service.SetGeoDevStatus(wId, status)
 
@@ -355,7 +360,9 @@ func TestSetGeoDevStatus(t *testing.T) {
 
 	wId := uuid.New()
 	hId := uuid.New()
-	_ = service.CreatePeripheral(wId, hId)
+	pId := uuid.New()
+	_ = service.CreatePeripheral(pId, hId)
+	service.BindPeripheral(pId, wId, hId, true, false)
 	status := true
 
 	err := service.SetGeoDevStatus(wId, status)
@@ -374,9 +381,11 @@ func TestGetGeoLocation(t *testing.T) {
 
 	wId := uuid.New()
 	hId := uuid.New()
+	pId := uuid.New()
 	longitude := 40.712776
 	latitude := -74.005974
-	_ = service.CreatePeripheral(wId, hId)
+	_ = service.CreatePeripheral(pId, hId)
+	service.BindPeripheral(pId, wId, hId, true, false)
 	_ = service.SetGeoLocation(wId, longitude, latitude)
 
 	_, retrievedLongitude, retrievedLatitude, _, err := service.GetGeoLocation(wId)
@@ -394,8 +403,12 @@ func TestGetLiveStatus(t *testing.T) {
 
 	wId := uuid.New()
 	hId := uuid.New()
+	pId := uuid.New()
 	_ = service.CreatePeripheral(wId, hId)
 	liveStatus := true
+	err := service.BindPeripheral(pId, wId, hId, true, false)
+	assert.NoError(t, err)
+
 	_ = service.SetLiveStatus(wId, liveStatus)
 
 	retrievedStatus, err := service.GetLiveStatus(wId)
@@ -412,10 +425,16 @@ func TestSetLiveStatus(t *testing.T) {
 
 	wId := uuid.New()
 	hId := uuid.New()
-	_ = service.CreatePeripheral(wId, hId)
+	pId := uuid.New()
+	err := service.CreatePeripheral(wId, hId)
+	assert.NoError(t, err)
+
+	err = service.BindPeripheral(pId, wId, hId, true, false)
+
+	assert.NoError(t, err)
 	liveStatus := true
 
-	err := service.SetLiveStatus(wId, liveStatus)
+	err = service.SetLiveStatus(wId, liveStatus)
 	assert.NoError(t, err)
 
 	pInstance, _ := repo.GetByWorkoutId(wId)
