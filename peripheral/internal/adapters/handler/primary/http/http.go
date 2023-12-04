@@ -107,7 +107,7 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 		})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"connect to hrm success": true})
+	ctx.JSON(http.StatusOK, gin.H{"message": "connected to hrm"})
 }
 
 // DisconnectHRM disconnects a Heart Rate Monitor (HRM) device.
@@ -131,6 +131,15 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to disconnect to hrm, bad hrm id"})
 		return
 
+	}
+	hrmStatus, err := h.svc.GetHRMDevStatusByHRMId(hrmId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "failed to disconnect to hrm, bad hrm request"})
+		return
+	}
+	if !hrmStatus {
+		ctx.JSON(http.StatusOK, gin.H{"message": "hrm already disconnected"})
+		return
 	}
 
 	err2 := h.svc.SetHRMDevStatusByHRMId(hrmId, false)
