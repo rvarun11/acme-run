@@ -233,7 +233,7 @@ func generateStartWorkoutOptionLinks(workoutID uuid.UUID, optionsOrder []uint8, 
 			optionString = optionStringForFE
 		}
 		linkURL := fmt.Sprintf("/api/v1/workout/%s/options", workoutID)
-		links = append(links, domain.WorkoutOptionLink{Option: optionName, URL: linkURL, Description: optionString, Rank: uint(i + 1)})
+		links = append(links, domain.WorkoutOptionLink{Option: optionName, URL: linkURL, Description: optionString, Rank: uint(i)})
 	}
 
 	return links
