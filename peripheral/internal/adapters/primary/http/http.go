@@ -121,7 +121,7 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 //	@Success	200				"disconnected HRM"
 //	@Failure	400				"error invalid request"
 //	@Failure	500				"cannot disconnect HRM"
-//	@Router		/api/v1/peripheral/hrm/{hrmid} [put]
+//	@Router		/api/v1/peripheral/hrm/{hrm_id} [put]
 func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 
 	hrmIdStr := ctx.Param("hrm_id")
