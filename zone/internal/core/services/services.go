@@ -50,7 +50,7 @@ func (t *ZoneService) CreateTrail(name string, zId uuid.UUID, startLatitude floa
 	if err != nil {
 		return uuid.Nil, err
 	}
-	log.Info("Zone: trail created")
+	log.Info("trail created successfully", zap.Any("trail_id", res))
 	return res, nil
 }
 
@@ -59,7 +59,6 @@ func (t *ZoneService) UpdateTrail(tid uuid.UUID, name string, zId uuid.UUID, sta
 	if err != nil {
 		return err
 	}
-	log.Info("Zone: trail updated")
 	return nil
 }
 
@@ -68,7 +67,6 @@ func (t *ZoneService) DeleteTrail(tId uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	log.Info("Zone: trail deleted")
 	return nil
 }
 
@@ -79,7 +77,6 @@ func (t *ZoneService) DisconnectZoneManager(wId uuid.UUID) error {
 
 func (t *ZoneService) GetTrailByID(id uuid.UUID) (*domain.Trail, error) {
 	trail, err := t.repoDB.GetTrailByID(id)
-	log.Info("Zone: trail detailed info retrieved")
 	return trail, err
 }
 
@@ -120,10 +117,9 @@ func (t *ZoneService) GetClosestTrail(zId uuid.UUID, currentLongitude float64, c
 
 	// If a closest trail is found, update the ZoneManager
 	if closestTrail != nil {
-		log.Info("Zone: cloest shelter id retrieved")
 		return closestTrail.TrailID, nil
 	}
-
+	log.Info("closest trail info retrieved", zap.Any("trail", closestTrail.TrailID))
 	return uuid.Nil, nil // Or return an appropriate error if necessary
 }
 
@@ -132,7 +128,7 @@ func (t *ZoneService) CreateShelter(name string, tId uuid.UUID, availability boo
 	if err != nil {
 		return uuid.Nil, err
 	} else {
-		log.Info("Zone: shelter created")
+		log.Info("shelter created successfully", zap.Any("shelter_id", sId))
 		return sId, nil
 	}
 }
@@ -144,7 +140,6 @@ func (t *ZoneService) UpdateShelter(id uuid.UUID, name string, tId uuid.UUID, av
 		log.Error("Zone: failed to updater shelter", zap.Error(err))
 		return err
 	}
-	log.Info("Zone: shelter updated")
 	return err
 
 }
@@ -155,9 +150,7 @@ func (t *ZoneService) DeleteShelter(id uuid.UUID) error {
 
 func (t *ZoneService) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
 	shelter, err := t.repoDB.GetShelterByID(id)
-	if err == nil {
-		log.Info("Zone: shelter location info retrieved")
-	} else {
+	if err != nil {
 		log.Error("Zone: shleter location can't be retrieved", zap.Error(err))
 	}
 	return shelter, err
@@ -176,7 +169,7 @@ func (t *ZoneService) CreateZone(zName string) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
-	log.Info("Zone: zone created")
+	log.Info("zone created successfully", zap.Any("zone_id", zId))
 	return zId, nil
 }
 
@@ -203,7 +196,6 @@ func (t *ZoneService) UpdateZone(zId uuid.UUID, zName string) error {
 	if err != nil {
 		return err
 	}
-	log.Info("Zone: shelter updated")
 	return nil
 }
 
@@ -218,7 +210,6 @@ func (t *ZoneService) DeleteZone(zId uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	log.Info("Zone: zone deleted")
 	return nil
 }
 
@@ -266,7 +257,6 @@ func (t *ZoneService) GetClosestShelter(longitude float64, latitude float64, tim
 
 	// If a closest trail is found, update the ZoneManager
 	if closestShelter != nil {
-		log.Info("Zone: cloest shelter info retrieved")
 		return closestShelter.ShelterID, minDistance, closestShelter.ShelterAvailability, time, nil
 	}
 

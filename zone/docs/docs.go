@@ -19,9 +19,174 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/zone": {
+            "post": {
+                "description": "Create a new zone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Create a zone",
+                "parameters": [
+                    {
+                        "description": "Zone Data",
+                        "name": "zone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ZoneDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "message\":\t\t\t\"zone created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/zone/{zone_id}": {
+            "put": {
+                "description": "Update details of an existing zone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Update a zone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone ID",
+                        "name": "zone_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated Zone Data",
+                        "name": "zone",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ZoneDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: error, message: success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete an existing zone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Delete a zone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone ID",
+                        "name": "zone_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: error, message: success",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Failed",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/zone/{zone_id}/trail": {
             "get": {
-                "description": "Get the closest trail based on given longitude and latitude",
+                "description": "Get the closest trail based on given longitude and latitude in a specific zone",
                 "consumes": [
                     "application/json"
                 ],
@@ -57,7 +222,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "status: success, message: get cloest trail",
+                        "description": "status: success, message: closest trail, trail_id: UUID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -66,7 +231,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: failed to retrieve closest trail",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -75,7 +240,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -86,7 +251,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create trail based on given longitude and latitude",
+                "description": "Create a trail based on given longitude and latitude within a zone",
                 "consumes": [
                     "application/json"
                 ],
@@ -96,7 +261,7 @@ const docTemplate = `{
                 "tags": [
                     "zone"
                 ],
-                "summary": "Create trail",
+                "summary": "Create a trail",
                 "parameters": [
                     {
                         "type": "string",
@@ -106,25 +271,23 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "number",
-                        "description": "Longitude",
-                        "name": "longitude",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "number",
-                        "description": "Latitude",
-                        "name": "latitude",
-                        "in": "query",
-                        "required": true
+                        "description": "Trail Data",
+                        "name": "trail",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.TrailDTO"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "UUID of the created trail",
+                    "201": {
+                        "description": "status: success, message: trail created successfully, trail_id: UUID",
                         "schema": {
-                            "type": "string"
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
                         }
                     },
                     "400": {
@@ -137,7 +300,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -205,7 +368,7 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Update details of an existing trail",
+                "description": "Update details of an existing trail within a zone",
                 "consumes": [
                     "application/json"
                 ],
@@ -243,7 +406,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "status: error, message: success",
+                        "description": "status: success, message: updated trail",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -252,7 +415,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: failed to update trail",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -261,7 +424,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -301,7 +464,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "status: error, message: success",
+                        "description": "status: success, message: deleted trail",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -310,7 +473,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: failed to delete trail",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -319,7 +482,87 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/zone/{zone_id}/trail/{trail_id}/shelter": {
+            "get": {
+                "description": "Retrieve the closest shelter information based on current longitude and latitude",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Get the closest shelter information",
+                "responses": {}
+            },
+            "post": {
+                "description": "Create a new shelter associated with a trail in a zone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Create a shelter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone ID",
+                        "name": "zone_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Trail ID",
+                        "name": "trail_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Shelter Data",
+                        "name": "shelter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ShelterDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "status: success, message: shelter created successfully, shelter_id: UUID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: failed to create shelter",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -332,7 +575,7 @@ const docTemplate = `{
         },
         "/api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id}": {
             "get": {
-                "description": "Retrieve detailed location information of a shelter by its ID",
+                "description": "Retrieve detailed location information of a shelter by its ID in a trail",
                 "consumes": [
                     "application/json"
                 ],
@@ -368,16 +611,16 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "status: success, message: get shelter info",
+                        "description": "status: success, message: shelter location information",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
-                                "type": "string"
+                                "type": "number"
                             }
                         }
                     },
                     "400": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: failed to retrieve shelter info",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -386,7 +629,74 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Update details of an existing shelter in a trail",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "zone"
+                ],
+                "summary": "Update a shelter",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Zone ID",
+                        "name": "zone_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Trail ID",
+                        "name": "trail_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Updated Shelter Data",
+                        "name": "shelter",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/httphandler.ShelterDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status: success, message: shelter updated successfully",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "status: error, message: failed to update shelter",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "status: error, message: Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -397,7 +707,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete an existing shelter",
+                "description": "Delete an existing shelter from a trail in a zone",
                 "consumes": [
                     "application/json"
                 ],
@@ -433,7 +743,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "status: error, message: success",
+                        "description": "status: success, message: shelter deleted successfully",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -442,7 +752,7 @@ const docTemplate = `{
                         }
                     },
                     "400": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: failed to delete shelter",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -451,7 +761,7 @@ const docTemplate = `{
                         }
                     },
                     "500": {
-                        "description": "status: error, message: Failed",
+                        "description": "status: error, message: Internal Server Error",
                         "schema": {
                             "type": "object",
                             "additionalProperties": {
@@ -464,6 +774,29 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "httphandler.ShelterDTO": {
+            "type": "object",
+            "properties": {
+                "latitude": {
+                    "type": "number"
+                },
+                "longitude": {
+                    "type": "number"
+                },
+                "shelter_availability": {
+                    "type": "boolean"
+                },
+                "shelter_id": {
+                    "type": "string"
+                },
+                "shelter_name": {
+                    "type": "string"
+                },
+                "trail_id": {
+                    "type": "string"
+                }
+            }
+        },
         "httphandler.TrailDTO": {
             "type": "object",
             "properties": {
@@ -486,6 +819,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "zone_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "httphandler.ZoneDTO": {
+            "type": "object",
+            "properties": {
+                "zone_id": {
+                    "type": "string"
+                },
+                "zone_name": {
                     "type": "string"
                 }
             }

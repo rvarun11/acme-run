@@ -172,7 +172,7 @@ func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueNa
 	}
 
 	for i := 0; i < workerPoolSize; i++ {
-		logger.Info("Starting worker", zap.Int("worker number", i))
+		logger.Debug("Starting worker", zap.Int("worker number", i))
 		go c.worker(deliveries)
 	}
 
@@ -191,7 +191,7 @@ func (c *LocationSubscriber) worker(deliveries <-chan amqp.Delivery) {
 			continue
 		}
 
-		logger.Info("Received a message and unmarshalled successfully", zap.Any("location", lastLocation))
+		logger.Debug("Received a message and unmarshalled successfully", zap.Any("location", lastLocation))
 		// Process the message...
 		err = c.svc.UpdateCurrentLocation(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
 		if err != nil {

@@ -29,7 +29,7 @@ var cfg *config.AppConfiguration = config.Config
 // @query.collection.format multi
 
 func main() {
-	log.Info("Zone Service is starting")
+	log.Info("zone manager is starting...")
 
 	// Initialize router
 	router := gin.New()

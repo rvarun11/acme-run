@@ -1,4 +1,19 @@
 definitions:
+  httphandler.ShelterDTO:
+    properties:
+      latitude:
+        type: number
+      longitude:
+        type: number
+      shelter_availability:
+        type: boolean
+      shelter_id:
+        type: string
+      shelter_name:
+        type: string
+      trail_id:
+        type: string
+    type: object
   httphandler.TrailDTO:
     properties:
       end_latitude:
@@ -16,6 +31,13 @@ definitions:
       zone_id:
         type: string
     type: object
+  httphandler.ZoneDTO:
+    properties:
+      zone_id:
+        type: string
+      zone_name:
+        type: string
+    type: object
 info:
   contact:
     email: shil9@mcmaster.ca
@@ -25,11 +47,121 @@ info:
   title: Zone Service API
   version: "1.0"
 paths:
+  /api/v1/zone:
+    post:
+      consumes:
+      - application/json
+      description: Create a new zone
+      parameters:
+      - description: Zone Data
+        in: body
+        name: zone
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.ZoneDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: "message\":\t\t\t\"zone created"
+          schema:
+            type: string
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a zone
+      tags:
+      - zone
+  /api/v1/zone/{zone_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing zone
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: error, message: success'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a zone
+      tags:
+      - zone
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing zone
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Updated Zone Data
+        in: body
+        name: zone
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.ZoneDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: error, message: success'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a zone
+      tags:
+      - zone
   /api/v1/zone/{zone_id}/trail:
     get:
       consumes:
       - application/json
-      description: Get the closest trail based on given longitude and latitude
+      description: Get the closest trail based on given longitude and latitude in
+        a specific zone
       parameters:
       - description: Zone ID
         in: path
@@ -50,19 +182,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'status: success, message: get cloest trail'
+          description: 'status: success, message: closest trail, trail_id: UUID'
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: failed to retrieve closest trail'
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: Internal Server Error'
           schema:
             additionalProperties:
               type: string
@@ -73,30 +205,29 @@ paths:
     post:
       consumes:
       - application/json
-      description: Create trail based on given longitude and latitude
+      description: Create a trail based on given longitude and latitude within a zone
       parameters:
       - description: Zone ID
         in: path
         name: zone_id
         required: true
         type: string
-      - description: Longitude
-        in: query
-        name: longitude
+      - description: Trail Data
+        in: body
+        name: trail
         required: true
-        type: number
-      - description: Latitude
-        in: query
-        name: latitude
-        required: true
-        type: number
+        schema:
+          $ref: '#/definitions/httphandler.TrailDTO'
       produces:
       - application/json
       responses:
-        "200":
-          description: UUID of the created trail
+        "201":
+          description: 'status: success, message: trail created successfully, trail_id:
+            UUID'
           schema:
-            type: string
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: 'status: error, message: failed to create trail'
           schema:
@@ -104,12 +235,12 @@ paths:
               type: string
             type: object
         "500":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: Internal Server Error'
           schema:
             additionalProperties:
               type: string
             type: object
-      summary: Create trail
+      summary: Create a trail
       tags:
       - zone
   /api/v1/zone/{zone_id}/trail/{trail_id}:
@@ -132,19 +263,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'status: error, message: success'
+          description: 'status: success, message: deleted trail'
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: failed to delete trail'
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: Internal Server Error'
           schema:
             additionalProperties:
               type: string
@@ -192,7 +323,7 @@ paths:
     put:
       consumes:
       - application/json
-      description: Update details of an existing trail
+      description: Update details of an existing trail within a zone
       parameters:
       - description: Zone ID
         in: path
@@ -214,19 +345,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'status: error, message: success'
+          description: 'status: success, message: updated trail'
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: failed to update trail'
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: Internal Server Error'
           schema:
             additionalProperties:
               type: string
@@ -234,11 +365,67 @@ paths:
       summary: Update a trail
       tags:
       - zone
+  /api/v1/zone/{zone_id}/trail/{trail_id}/shelter:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve the closest shelter information based on current longitude
+        and latitude
+      responses: {}
+      summary: Get the closest shelter information
+      tags:
+      - zone
+    post:
+      consumes:
+      - application/json
+      description: Create a new shelter associated with a trail in a zone
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      - description: Shelter Data
+        in: body
+        name: shelter
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.ShelterDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: 'status: success, message: shelter created successfully, shelter_id:
+            UUID'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: failed to create shelter'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Internal Server Error'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a shelter
+      tags:
+      - zone
   /api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id}:
     delete:
       consumes:
       - application/json
-      description: Delete an existing shelter
+      description: Delete an existing shelter from a trail in a zone
       parameters:
       - description: Zone ID
         in: path
@@ -259,19 +446,19 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'status: error, message: success'
+          description: 'status: success, message: shelter deleted successfully'
           schema:
             additionalProperties:
               type: string
             type: object
         "400":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: failed to delete shelter'
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: Internal Server Error'
           schema:
             additionalProperties:
               type: string
@@ -282,7 +469,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Retrieve detailed location information of a shelter by its ID
+      description: Retrieve detailed location information of a shelter by its ID in
+        a trail
       parameters:
       - description: Zone ID
         in: path
@@ -303,24 +491,69 @@ paths:
       - application/json
       responses:
         "200":
-          description: 'status: success, message: get shelter info'
+          description: 'status: success, message: shelter location information'
           schema:
             additionalProperties:
-              type: string
+              type: number
             type: object
         "400":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: failed to retrieve shelter info'
           schema:
             additionalProperties:
               type: string
             type: object
         "500":
-          description: 'status: error, message: Failed'
+          description: 'status: error, message: Internal Server Error'
           schema:
             additionalProperties:
               type: string
             type: object
       summary: Get location information of a specific shelter
+      tags:
+      - zone
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing shelter in a trail
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      - description: Updated Shelter Data
+        in: body
+        name: shelter
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.ShelterDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: shelter updated successfully'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: failed to update shelter'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Internal Server Error'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a shelter
       tags:
       - zone
 swagger: "2.0"
