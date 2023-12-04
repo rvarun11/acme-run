@@ -1,4 +1,4 @@
-package workouthandler
+package amqp
 
 import "github.com/google/uuid"
 

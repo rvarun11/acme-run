@@ -1,4 +1,4 @@
-package peripheralhandler
+package amqp
 
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -19,10 +19,10 @@ func (m *LocationSubscriberMock) StartConsumer(workerPoolSize int, exchange, que
 	return args.Error(0)
 }
 
-func (m *LocationSubscriberMock) worker(deliveries <-chan amqp.Delivery) {
-	m.Called(deliveries)
-	// Implement the logic as needed or leave empty if not required for tests
-}
+// func (m *LocationSubscriberMock) worker(deliveries <-chan amqp.Delivery) {
+// 	m.Called(deliveries)
+// 	// Implement the logic as needed or leave empty if not required for tests
+// }
 
 type ZoneManagerAMQPHandlerMock struct {
 	mock.Mock

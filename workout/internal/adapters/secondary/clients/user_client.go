@@ -28,16 +28,19 @@ func calculateAge(dob string) (int, error) {
 }
 
 type UserServiceClientImpl struct {
+	clientURL string
 }
 
 // Factory for creating a new WorkoutService
-func NewUserServiceClient() *UserServiceClientImpl {
-	return &UserServiceClientImpl{}
+func NewUserServiceClient(cfg string) *UserServiceClientImpl {
+	return &UserServiceClientImpl{
+		clientURL: cfg,
+	}
 }
 
 func (u *UserServiceClientImpl) GetWorkoutPreferenceOfUser(playerID uuid.UUID) (string, error) {
 
-	url := "http://localhost:8010/api/v1/players/" + playerID.String()
+	url := u.clientURL + "/api/v1/players/" + playerID.String()
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -62,7 +65,7 @@ func (u *UserServiceClientImpl) GetWorkoutPreferenceOfUser(playerID uuid.UUID) (
 
 func (u *UserServiceClientImpl) GetUserAge(playerID uuid.UUID) (uint8, error) {
 
-	url := "http://localhost:8010/api/v1/players/" + playerID.String()
+	url := u.clientURL + "/api/v1/players/" + playerID.String()
 
 	// Create a new GET request to fetch the user's age.
 	req, err := http.NewRequest("GET", url, nil)

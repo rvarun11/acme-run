@@ -41,10 +41,10 @@ func NewLocationConsumer(cfg *config.RabbitMQ, workoutSvc *services.WorkoutServi
 	}
 }
 
-func (wsc *LocationConsumer) InitAMQP() {
+func (lc *LocationConsumer) InitAMQP() {
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go wsc.StartConsumer(&wg, 1, "", wsc.config.LiveLocationConsumer, "", "")
+	go lc.StartConsumer(&wg, 1, "", lc.config.LiveLocationConsumer, "", "")
 }
 
 // Consume messages
@@ -54,7 +54,7 @@ func (c *LocationConsumer) CreateChannel(exchangeName, queueName, bindingKey, co
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	// logger.Debug("declaring exchange", zap.String("exchange name", exchangeName))
 	/*err = ch.ExchangeDeclare(
 		exchangeName,
 		exchangeKind,

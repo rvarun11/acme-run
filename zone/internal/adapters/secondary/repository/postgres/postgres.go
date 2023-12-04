@@ -6,12 +6,13 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/zone/config"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/core/domain"
+	logger "github.com/CAS735-F23/macrun-teamvsl/zone/log"
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	gormLogger "gorm.io/gorm/logger"
 )
-
-var cfg *config.AppConfiguration = config.Config
 
 type postgresShelter struct {
 	ShelterID           uuid.UUID `gorm:"type:uuid;primaryKey;unique"`
@@ -37,11 +38,11 @@ type postgresZone struct {
 	ZoneName string    `gorm:"type:string;not null;unique"`
 }
 
-type DBRepository struct {
+type Repository struct {
 	db *gorm.DB
 }
 
-func NewDBRepository(cfg *config.Postgres) *DBRepository {
+func NewRepository(cfg *config.Postgres) *Repository {
 
 	conn := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable client_encoding=%s",
 		cfg.Host,
@@ -52,12 +53,16 @@ func NewDBRepository(cfg *config.Postgres) *DBRepository {
 		cfg.Encoding,
 	)
 
-	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{})
+	logLevel := getLogLevel(cfg.LogLevel)
+
+	db, err := gorm.Open(postgres.Open(conn), &gorm.Config{
+		Logger: gormLogger.Default.LogMode(logLevel),
+	})
 	if err != nil {
-		panic(err)
+		logger.Fatal("failed to connect to database", zap.Error(err))
 	}
 	db.AutoMigrate(&postgresTrail{}, &postgresShelter{}, &postgresZone{})
-	return &DBRepository{db: db}
+	return &Repository{db: db}
 }
 
 func (ptrail *postgresTrail) toAggregate() *domain.Trail {
@@ -90,5 +95,21 @@ func (pzone *postgresZone) toAggregate() *domain.Zone {
 	return &domain.Zone{
 		ZoneID:   pzone.ZoneID,
 		ZoneName: pzone.ZoneName,
+	}
+}
+
+// getLogLevel returns the GORM Log Level
+func getLogLevel(l string) gormLogger.LogLevel {
+	switch l {
+	case "silent":
+		return gormLogger.Silent
+	case "info":
+		return gormLogger.Info
+	case "error":
+		return gormLogger.Error
+	case "warn":
+		return gormLogger.Warn
+	default:
+		return gormLogger.Warn
 	}
 }

@@ -36,8 +36,8 @@ func main() {
 
 	// Initialize challenge service
 	challengeSvc := services.NewChallengeService(store)
-	ChallengeHandler := http.NewChallengeHandler(router, challengeSvc)
-	ChallengeHandler.InitRouter()
+	challengeHandler := http.NewChallengeHandler(router, challengeSvc)
+	challengeHandler.InitRouter()
 
 	// Initialize workout stats consumer
 	workoutStatsConsumer := amqp.NewWorkoutStatsConsumer(cfg.RabbitMQ, challengeSvc)
