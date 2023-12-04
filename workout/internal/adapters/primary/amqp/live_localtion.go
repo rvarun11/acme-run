@@ -41,10 +41,10 @@ func NewLocationConsumer(cfg *config.RabbitMQ, workoutSvc *services.WorkoutServi
 	}
 }
 
-func (wsc *LocationConsumer) InitAMQP() {
+func (lc *LocationConsumer) InitAMQP() {
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go wsc.StartConsumer(&wg, 1, "", wsc.config.LiveLocationConsumer, "", "")
+	go lc.StartConsumer(&wg, 1, "", lc.config.LiveLocationConsumer, "", "")
 }
 
 // Consume messages

@@ -1,8 +1,9 @@
-package peripheralhandler
+package amqp
 
 import (
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"github.com/CAS735-F23/macrun-teamvsl/zone/config"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/core/services"
@@ -36,38 +37,14 @@ const (
 	consumeNoWait    = false
 )
 
-var cfg *config.RabbitMQ = config.Config.RabbitMQ
-
-// Location Rabbitmq consumer
-type LocationSubscriber struct {
+// Location AMQP consumer
+type LocationConsumer struct {
 	amqpConn *amqp.Connection
 	svc      *services.ZoneService
+	config   *config.RabbitMQ
 }
 
-type ZoneManagerAMQPHandler struct {
-	svc                *services.ZoneService
-	locationSubscriber *LocationSubscriber
-}
-
-func NewAMQPHandler(ZoneManagerSvc *services.ZoneService) *ZoneManagerAMQPHandler {
-
-	amqpConn_locationSub, err := NewConnection(cfg)
-	if err != nil {
-		logger.Error("Connection to RabbitMQ Failed")
-	}
-	locationSubscriber := LocationSubscriber{
-		amqpConn: amqpConn_locationSub,
-		svc:      ZoneManagerSvc,
-	}
-
-	return &ZoneManagerAMQPHandler{
-		svc:                ZoneManagerSvc,
-		locationSubscriber: &locationSubscriber,
-	}
-}
-
-// Initialize new RabbitMQ connection
-func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
+func NewLocationConsumer(cfg *config.RabbitMQ, zoneSvc *services.ZoneService) *LocationConsumer {
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
@@ -75,17 +52,27 @@ func NewConnection(cfg *config.RabbitMQ) (*amqp.Connection, error) {
 		cfg.Host,
 		cfg.Port,
 	)
-	mq, err := amqp.Dial(conn)
+
+	amqpConn, err := amqp.Dial(conn)
 	if err != nil {
-		return &amqp.Connection{}, err
+		logger.Fatal("unable to dial connection to RabbitMQ")
 	}
 
-	return mq, nil
+	return &LocationConsumer{
+		amqpConn: amqpConn,
+		svc:      zoneSvc,
+		config:   cfg,
+	}
 }
 
-// Consume messages
-func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, consumerTag string) (*amqp.Channel, error) {
-	ch, err := c.amqpConn.Channel()
+func (lc *LocationConsumer) InitAMQP() {
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go lc.StartConsumer(&wg, 1, "", lc.config.LiveLocationConsumer, "", "")
+}
+
+func (lc *LocationConsumer) CreateChannel(exchangeName, queueName, bindingKey, consumerTag string) (*amqp.Channel, error) {
+	ch, err := lc.amqpConn.Channel()
 	if err != nil {
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
@@ -150,9 +137,9 @@ func (c *LocationSubscriber) CreateChannel(exchangeName, queueName, bindingKey, 
 	return ch, nil
 }
 
-func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
+func (lc *LocationConsumer) StartConsumer(wg *sync.WaitGroup, workerPoolSize int, exchange, queueName, bindingKey, consumerTag string) error {
 	// Remove the context cancellation, as this should only be done when the application stops
-	ch, err := c.CreateChannel(exchange, queueName, bindingKey, consumerTag)
+	ch, err := lc.CreateChannel(exchange, queueName, bindingKey, consumerTag)
 	if err != nil {
 		return fmt.Errorf("create channel error %w", err)
 	}
@@ -173,7 +160,7 @@ func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueNa
 
 	for i := 0; i < workerPoolSize; i++ {
 		logger.Debug("Starting worker", zap.Int("worker number", i))
-		go c.worker(deliveries)
+		go lc.worker(deliveries)
 	}
 
 	// Do not close the channel here, it will be closed when the application exits
@@ -181,7 +168,7 @@ func (c *LocationSubscriber) StartConsumer(workerPoolSize int, exchange, queueNa
 	return nil
 }
 
-func (c *LocationSubscriber) worker(deliveries <-chan amqp.Delivery) {
+func (lc *LocationConsumer) worker(deliveries <-chan amqp.Delivery) {
 	for d := range deliveries {
 		var lastLocation LocationDTO
 		err := json.Unmarshal(d.Body, &lastLocation)
@@ -193,21 +180,10 @@ func (c *LocationSubscriber) worker(deliveries <-chan amqp.Delivery) {
 
 		logger.Debug("Received a message and unmarshalled successfully", zap.Any("location", lastLocation))
 		// Process the message...
-		err = c.svc.UpdateCurrentLocation(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
+		err = lc.svc.UpdateCurrentLocation(lastLocation.WorkoutID, lastLocation.Latitude, lastLocation.Longitude, lastLocation.TimeOfLocation)
 		if err != nil {
 			logger.Error("Failed to update current location", zap.Error(err))
 		}
 		d.Ack(false) // acknowledge the message upon successful processing
 	}
-}
-
-func (wah *ZoneManagerAMQPHandler) InitAMQP() error {
-
-	err := wah.locationSubscriber.StartConsumer(1, "PERIPHERAL_TRAIL_EXCHANGE", "LOCATION_PERIPHERL_TRAIL_MANAGER", "", "")
-	if err != nil {
-		return err
-	}
-	logger.Debug("Error err", zap.Any("err", err))
-
-	return nil
 }

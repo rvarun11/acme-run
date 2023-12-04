@@ -10,19 +10,8 @@ func (postgresShelter) TableName() string {
 	return "shelter"
 }
 
-func toShelterPostgres(shelter *domain.Shelter) *postgresShelter {
-
-	return &postgresShelter{
-		ShelterID:           shelter.ShelterID,
-		ShelterName:         shelter.ShelterName,
-		ShelterAvailability: shelter.ShelterAvailability,
-		Longitude:           shelter.Longitude,
-		Latitude:            shelter.Latitude,
-	}
-}
-
 // Shelters
-func (repo *DBRepository) CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
+func (repo *Repository) CreateShelter(name string, tId uuid.UUID, availability bool, lat, long float64) (uuid.UUID, error) {
 	shelter := postgresShelter{
 		ShelterID:           uuid.New(),
 		ShelterName:         name,
@@ -37,7 +26,7 @@ func (repo *DBRepository) CreateShelter(name string, tId uuid.UUID, availability
 	return shelter.ShelterID, nil
 }
 
-func (repo *DBRepository) UpdateShelterByID(id uuid.UUID, tId uuid.UUID, name string, availability bool, lat, long float64) error {
+func (repo *Repository) UpdateShelterByID(id uuid.UUID, tId uuid.UUID, name string, availability bool, lat, long float64) error {
 	return repo.db.Model(&postgresShelter{}).Where("shelter_id = ?", id).Updates(postgresShelter{
 		ShelterName:         name,
 		ShelterAvailability: availability,
@@ -47,11 +36,11 @@ func (repo *DBRepository) UpdateShelterByID(id uuid.UUID, tId uuid.UUID, name st
 	}).Error
 }
 
-func (repo *DBRepository) DeleteShelterByID(id uuid.UUID) error {
+func (repo *Repository) DeleteShelterByID(id uuid.UUID) error {
 	return repo.db.Delete(&postgresShelter{}, "shelter_id = ?", id).Error
 }
 
-func (repo *DBRepository) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
+func (repo *Repository) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
 	var shelter postgresShelter
 	if err := repo.db.Where("shelter_id = ?", id).First(&shelter).Error; err != nil {
 		return nil, err // remove the domain.Shelter type
@@ -60,7 +49,7 @@ func (repo *DBRepository) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) 
 }
 
 // GetAllShelters retrieves all shelter records from the database.
-func (repo *DBRepository) ListShelters() ([]*domain.Shelter, error) {
+func (repo *Repository) ListShelters() ([]*domain.Shelter, error) {
 
 	var postgresShelters []postgresShelter
 	if err := repo.db.Find(&postgresShelters).Error; err != nil {
@@ -76,7 +65,7 @@ func (repo *DBRepository) ListShelters() ([]*domain.Shelter, error) {
 	return domainShelters, nil
 }
 
-func (repo *DBRepository) ListSheltersByTrailId(tId uuid.UUID) ([]*domain.Shelter, error) {
+func (repo *Repository) ListSheltersByTrailId(tId uuid.UUID) ([]*domain.Shelter, error) {
 	var postgresShelters []postgresShelter
 	if err := repo.db.Where("trail_id = ?", tId).Find(&postgresShelters).Error; err != nil {
 		return nil, err
@@ -91,6 +80,6 @@ func (repo *DBRepository) ListSheltersByTrailId(tId uuid.UUID) ([]*domain.Shelte
 	return domainShelters, nil
 }
 
-func (repo *DBRepository) DeleteShelterByName(name string) error {
+func (repo *Repository) DeleteShelterByName(name string) error {
 	return repo.db.Where("shelter_name = ?", name).Delete(&postgresShelter{}).Error
 }

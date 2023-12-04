@@ -32,7 +32,7 @@ func main() {
 	peripheralClient := clients.NewPeripheralClient()
 	userClient := clients.NewUserServiceClient()
 
-	// Initialize WorkoutStatsPublishers
+	// Initialize workout stats publisher
 	workoutStatsWorkoutStatsPublisher := amqpSecondary.NewWorkoutStatsPublisher(cfg.RabbitMQ)
 
 	// Initialize workout service
