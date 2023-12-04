@@ -10,11 +10,14 @@ import (
 )
 
 type ZoneClient struct {
+	clientURL string
 }
 
 // Factory for creating a new WorkoutService
-func NewZoneServiceClient() *ZoneClient {
-	return &ZoneClient{}
+func NewZoneServiceClient(cfg string) *ZoneClient {
+	return &ZoneClient{
+		clientURL: cfg,
+	}
 }
 
 // GetTrailLocation makes a GET request to the GetTrailLocationInfo endpoint and saves the location data
@@ -53,12 +56,11 @@ func GetTrailLocation(serverURL, zoneID, trailID string) (*TrailLocationResponse
 func (z *ZoneClient) GetTrailLocation(trailID uuid.UUID) (float64, float64, float64, float64, error) {
 
 	// Create a new GET request to fetch the user's age.
-	serverURL := "http://localhost:8005/api/v1"
+	serverURL := z.clientURL + "/api/v1"
 	zoneID := uuid.New().String()
 
 	locationInfo, err := GetTrailLocation(serverURL, zoneID, trailID.String())
 	if err != nil {
-		fmt.Println("Error getting trail location:", err)
 		return 0, 0, 0, 0, err
 	}
 

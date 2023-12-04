@@ -104,6 +104,7 @@ services:
       - RABBITMQ_PASSWORD=guest
       - RABBIT_WORKOUT_LOCATION_PUBLISHER=location_peripheral_workout_queue
       - RABBITMQ_ZONE_LOCATION_PUBLISHER=location_peripheral_zone_queue
+      - ZONE_CLIENT_URL=http://zone:8011
     depends_on:
       rabbitmq:
         condition: service_healthy
@@ -134,6 +135,8 @@ services:
       - RABBITMQ_SHELTER_DISTANCE_CONSUMER=shelter_zone_workout_queue
       - RABBITMQ_LOCATION_CONSUMER=location_peripheral_workout_queue
       - RABBITMQ_WORKOUT_STATS_PUBLISHER=stats_workout_challenge_queue
+      - USER_CLIENT_URL=http://user:8010
+      - PERIPHERAL_CLIENT_URL=http://peripheral:8012
     depends_on:
       db:
         condition: service_healthy
