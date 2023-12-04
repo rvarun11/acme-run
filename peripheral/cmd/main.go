@@ -64,14 +64,13 @@ func main() {
 
 	// Set up the HTTP routes
 	peripheralHTTPHandler.InitRouter()
-
+	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	// Start the HTTP server
 	err := router.Run(":" + cfg.Port)
 	if err != nil {
 		log.Fatal("Failed to run the server: %v", zap.Error(err))
 	}
 
-	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
