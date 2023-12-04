@@ -2,17 +2,34 @@ version: "3.8"
 
 services:
 # RabbitMQ
-  # rabbitmq:
-  #   container_name: rabbitmq
-  #   image: rabbitmq:management
-  #   ports:
-  #     - "5672:5672"
-  #     - "15672:15672"
-  #   healthcheck:
-  #     test: rabbitmq-diagnostics check_port_connectivity
-  #     interval: 5s
-  #     timeout: 5s
-  #     retries: 3
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 3
+
+# Database
+  db:
+    container_name: db
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ENCODING=UTF8
+    healthcheck:
+      test: pg_isready -U postgres
+      interval: 5s
+      timeout: 10s
+      retries: 3
 
 # User Manager
   user:
@@ -25,7 +42,7 @@ services:
       - MODE=prod
       - PORT=8010
       - GIN_MODE=release
-      - POSTGRES_HOST=user-db
+      - POSTGRES_HOST=db
       - POSTGRES_PORT=5432
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
@@ -33,28 +50,10 @@ services:
       - POSTGRES_ENCODING=UTF8
       - POSTGRES_LOG_LEVEL=silent
     depends_on:
-      user-db:
+      db:
         condition: service_healthy
-    networks:
-      - user-network
-
-  user-db:
-    container_name: user-db
-    image: postgres:latest
-    restart: always
-    environment:
-      - POSTGRES_DB=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_ENCODING=UTF8
-    healthcheck:
-      test: pg_isready -U postgres
-      interval: 5s
-      timeout: 5s
-      retries: 3
-    networks:
-      - user-network
+      rabbitmq:
+        condition: service_healthy
 
 
 # Zone Manager
@@ -192,64 +191,30 @@ services:
   #   networks:
   #     - workout-network
 
-# Challenge Manager
-  # challenge:
-  #   container_name: challenge
-  #   build: ./challenge
-  #   restart: always
-  #   ports:
-  #    - "8014:8014"
-  #   environment:
-  #     - MODE=prod
-  #     - PORT=8014
-  #     - GIN_MODE=release
-  #     - POSTGRES_HOST=challenge-db
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_ENCODING=UTF8
-  #     - POSTGRES_LOG_LEVEL=silent
-  #     - RABBITMQ_HOSTNAME=rabbitmq
-  #     - RABBITMQ_PORT=5672
-  #     - RABBITMQ_USER=guest
-  #     - RABBITMQ_PASSWORD=guest
-  #   depends_on:
-  #     challenge-db:
-  #       condition: service_healthy
-  #     rabbitmq:
-  #       condition: service_healthy
-  #   networks:
-  #     - challenge-network
-
-  # challenge-db:
-  #   container_name: challenge-db
-  #   image: postgres:latest
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_ENCODING=UTF8
-  #   healthcheck:
-  #     test: pg_isready -U postgres
-  #     interval: 5s
-  #     timeout: 10s
-  #     retries: 3
-  #   networks:
-  #     - challenge-network
-
-
-# Networks for the different services
-networks:
-  user-network:
-    driver: bridge
-  zone-network:
-    driver: bridge
-  peripheral-network:
-    driver: bridge
-  workout-network:
-    driver: bridge
-  challenge-network:
-    driver: bridge
+#Challenge Manager
+  challenge:
+    container_name: challenge
+    build: ./challenge
+    restart: always
+    ports:
+     - "8014:8014"
+    environment:
+      - MODE=prod
+      - PORT=8014
+      - GIN_MODE=release
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ENCODING=UTF8
+      - POSTGRES_LOG_LEVEL=silent
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
