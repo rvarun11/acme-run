@@ -42,9 +42,10 @@ const (
 type WorkoutStatsConsumer struct {
 	amqpConn *amqp.Connection
 	svc      *services.ChallengeService
+	config   *config.RabbitMQ
 }
 
-func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.ChallengeService) {
+func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.ChallengeService) *WorkoutStatsConsumer {
 	conn := fmt.Sprintf(
 		"amqp://%s:%s@%s:%s/",
 		cfg.User,
@@ -58,14 +59,18 @@ func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.Challe
 		logger.Fatal("Unable to dial connection to RabbitMQ")
 	}
 
-	wsc := &WorkoutStatsConsumer{
+	return &WorkoutStatsConsumer{
+		config:   cfg,
 		amqpConn: amqpConn,
 		svc:      challengeSvc,
 	}
 
+}
+
+func (wsc *WorkoutStatsConsumer) InitAMQP() {
 	var wg sync.WaitGroup
 	wg.Add(1)
-	go wsc.StartConsumer(&wg, 1, "", cfg.WorkoutStatsConsumer, "", "")
+	go wsc.StartConsumer(&wg, 1, "", wsc.config.WorkoutStatsConsumer, "", "")
 }
 
 // Consume messages
