@@ -1,4 +1,326 @@
+definitions:
+  httphandler.TrailDTO:
+    properties:
+      end_latitude:
+        type: number
+      end_longitude:
+        type: number
+      start_latitude:
+        type: number
+      start_longitude:
+        type: number
+      trail_id:
+        type: string
+      trail_name:
+        type: string
+      zone_id:
+        type: string
+    type: object
 info:
-  contact: {}
-paths: {}
+  contact:
+    email: shil9@mcmaster.ca
+    name: Liuyin Shi
+    url: https://github.com/XIAOKAOBO
+  description: This provides a description of API endpoints for the zone
+  title: Zone Service API
+  version: "1.0"
+paths:
+  /api/v1/zone/{zone_id}/trail:
+    get:
+      consumes:
+      - application/json
+      description: Get the closest trail based on given longitude and latitude
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Longitude
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: Latitude
+        in: query
+        name: latitude
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: get cloest trail'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get the closest trail
+      tags:
+      - zone
+    post:
+      consumes:
+      - application/json
+      description: Create trail based on given longitude and latitude
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Longitude
+        in: query
+        name: longitude
+        required: true
+        type: number
+      - description: Latitude
+        in: query
+        name: latitude
+        required: true
+        type: number
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UUID of the created trail
+          schema:
+            type: string
+        "400":
+          description: 'status: error, message: failed to create trail'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create trail
+      tags:
+      - zone
+  /api/v1/zone/{zone_id}/trail/{trail_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a trail from the zone by its ID
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: error, message: success'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a specific trail
+      tags:
+      - zone
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed location information of a trail by its ID
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: UUID of the closest trail
+          schema:
+            type: string
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get location information of a specific trail
+      tags:
+      - zone
+    put:
+      consumes:
+      - application/json
+      description: Update details of an existing trail
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      - description: Updated Trail Data
+        in: body
+        name: trail
+        required: true
+        schema:
+          $ref: '#/definitions/httphandler.TrailDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: error, message: success'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update a trail
+      tags:
+      - zone
+  /api/v1/zone/{zone_id}/trail/{trail_id}/shelter/{shelter_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an existing shelter
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      - description: Shelter ID
+        in: path
+        name: shelter_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: error, message: success'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete a shelter
+      tags:
+      - zone
+    get:
+      consumes:
+      - application/json
+      description: Retrieve detailed location information of a shelter by its ID
+      parameters:
+      - description: Zone ID
+        in: path
+        name: zone_id
+        required: true
+        type: string
+      - description: Trail ID
+        in: path
+        name: trail_id
+        required: true
+        type: string
+      - description: Shelter ID
+        in: path
+        name: shelter_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 'status: success, message: get shelter info'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: 'status: error, message: Failed'
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get location information of a specific shelter
+      tags:
+      - zone
 swagger: "2.0"

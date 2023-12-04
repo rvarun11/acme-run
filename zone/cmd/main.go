@@ -14,7 +14,6 @@ import (
 	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
-	"go.uber.org/zap"
 )
 
 var cfg *config.AppConfiguration = config.Config
@@ -54,14 +53,10 @@ func main() {
 	phandler := peripheralhandler.NewAMQPHandler(ZoneService)
 	phandler.InitAMQP()
 
-	// Start the HTTP server
-	err := router.Run(":" + cfg.Port)
-
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	if err != nil {
-		log.Fatal("Failed to run the server", zap.Error(err))
-	}
+	// Start the HTTP server
+	router.Run(":" + cfg.Port)
 }
