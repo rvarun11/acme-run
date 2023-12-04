@@ -11,19 +11,19 @@ import (
 	"github.com/google/uuid"
 )
 
-type WorkoutHTTPHandler struct {
+type WorkoutHanlder struct {
 	gin *gin.Engine
 	svc *services.WorkoutService
 }
 
-func NewWorkoutHTTPHandler(gin *gin.Engine, workoutSvc *services.WorkoutService) *WorkoutHTTPHandler {
-	return &WorkoutHTTPHandler{
+func NewWorkoutHanlder(gin *gin.Engine, workoutSvc *services.WorkoutService) *WorkoutHanlder {
+	return &WorkoutHanlder{
 		gin: gin,
 		svc: workoutSvc,
 	}
 }
 
-func (handler *WorkoutHTTPHandler) InitRouter() {
+func (handler *WorkoutHanlder) InitRouter() {
 
 	router := handler.gin.Group("/api/v1")
 
@@ -52,7 +52,7 @@ func (handler *WorkoutHTTPHandler) InitRouter() {
 //	@Success		201		"Successfully started workout session"
 //	@Failure		400		"Bad Request with error details"
 //	@Router			/api/v1/workout [post]
-func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
+func (h *WorkoutHanlder) StartWorkout(ctx *gin.Context) {
 
 	var startWorkout StartWorkout
 	if err := ctx.ShouldBindJSON(&startWorkout); err != nil {
@@ -100,7 +100,7 @@ func (h *WorkoutHTTPHandler) StartWorkout(ctx *gin.Context) {
 //	@Success		202			"Successfully stopped workout session"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId} [put]
-func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
+func (h *WorkoutHanlder) StopWorkout(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutId := ctx.Param("workoutId")
 
@@ -135,7 +135,7 @@ func (h *WorkoutHTTPHandler) StopWorkout(ctx *gin.Context) {
 //	@Success		200			"Successfully retrieved workout options"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId}/options [get]
-func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetWorkoutOptions(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
 
@@ -171,7 +171,7 @@ func (h *WorkoutHTTPHandler) GetWorkoutOptions(ctx *gin.Context) {
 //	@Success		200			"Successfully started workout option"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId}/options [post]
-func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
+func (h *WorkoutHanlder) StartWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
 
@@ -214,7 +214,7 @@ func (h *WorkoutHTTPHandler) StartWorkoutOption(ctx *gin.Context) {
 //	@Success		200			"Successfully stopped workout option"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/{workoutId}/options [patch]
-func (h *WorkoutHTTPHandler) StopWorkoutOption(ctx *gin.Context) {
+func (h *WorkoutHanlder) StopWorkoutOption(ctx *gin.Context) {
 	// Retrieve workoutId from the path parameter
 	workoutIdStr := ctx.Param("workoutId")
 
@@ -272,7 +272,7 @@ func parseTime(ctx *gin.Context, paramName string, layout string) (time.Time, er
 //	@Success		201			"Successfully retrieved distance"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/distance [get]
-func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetDistance(ctx *gin.Context) {
 	workoutID, err := parseUUID(ctx, "workoutID")
 	var distance float64
 
@@ -339,7 +339,7 @@ func (h *WorkoutHTTPHandler) GetDistance(ctx *gin.Context) {
 //	@Success		201			"Successfully retrieved shelter count"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/shelters [get]
-func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetShelters(ctx *gin.Context) {
 	var shelterCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -402,7 +402,7 @@ func (h *WorkoutHTTPHandler) GetShelters(ctx *gin.Context) {
 //	@Success		201			"Successfully retrieved escape count"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/escapes [get]
-func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetEscapes(ctx *gin.Context) {
 	var escapeCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -465,7 +465,7 @@ func (h *WorkoutHTTPHandler) GetEscapes(ctx *gin.Context) {
 //	@Success		201			"Successfully retrieved fight count"
 //	@Failure		400			"Bad Request with error details"
 //	@Router			/api/v1/workout/fights [get]
-func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
+func (h *WorkoutHanlder) GetFights(ctx *gin.Context) {
 	var fightCount uint16
 	workoutID, workoutIDErr := parseUUID(ctx, "workoutID")
 	playerID, playerIDErr := parseUUID(ctx, "playerID")
@@ -526,7 +526,7 @@ func (h *WorkoutHTTPHandler) GetFights(ctx *gin.Context) {
 //	@Failure		400			"Bad Request with error details"
 //	@Failure		404			"Workout session not found"
 //	@Router			/api/v1/workout/{workoutId} [delete]
-func (h *WorkoutHTTPHandler) DeleteWorkout(ctx *gin.Context) {
+func (h *WorkoutHanlder) DeleteWorkout(ctx *gin.Context) {
 	workoutId := ctx.Param("workoutId")
 
 	// Parse the UUID from the workoutId, handle error if invalid

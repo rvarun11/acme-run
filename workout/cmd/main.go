@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
-	amqphandler "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/amqp"
+	amqpPrimary "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/amqp"
 	http "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/primary/http"
-	amqpsecondaryadapter "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/amqp"
+	amqpSecondary "github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/amqp"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/clients"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/adapters/secondary/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/services"
@@ -28,26 +28,31 @@ func main() {
 	// Initialize postgres repository
 	store := postgres.NewRepository(cfg.Postgres)
 
-	// Initialize Clients
-	peripheralDeviceClient := clients.NewPeripheralDeviceClient()
-	user := clients.NewUserServiceClient()
+	// Initialize clients
+	peripheralClient := clients.NewPeripheralDeviceClient()
+	userClient := clients.NewUserServiceClient()
 
-	workoutAMQPSecondaryHandler := amqpsecondaryadapter.NewPublisher(cfg.RabbitMQ)
+	// Initialize publishers
+	workoutStatsPublisher := amqpSecondary.NewPublisher(cfg.RabbitMQ)
 
-	// Initialize Workout service
-	workoutSvc := services.NewWorkoutService(store, peripheralDeviceClient, user, workoutAMQPSecondaryHandler)
+	// Initialize workout service
+	workoutSvc := services.NewWorkoutService(store, peripheralClient, userClient, workoutStatsPublisher)
+	workoutHandler := http.NewWorkoutHanlder(router, workoutSvc)
+	workoutHandler.InitRouter()
 
-	workoutHTTPHandler := http.NewWorkoutHTTPHandler(router, workoutSvc)
-	workoutHTTPHandler.InitRouter()
+	// Initialize shelter distance consumer
+	shelterDistanceConsumer := amqpPrimary.NewShelterDistanceConsumer(cfg.RabbitMQ, workoutSvc)
+	shelterDistanceConsumer.InitAMQP()
 
-	workoutAMQPHandler := amqphandler.NewAMQPHandler(workoutSvc)
+	// Initialize location consumer
+	locationConsumer := amqpPrimary.NewLocationConsumer(cfg.RabbitMQ, workoutSvc)
+	locationConsumer.InitAMQP()
 
-	go workoutAMQPHandler.InitAMQP()
-	// Start Server
-
+	// Swagger support
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
+	// Start server
 	router.Run(":" + cfg.Port)
 }

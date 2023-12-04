@@ -36,14 +36,14 @@ func main() {
 
 	// Initialize challenge service
 	challengeSvc := services.NewChallengeService(store)
-	ChallengeHTTPHandler := http.NewChallengeHandler(router, challengeSvc)
-	ChallengeHTTPHandler.InitRouter()
+	ChallengeHandler := http.NewChallengeHandler(router, challengeSvc)
+	ChallengeHandler.InitRouter()
 
-	// Initialize WorkoutStats Consumer
+	// Initialize workout stats consumer
 	workoutStatsConsumer := amqp.NewWorkoutStatsConsumer(cfg.RabbitMQ, challengeSvc)
 	workoutStatsConsumer.InitAMQP()
 
-	// Swagger Support
+	// Swagger support
 	docs.SwaggerInfo.Host = "localhost:" + cfg.Port
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

@@ -56,7 +56,7 @@ func NewWorkoutStatsConsumer(cfg *config.RabbitMQ, challengeSvc *services.Challe
 
 	amqpConn, err := amqp.Dial(conn)
 	if err != nil {
-		logger.Fatal("Unable to dial connection to RabbitMQ")
+		logger.Fatal("unable to dial connection to RabbitMQ")
 	}
 
 	return &WorkoutStatsConsumer{
