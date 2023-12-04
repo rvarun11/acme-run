@@ -54,7 +54,7 @@ func init() {
 
 	Config = &AppConfiguration{
 		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8001"),
+		Port:     getEnv("PORT", "8013"),
 		Postgres: postgres,
 		RabbitMQ: rabbitmq,
 	}
