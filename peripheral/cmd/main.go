@@ -9,10 +9,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
-	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/http"
-	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/handler/primary/rabbitmq"
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/repository"
+	httphandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/primary/http"
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/primary/rabbitmq"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/clients"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/repository"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/services"
 	log "github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/gin-gonic/gin"

@@ -67,7 +67,7 @@ func (s *PeripheralService) BindPeripheral(pId uuid.UUID, wId uuid.UUID, hId uui
 func (s *PeripheralService) DisconnectPeripheral(wId uuid.UUID) error {
 	err := s.repo.DeletePeripheralInstance(wId)
 	if err != nil {
-		return ports.ErrorUnbindPeripheralFailed
+		return ports.ErrorPeripheralNotFound
 	}
 	return err
 }
