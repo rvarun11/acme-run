@@ -54,7 +54,7 @@ func (c *LocationConsumer) CreateChannel(exchangeName, queueName, bindingKey, co
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
+	// logger.Debug("declaring exchange", zap.String("exchange name", exchangeName))
 	/*err = ch.ExchangeDeclare(
 		exchangeName,
 		exchangeKind,

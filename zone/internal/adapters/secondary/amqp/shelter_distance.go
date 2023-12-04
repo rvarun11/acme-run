@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/CAS735-F23/macrun-teamvsl/peripheral/log"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/config"
 	logger "github.com/CAS735-F23/macrun-teamvsl/zone/log"
 	"github.com/google/uuid"
@@ -44,7 +43,7 @@ func NewShelterDistancePublisher(cfg *config.RabbitMQ) *ShelterDistancePublisher
 func (pub *ShelterDistancePublisher) PublishShelterDistance(wId uuid.UUID, sId uuid.UUID, name string, availability bool, distance float64) error {
 	ch, err := pub.amqpConn.Channel()
 	if err != nil {
-		log.Error("publish shelter: failed to open a channel", zap.Error(err))
+		logger.Error("publish shelter: failed to open a channel", zap.Error(err))
 		return fmt.Errorf("failed to open a channel: %w", err)
 	}
 	defer ch.Close()
@@ -56,10 +55,10 @@ func (pub *ShelterDistancePublisher) PublishShelterDistance(wId uuid.UUID, sId u
 	shelter.ShelterAvailability = availability
 	body, err := json.Marshal(shelter)
 	if err != nil {
-		log.Error("publish shelter: failed to convert to json data", zap.Error(err))
+		logger.Error("publish shelter: failed to convert to json data", zap.Error(err))
 		return fmt.Errorf("failed to serialize workoutStats: %w", err)
 	}
-	log.Debug("distance to shelter", zap.Float64("distance", distance))
+	logger.Debug("distance to shelter", zap.Float64("distance", distance))
 	err = ch.Publish(
 		"",                                  // exchange
 		pub.config.ShelterDistancePublisher, // queue name
@@ -71,7 +70,7 @@ func (pub *ShelterDistancePublisher) PublishShelterDistance(wId uuid.UUID, sId u
 		},
 	)
 	if err != nil {
-		log.Error("publish shelter: failed to push data", zap.Error(err))
+		logger.Error("publish shelter: failed to push data", zap.Error(err))
 		return fmt.Errorf("failed to publish a message: %w", err)
 	}
 

@@ -8,7 +8,7 @@ import (
 	amqpSecondary "github.com/CAS735-F23/macrun-teamvsl/zone/internal/adapters/secondary/amqp"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/adapters/secondary/repository/postgres"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/core/services"
-	log "github.com/CAS735-F23/macrun-teamvsl/zone/log"
+	logger "github.com/CAS735-F23/macrun-teamvsl/zone/log"
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 	swaggerFiles "github.com/swaggo/files"
@@ -27,7 +27,7 @@ var cfg *config.AppConfiguration = config.Config
 
 // @query.collection.format multi
 func main() {
-	log.Info("zone manager is starting...")
+	logger.Info("zone manager is starting...")
 
 	// Initialize router
 	router := gin.New()

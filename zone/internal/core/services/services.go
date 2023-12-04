@@ -7,7 +7,7 @@ import (
 
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/zone/internal/core/ports"
-	"github.com/CAS735-F23/macrun-teamvsl/zone/log"
+	logger "github.com/CAS735-F23/macrun-teamvsl/zone/log"
 	"github.com/google/uuid"
 	"github.com/umahmood/haversine"
 	"go.uber.org/zap"
@@ -30,7 +30,7 @@ func (zs *ZoneService) CreateTrail(name string, zId uuid.UUID, startLatitude flo
 	if err != nil {
 		return uuid.Nil, err
 	}
-	log.Info("trail created successfully", zap.Any("trail_id", res))
+	logger.Info("trail created successfully", zap.Any("trail_id", res))
 	return res, nil
 }
 
@@ -95,7 +95,7 @@ func (zs *ZoneService) GetClosestTrail(zId uuid.UUID, currentLongitude float64, 
 	if closestTrail != nil {
 		return closestTrail.TrailID, nil
 	}
-	log.Info("closest trail info retrieved", zap.Any("trail", closestTrail.TrailID))
+	logger.Info("closest trail info retrieved", zap.Any("trail", closestTrail.TrailID))
 	return uuid.Nil, nil // Or return an appropriate error if necessary
 }
 
@@ -104,7 +104,7 @@ func (zs *ZoneService) CreateShelter(name string, tId uuid.UUID, availability bo
 	if err != nil {
 		return uuid.Nil, err
 	} else {
-		log.Info("shelter created successfully", zap.Any("shelter_id", sId))
+		logger.Info("shelter created successfully", zap.Any("shelter_id", sId))
 		return sId, nil
 	}
 }
@@ -113,7 +113,7 @@ func (zs *ZoneService) UpdateShelter(id uuid.UUID, name string, tId uuid.UUID, a
 
 	err := zs.repo.UpdateShelterByID(id, tId, name, availability, lat, long)
 	if err != nil {
-		log.Error("Zone: failed to updater shelter", zap.Error(err))
+		logger.Error("Zone: failed to updater shelter", zap.Error(err))
 		return err
 	}
 	return err
@@ -127,7 +127,7 @@ func (zs *ZoneService) DeleteShelter(id uuid.UUID) error {
 func (zs *ZoneService) GetShelterByID(id uuid.UUID) (*domain.Shelter, error) {
 	shelter, err := zs.repo.GetShelterByID(id)
 	if err != nil {
-		log.Error("Zone: shleter location can't be retrieved", zap.Error(err))
+		logger.Error("Zone: shleter location can't be retrieved", zap.Error(err))
 	}
 	return shelter, err
 }
@@ -145,7 +145,7 @@ func (zs *ZoneService) CreateZone(zName string) (uuid.UUID, error) {
 	if err != nil {
 		return uuid.Nil, err
 	}
-	log.Info("zone created successfully", zap.Any("zone_id", zId))
+	logger.Info("zone created successfully", zap.Any("zone_id", zId))
 	return zId, nil
 }
 
@@ -194,16 +194,16 @@ func (zs *ZoneService) UpdateCurrentLocation(wId uuid.UUID, latitude float64, lo
 	// Now push the shelter data data to the queue to the workout
 	shelterId, distance, availability, _, err := zs.GetClosestShelter(longitude, latitude, time)
 	if err != nil {
-		log.Error("error when getting cloest shelter info", zap.Error(err))
+		logger.Error("error when getting cloest shelter info", zap.Error(err))
 		return err
 	}
 	closestShelter, _ := zs.repo.GetShelterByID(shelterId)
 	err = zs.shelterDistancePublisher.PublishShelterDistance(wId, shelterId, closestShelter.ShelterName, availability, distance)
 
 	if err != nil {
-		log.Error("error when publishing shelter info", zap.Error(err))
+		logger.Error("error when publishing shelter info", zap.Error(err))
 	}
-	log.Debug("publishing shelter data to workout thru queue")
+	logger.Debug("publishing shelter data to workout thru queue")
 
 	return nil
 }

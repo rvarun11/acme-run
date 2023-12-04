@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	exchangeKind       = "direct"
-	exchangeDurable    = true
-	exchangeAutoDelete = false
-	exchangeInternal   = false
-	exchangeNoWait     = false
+	// exchangeKind       = "direct"
+	// exchangeDurable    = true
+	// exchangeAutoDelete = false
+	// exchangeInternal   = false
+	// exchangeNoWait     = false
 
 	queueDurable    = true
 	queueAutoDelete = false
@@ -77,19 +77,19 @@ func (lc *LocationConsumer) CreateChannel(exchangeName, queueName, bindingKey, c
 		return nil, fmt.Errorf("error amqpConn.Channel %w", err)
 	}
 
-	logger.Debug("Declaring exchange", zap.String("exchange name", exchangeName))
-	err = ch.ExchangeDeclare(
-		exchangeName,
-		exchangeKind,
-		exchangeDurable,
-		exchangeAutoDelete,
-		exchangeInternal,
-		exchangeNoWait,
-		nil,
-	)
-	if err != nil {
-		return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
-	}
+	// logger.Debug("declaring exchange", zap.String("exchange name", exchangeName))
+	// err = ch.ExchangeDeclare(
+	// 	exchangeName,
+	// 	exchangeKind,
+	// 	exchangeDurable,
+	// 	exchangeAutoDelete,
+	// 	exchangeInternal,
+	// 	exchangeNoWait,
+	// 	nil,
+	// )
+	// if err != nil {
+	// 	return nil, fmt.Errorf("error ch.ExchangeDeclare %w", err)
+	// }
 
 	queue, err := ch.QueueDeclare(
 		queueName,
