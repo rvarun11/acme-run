@@ -21,7 +21,7 @@ func (svc *ChallengeService) CreateBadge(cs *domain.ChallengeStats) (*domain.Bad
 	if err != nil {
 		return &domain.Badge{}, err
 	}
-	logger.Debug("Badge create for challenge stat", zap.Any("stat", cs))
+	logger.Debug("badge created for challenge stat", zap.Any("stat", cs))
 
 	return badge, nil
 }
@@ -76,7 +76,7 @@ func (svc *ChallengeService) AssignBadges(ch *domain.Challenge) {
 	// var badges []*domain.Badge
 	for _, cs := range csArr {
 		_, err := svc.CreateBadge(cs)
-		logger.Debug("Attempting to create badge for stat", zap.Any("stat", cs))
+		logger.Debug("attempting to create badge for stat", zap.Any("stat", cs))
 		if err != nil {
 			logger.Debug("unable to create badge for challenge stat", zap.Error(err))
 			continue

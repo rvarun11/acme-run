@@ -384,7 +384,7 @@ func TestWorkoutService_HardcoreMode(t *testing.T) {
 
 	// In hardcore mode, shelter should not be present, verify it
 	for _, link := range links {
-		assert.NotContains(t, link.Name, "option=shelter", "Shelter option should not be present in hardcore mode")
+		assert.NotContains(t, link.Option, "shelter", "Shelter option should not be present in hardcore mode")
 	}
 
 	// Stop the workout using the service
@@ -445,15 +445,15 @@ func TestWorkoutService_InitialWorkoutOptionsIfCardio(t *testing.T) {
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
-	assert.Contains(t, links[0].Name, "option=escape", "Escape must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=fight", "Fight must go down")
+	assert.Contains(t, links[0].Option, "escape", "Escape must be at a higher rank")
+	assert.Contains(t, links[1].Option, "fight", "Fight must go down")
 
 	// Get workout options and assert shelter is not an option
 	links, err = service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
-	assert.Contains(t, links[0].Name, "option=fight", "Fight must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=escape", "Escape must go down")
+	assert.Contains(t, links[0].Option, "fight", "Fight must be at a higher rank")
+	assert.Contains(t, links[1].Option, "escape", "Escape must go down")
 
 	// Stop the workout using the service
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)
@@ -506,8 +506,8 @@ func TestWorkoutService_WorkoutOptionsIfCardio(t *testing.T) {
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
-	assert.Contains(t, links[0].Name, "option=escape", "Escape must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=fight", "Fight must go down")
+	assert.Contains(t, links[0].Option, "escape", "Escape must be at a higher rank")
+	assert.Contains(t, links[1].Option, "fight", "Fight must go down")
 
 	_, err = service.StartWorkoutOption(workout.WorkoutID, "escape")
 	assert.NoError(t, err)
@@ -518,8 +518,8 @@ func TestWorkoutService_WorkoutOptionsIfCardio(t *testing.T) {
 	links, err = service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
-	assert.Contains(t, links[0].Name, "option=escape", "Escape must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=fight", "Fight must go down")
+	assert.Contains(t, links[0].Option, "escape", "Escape must be at a higher rank")
+	assert.Contains(t, links[1].Option, "fight", "Fight must go down")
 
 	_, err = service.StartWorkoutOption(workout.WorkoutID, "escape")
 	assert.NoError(t, err)
@@ -531,8 +531,8 @@ func TestWorkoutService_WorkoutOptionsIfCardio(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Options should now be flipped
-	assert.Contains(t, links[0].Name, "option=fight", "Fight must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=escape", "Escape must go down")
+	assert.Contains(t, links[0].Option, "fight", "Fight must be at a higher rank")
+	assert.Contains(t, links[1].Option, "escape", "Escape must go down")
 
 	// Stop the workout using the service
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)
@@ -586,8 +586,8 @@ func TestWorkoutService_InitialWorkoutOptionsIfStrength(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Just check for fight followed by escape order
-	assert.Contains(t, links[0].Name, "option=fight", "Fight must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=escape", "Escape must go down")
+	assert.Contains(t, links[0].Option, "fight", "Fight must be at a higher rank")
+	assert.Contains(t, links[1].Option, "escape", "Escape must go down")
 
 	// Stop the workout using the service
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)
@@ -640,8 +640,8 @@ func TestWorkoutService_WorkoutOptionsIfStrength(t *testing.T) {
 	links, err := service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
-	assert.Contains(t, links[0].Name, "option=fight", "Fight must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=escape", "Escape must go down")
+	assert.Contains(t, links[0].Option, "fight", "Fight must be at a higher rank")
+	assert.Contains(t, links[1].Option, "escape", "Escape must go down")
 
 	_, err = service.StartWorkoutOption(workout.WorkoutID, "fight")
 	assert.NoError(t, err)
@@ -652,8 +652,8 @@ func TestWorkoutService_WorkoutOptionsIfStrength(t *testing.T) {
 	links, err = service.GetWorkoutOptions(workout.WorkoutID)
 	assert.NoError(t, err)
 
-	assert.Contains(t, links[0].Name, "option=fight", "Fight must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=escape", "Escape must go down")
+	assert.Contains(t, links[0].Option, "fight", "Fight must be at a higher rank")
+	assert.Contains(t, links[1].Option, "escape", "Escape must go down")
 
 	_, err = service.StartWorkoutOption(workout.WorkoutID, "fight")
 	assert.NoError(t, err)
@@ -665,8 +665,8 @@ func TestWorkoutService_WorkoutOptionsIfStrength(t *testing.T) {
 	assert.NoError(t, err)
 
 	// Options should now be flipped
-	assert.Contains(t, links[0].Name, "option=escape", "Escape must be at a higher rank")
-	assert.Contains(t, links[1].Name, "option=fight", "Fight must go down")
+	assert.Contains(t, links[0].Option, "escape", "Escape must be at a higher rank")
+	assert.Contains(t, links[1].Option, "fight", "Fight must go down")
 
 	// Stop the workout using the service
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)
@@ -723,7 +723,7 @@ func TestWorkoutService_DistanceToShelterUpdatesTest(t *testing.T) {
 	assert.NoError(t, err)
 
 	// In hardcore mode, shelter should not be present, verify it
-	assert.Contains(t, links[0].Name, "Distance to Shelter = "+strconv.FormatFloat(distance, 'f', -1, 64), "Distance Not Updated for Shelter")
+	assert.Contains(t, links[0].Description, "Distance to Shelter = "+strconv.FormatFloat(distance, 'f', -1, 64), "Distance Not Updated for Shelter")
 
 	// Mocking the Trail Manager
 	distance = 15.0
@@ -734,7 +734,7 @@ func TestWorkoutService_DistanceToShelterUpdatesTest(t *testing.T) {
 	assert.NoError(t, err)
 
 	// In hardcore mode, shelter should not be present, verify it
-	assert.Contains(t, links[0].Name, "Distance to Shelter = "+strconv.FormatFloat(distance, 'f', -1, 64), "Distance Not Updated for Shelter")
+	assert.Contains(t, links[0].Description, "Distance to Shelter = "+strconv.FormatFloat(distance, 'f', -1, 64), "Distance Not Updated for Shelter")
 
 	// Stop the workout using the service
 	stoppedWorkout, stopErr := service.Stop(workout.WorkoutID)

@@ -22,10 +22,11 @@ type Postgres struct {
 }
 
 type RabbitMQ struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
+	Host                 string
+	Port                 string
+	User                 string
+	Password             string
+	WorkoutStatsConsumer string
 }
 
 func init() {
@@ -40,10 +41,11 @@ func init() {
 	}
 
 	rabbitmq := &RabbitMQ{
-		Host:     getEnv("RABBITMQ_HOSTNAME", "localhost"),
-		Port:     getEnv("RABBITMQ_PORT", "5672"),
-		User:     getEnv("RABBITMQ_USER", "guest"),
-		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
+		Host:                 getEnv("RABBITMQ_HOSTNAME", "localhost"),
+		Port:                 getEnv("RABBITMQ_PORT", "5672"),
+		User:                 getEnv("RABBITMQ_USER", "guest"),
+		Password:             getEnv("RABBITMQ_PASSWORD", "guest"),
+		WorkoutStatsConsumer: getEnv("RABBITMQ_WORKOUT_STATS_CONSUMER", "WORKOUT_STATS_QUEUE"),
 	}
 
 	Config = &AppConfiguration{
