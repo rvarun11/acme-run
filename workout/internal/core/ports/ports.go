@@ -20,6 +20,7 @@ var (
 	ErrInvalidWorkout               = errors.New("no workout_id matched")
 	ErrWorkoutOptionAlreadyActive   = errors.New("workout option is already active")
 	ErrWorkoutOptionAlreadyInActive = errors.New("no workout option is active")
+	ErrWorkoutAlreadyCompleted      = errors.New("workout already completed")
 )
 
 type WorkoutService interface {
