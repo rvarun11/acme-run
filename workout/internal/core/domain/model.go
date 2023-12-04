@@ -85,6 +85,8 @@ func (w *Workout) SetID(id uuid.UUID) {
 }
 
 type WorkoutOptionLink struct {
-	Name string
-	URL  string
+	Option      string `json:"option"`
+	Rank        uint   `json:"rank"`
+	Description string `json:"description"`
+	URL         string `json:"url"`
 }

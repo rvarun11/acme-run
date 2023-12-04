@@ -19,7 +19,7 @@ import (
 var cfg *config.AppConfiguration = config.Config
 
 func main() {
-	logger.Info("Workout Service is starting...")
+	logger.Info("workout manager is starting...")
 
 	// Initialize router
 	router := gin.New()

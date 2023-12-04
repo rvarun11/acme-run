@@ -336,8 +336,8 @@ func (c *LocationSubscriber) worker(ctx context.Context, deliveries <-chan amqp.
 func (wah *WorkoutAMQPHandler) InitAMQP() error {
 	var wg sync.WaitGroup
 	wg.Add(2)
-	go wah.locationSubscriber.StartConsumer(&wg, 1, "WORKOUT_EXCHANGE", "LOCATION_PERIPHERAL_WORKOUT", "", "")
-	go wah.shelterSubscriber.StartConsumer(&wg, 1, "WORKOUT_EXCHANGE", "SHELTER_TRAIL_WORKOUT", "", "")
+	go wah.locationSubscriber.StartConsumer(&wg, 1, "", "LOCATION_PERIPHERAL_WORKOUT", "", "")
+	go wah.shelterSubscriber.StartConsumer(&wg, 1, "", "SHELTER_TRAIL_WORKOUT", "", "")
 
 	return nil
 }

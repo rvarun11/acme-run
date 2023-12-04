@@ -31,6 +31,6 @@ func (m *MockPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error 
 		DistanceCovered: workoutStats.DistanceCovered,
 	}
 	m.PublishedWorkouts = append(m.PublishedWorkouts, workoutStats)
-	logger.Info("Workout statistics published to Challenge Manager", zap.Any("Stats", challengeStatsDTO))
+	logger.Debug("workout statistics published to challenge manager", zap.Any("stats", challengeStatsDTO))
 	return nil // Return nil to simulate successful execution
 }

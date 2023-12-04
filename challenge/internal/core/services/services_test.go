@@ -55,7 +55,6 @@ func TestChallengeService_CreateOrUpdateChallengeStats(t *testing.T) {
 	// 3. Run Tests
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
-			// logger.Debug("Running new test case", zap.String("test", tc.test))
 			// 2.1 Create a Challenge
 			ch, err := domain.NewChallenge(tc.challenge.name+uuid.NewString(), tc.challenge.desc, tc.challenge.badgeURL, domain.Criteria(tc.challenge.criteria), tc.challenge.goal, time.Now(), time.Now().Add(time.Second*30))
 			if err != nil {
@@ -81,7 +80,6 @@ func TestChallengeService_CreateOrUpdateChallengeStats(t *testing.T) {
 			if err != nil {
 				t.Errorf("unable to fetch badges, got %v", err)
 			}
-			// logger.Debug("Badges List", zap.Any("badges", badges))
 
 			err = badgeExists(badges, ch.ID, tc.playerID)
 			if !errors.Is(err, tc.expectedErr) {
