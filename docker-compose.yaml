@@ -57,139 +57,85 @@ services:
 
 
 # Zone Manager
-  # zone:
-  #   container_name: zone
-  #   build: ./zone
-  #   restart: always
-  #   ports:
-  #    - "8011:8011"
-  #   environment:
-  #     - MODE=prod
-  #     - PORT=8011
-  #     - GIN_MODE=release
-  #     - POSTGRES_HOST=zone-db
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_ENCODING=UTF8
-  #     - POSTGRES_LOG_LEVEL=silent
-  #     - RABBITMQ_HOSTNAME=rabbitmq
-  #     - RABBITMQ_PORT=5672
-  #     - RABBITMQ_USER=guest
-  #     - RABBITMQ_PASSWORD=guest
-  #   depends_on:
-  #     zone-db:
-  #       condition: service_healthy
-  #     # xxxx: # TODO: add correct dep
-  #     #   condition: service_started
-  #     # rabbitmq:
-  #     #   condition: service_healthy
-  #   networks:
-  #     - zone-network
-
-  # zone-db:
-  #   container_name: trail-db
-  #   image: postgres:latest
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_ENCODING=UTF8
-  #   healthcheck:
-  #     test: pg_isready -U postgres
-  #     interval: 5s
-  #     timeout: 10s
-  #     retries: 3
-  #   networks:
-  #     - zone-network
+  zone:
+    container_name: zone
+    build: ./zone
+    restart: always
+    ports:
+     - "8011:8011"
+    environment:
+      - MODE=prod
+      - PORT=8011
+      - GIN_MODE=release
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ENCODING=UTF8
+      - POSTGRES_LOG_LEVEL=silent
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 # Peripheral Service
-  # peripheral:
-  #   container_name: peripheral
-  #   build: ./peripheral
-  #   restart: always
-  #   ports:
-  #    - "8012:8012"
-  #   environment:
-  #     - MODE=prod
-  #     - PORT=8012
-  #     - GIN_MODE=release
-  #     # - POSTGRES_HOST=peripheral-db # TODO: Remove if no db is present
-  #     # - POSTGRES_PORT=5432
-  #     # - POSTGRES_DB=postgres
-  #     # - POSTGRES_USER=postgres
-  #     # - POSTGRES_PASSWORD=postgres
-  #     # - POSTGRES_ENCODING=UTF8
-  #     # - POSTGRES_LOG_LEVEL=silent
-  #     - RABBITMQ_HOSTNAME=rabbitmq
-  #     - RABBITMQ_PORT=5672
-  #     - RABBITMQ_USER=guest
-  #     - RABBITMQ_PASSWORD=guest
-  #   depends_on:
-  #     # rabbitmq:
-  #     #   condition: service_healthy
-  #     # xxxx:
-  #     #   condition: service_started
-  #   networks:
-  #     - peripheral-network
+  peripheral:
+    container_name: peripheral
+    build: ./peripheral
+    restart: always
+    ports:
+     - "8012:8012"
+    environment:
+      - MODE=prod
+      - PORT=8012
+      - GIN_MODE=release
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
 
 # Workout Manager
-  # workout:
-  #   container_name: workout
-  #   build: ./workout
-  #   restart: always
-  #   ports:
-  #    - "8013:8013"
-  #   environment:
-  #     - MODE=prod
-  #     - PORT=8013
-  #     - GIN_MODE=release
-  #     - POSTGRES_HOST=workout-db
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_ENCODING=UTF8
-  #     - POSTGRES_LOG_LEVEL=silent
-  #     - RABBITMQ_HOSTNAME=rabbitmq
-  #     - RABBITMQ_PORT=5672
-  #     - RABBITMQ_USER=guest
-  #     - RABBITMQ_PASSWORD=guest
-  #   depends_on:
-  #     workout-db:
-  #       condition: service_healthy
-  #     # rabbitmq:
-  #     #   condition: service_healthy
-  #     # peripheral:
-  #     #   condition: service_started
-  #     # trail:
-  #     #   condition: service_started
-  #     # challenge:
-  #     #   condition: service_started
-  #   networks:
-  #     - workout-network
+  workout:
+    container_name: workout
+    build: ./workout
+    restart: always
+    ports:
+     - "8013:8013"
+    environment:
+      - MODE=prod
+      - PORT=8013
+      - GIN_MODE=release
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ENCODING=UTF8
+      - POSTGRES_LOG_LEVEL=silent
+      - RABBITMQ_HOSTNAME=rabbitmq
+      - RABBITMQ_PORT=5672
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      peripheral:
+        condition: service_started
+      user:
+        condition: service_started
 
-  # workout-db:
-  #   container_name: workout-db
-  #   image: postgres:latest
-  #   restart: always
-  #   environment:
-  #     - POSTGRES_DB=postgres
-  #     - POSTGRES_PORT=5432
-  #     - POSTGRES_USER=postgres
-  #     - POSTGRES_PASSWORD=postgres
-  #     - POSTGRES_ENCODING=UTF8
-  #   healthcheck:
-  #     test: pg_isready -U postgres
-  #     interval: 5s
-  #     timeout: 10s
-  #     retries: 3
-  #   networks:
-  #     - workout-network
 
 #Challenge Manager
   challenge:
