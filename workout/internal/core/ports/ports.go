@@ -68,7 +68,7 @@ type WorkoutRepository interface {
 	GetSheltersTakenBetweenDates(playerID uuid.UUID, startDate time.Time, endDate time.Time) (uint16, error)
 }
 
-type Publisher interface {
+type WorkoutStatsPublisher interface {
 	PublishWorkoutStats(workoutStats *domain.Workout) error
 }
 
@@ -77,7 +77,7 @@ type UserServiceClient interface {
 	GetUserAge(playerID uuid.UUID) (uint8, error)
 }
 
-type PeripheralDeviceClient interface {
+type PeripheralClient interface {
 	GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error)
 	BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, HRMConnected bool, SendLiveLocationToTrailManager bool) error
 	UnbindPeripheralData(workoutID uuid.UUID) error

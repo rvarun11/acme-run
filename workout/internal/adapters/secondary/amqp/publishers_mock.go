@@ -1,4 +1,4 @@
-package amqphandler
+package amqp
 
 import (
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
@@ -6,21 +6,21 @@ import (
 	"go.uber.org/zap"
 )
 
-// MockPublisher is a mock implementation of the Publisher interface
-type MockPublisher struct {
+// MockWorkoutStatsPublisher is a mock implementation of the WorkoutStatsPublisher interface
+type MockWorkoutStatsPublisher struct {
 	// Add fields to store information about calls to the methods, if necessary
 	PublishedWorkouts []*domain.Workout
 }
 
-// NewMockPublisher creates a new instance of MockPublisher
-func NewMockPublisher() *MockPublisher {
-	return &MockPublisher{
+// NewMockWorkoutStatsPublisher creates a new instance of MockWorkoutStatsPublisher
+func NewMockWorkoutStatsPublisher() *MockWorkoutStatsPublisher {
+	return &MockWorkoutStatsPublisher{
 		PublishedWorkouts: make([]*domain.Workout, 0),
 	}
 }
 
-// PublishWorkoutStats mocks the PublishWorkoutStats method of Publisher
-func (m *MockPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
+// PublishWorkoutStats mocks the PublishWorkoutStats method of WorkoutStatsPublisher
+func (m *MockWorkoutStatsPublisher) PublishWorkoutStats(workoutStats *domain.Workout) error {
 	// In the mock, we just store the workoutStats for verification in tests
 
 	var challengeStatsDTO = challengeStatsDTO{

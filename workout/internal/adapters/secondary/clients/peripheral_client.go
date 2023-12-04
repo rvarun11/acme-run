@@ -10,15 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
-type PeripheralDeviceClientImpl struct {
+type PeripheralClientImpl struct {
 }
 
-// Factory for creating a NewPeripheralDeviceClient
-func NewPeripheralDeviceClient() *PeripheralDeviceClientImpl {
-	return &PeripheralDeviceClientImpl{}
+// Factory for creating a NewPeripheralClient
+func NewPeripheralClient() *PeripheralClientImpl {
+	return &PeripheralClientImpl{}
 }
 
-func (p *PeripheralDeviceClientImpl) BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
+func (p *PeripheralClientImpl) BindPeripheralData(trailID uuid.UUID, playerID uuid.UUID, workoutID uuid.UUID, hrmID uuid.UUID, hrmConnected bool, SendLiveLocationToTrailManager bool) error {
 	// Prepare the data for the POST request
 	bindData := BindPeripheralData{
 		TrailID:                        trailID,
@@ -52,7 +52,7 @@ func (p *PeripheralDeviceClientImpl) BindPeripheralData(trailID uuid.UUID, playe
 	return err
 }
 
-func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) error {
+func (p *PeripheralClientImpl) UnbindPeripheralData(workoutID uuid.UUID) error {
 	// Prepare the data for the PUT request
 	unbindData := UnbindPeripheralData{
 		WorkoutID: workoutID,
@@ -81,7 +81,7 @@ func (p *PeripheralDeviceClientImpl) UnbindPeripheralData(workoutID uuid.UUID) e
 	return err
 }
 
-func (p *PeripheralDeviceClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
+func (p *PeripheralClientImpl) GetAverageHeartRateOfUser(workoutID uuid.UUID) (uint8, error) {
 	// Ensure workoutID is valid
 	if workoutID == uuid.Nil {
 		return 0, errors.New("invalid workout ID")
