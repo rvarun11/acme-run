@@ -253,7 +253,7 @@ func TestGetHRMReading(t *testing.T) {
 	_ = service.BindPeripheral(pId, wId, hId, true, true)
 	_ = service.SetHeartRateReading(hId, reading)
 
-	hrmId, timeRead, currentReading, err := service.GetHRMReading(hId)
+	hrmId, timeRead, currentReading, err := service.GetHRMReading(wId)
 	assert.NoError(t, err)
 	assert.Equal(t, hId, hrmId)
 	assert.Equal(t, reading, currentReading)

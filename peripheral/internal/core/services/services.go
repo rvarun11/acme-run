@@ -81,8 +81,8 @@ func (s *PeripheralService) GetHRMAvgReading(hId uuid.UUID) (uuid.UUID, time.Tim
 	return pInstance.HRMId, pInstance.HRMDev.HRateTime, pInstance.HRMDev.AverageHRate, nil
 }
 
-func (s *PeripheralService) GetHRMReading(hId uuid.UUID) (uuid.UUID, time.Time, int, error) {
-	pInstance, err := s.repo.GetByWorkoutId(hId)
+func (s *PeripheralService) GetHRMReading(wId uuid.UUID) (uuid.UUID, time.Time, int, error) {
+	pInstance, err := s.repo.GetByWorkoutId(wId)
 	if err != nil {
 		return uuid.Nil, time.Time{}, 0, ports.ErrorPeripheralNotFound
 	}
