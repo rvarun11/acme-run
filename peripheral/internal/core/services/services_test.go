@@ -268,12 +268,12 @@ func TestGetHRMDevStatus(t *testing.T) {
 	service := services.NewPeripheralService(repo, rabbitMQHandlerMock, zoneClientMock)
 
 	hId := uuid.New()
-	wId := uuid.New()
-	_ = service.CreatePeripheral(wId, hId)
+	pId := uuid.New()
+	_ = service.CreatePeripheral(pId, hId)
 	status := true
 	_ = service.SetHRMDevStatusByHRMId(hId, status)
 
-	retrievedStatus, err := service.GetHRMDevStatus(wId)
+	retrievedStatus, err := service.GetHRMDevStatusByPlayerId(pId)
 	assert.NoError(t, err)
 	assert.Equal(t, status, retrievedStatus)
 }
