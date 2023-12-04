@@ -158,7 +158,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
 	var bindDataInstance BindPeripheralData
 	if err := ctx.ShouldBindJSON(&bindDataInstance); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "cannot bind peripheral data, " + err.Error()})
 		return
 	}
 
