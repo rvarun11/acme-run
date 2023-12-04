@@ -260,7 +260,7 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMAvgReading(wId)
 		if err != nil {
 			ctx.JSON(http.StatusNotFound, gin.H{
-				"message": "heart rate record not found",
+				"message": "heart rate record for the given workout id not found",
 			})
 			return
 		}
@@ -559,7 +559,7 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 
 					randomInteger := rand.Intn(maxHR-minHR+1) + minHR
 					currentReadingStr := fmt.Sprintf("%d", randomInteger)
-					baseURL := "localhost:" + port + "/api/v1/hrm/" + hId.String()
+					baseURL := "http://localhost:" + port + "/api/v1/hrm/" + hId.String()
 					params := url.Values{}
 					params.Add("hrm_id", hId.String())
 					fmt.Println(currentReadingStr)
