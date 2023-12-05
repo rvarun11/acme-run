@@ -84,9 +84,9 @@
 
 5. **TestCheckStatusByHRMId**: Ensures accurate reporting of a peripheral's status based on its HRM ID.
 
-6. **TestBindPeripheral_NewPeripheral**: Tests binding a new peripheral, verifying correct repository addition and status update.
+6. **TestBindPeripheral_NewPeripheral**: Tests creating new peripheral, verifying correct repository addition and status update.
 
-7. **TestDisconnectPeripheral_NotExists**: Checks error handling when unbinding a non-existent peripheral.
+7. **TestDisconnectPeripheral_NotExists**: Checks error handling when disconnect or unbind a non-existent peripheral.
 
 8. **TestSetHeartRateReading**: Verifies updating and reflecting a bound peripheral's heart rate reading in the repository.
 
