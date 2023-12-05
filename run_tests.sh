@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export MODE=prod
+
 echo -e "\e[1mWelcome to ACME Run Test Suite by Liuyin, Samkith & Varun.\e[0m"
 echo "The test suite only focuses on critical functionalities for key scenarios."
 echo "Some tests may take longer; your patience is appreciated."

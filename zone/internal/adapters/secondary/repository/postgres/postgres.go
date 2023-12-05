@@ -15,16 +15,16 @@ import (
 )
 
 type postgresShelter struct {
-	ShelterID           uuid.UUID `gorm:"type:uuid;primaryKey;unique"`
-	ShelterName         string    `gorm:"type:string;not null;unique"`
+	ShelterID           uuid.UUID `gorm:"type:uuid;primaryKey;"`
+	ShelterName         string    `gorm:"type:string;not null;"`
 	ShelterAvailability bool
 	TrailID             uuid.UUID
 	Longitude           float64
 	Latitude            float64
 }
 type postgresTrail struct {
-	TrailID        uuid.UUID `gorm:"type:uuid;primaryKey;unique"`
-	TrailName      string    `gorm:"type:string;not null;unique"`
+	TrailID        uuid.UUID `gorm:"type:uuid;primaryKey;"`
+	TrailName      string    `gorm:"type:string;not null;"`
 	ZoneID         uuid.UUID `gorm:"not null"`
 	StartLongitude float64
 	StartLatitude  float64
