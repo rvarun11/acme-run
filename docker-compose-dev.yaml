@@ -1,19 +1,6 @@
 version: "3.8"
 
 services:
-# RabbitMQ
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 5s
-      timeout: 5s
-      retries: 3
-
 # Database
   db:
     container_name: db
@@ -31,10 +18,51 @@ services:
       timeout: 10s
       retries: 3
 
+# Test Suite
+  tests:
+    container_name: acme-run-tests
+    build: ./
+    restart: no
+    # TODO: A health check has to be added here
+    # healthcheck:
+    #   test: rabbitmq-diagnostics check_port_connectivity
+    #   interval: 10s
+    #   timeout: 30s # by when will tests finish running
+    #   retries: 1
+    environment:
+      - MODE=prod
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ENCODING=UTF8
+      - POSTGRES_LOG_LEVEL=silent
+    depends_on:
+      db:
+        condition: service_healthy
+
+# RabbitMQ
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      tests: # adding this check because we want tests to finish running before we start the application
+        condition: service_healthy
+
+
 # User Manager
   user:
     container_name: user
-    build: ../user
+    build: ./user
     restart: always
     ports:
      - "8010:8010"
@@ -54,12 +82,14 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      tests:
+        condition: service_healthy
 
 
 # Zone Manager
   zone:
     container_name: zone
-    build: ../zone
+    build: ./zone
     restart: always
     ports:
      - "8011:8011"
@@ -80,17 +110,18 @@ services:
       - RABBITMQ_PASSWORD=guest
       - RABBIT_LOCATION_CONSUMER=location_peripheral_zone_queue
       - RABBITMQ_SHELTER_DISTANCE_PUBLISHER=shelter_zone_workout_queue
-
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      tests:
+        condition: service_healthy
 
 # Peripheral Service
   peripheral:
     container_name: peripheral
-    build: ../peripheral
+    build: ./peripheral
     restart: always
     ports:
      - "8012:8012"
@@ -108,12 +139,17 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      zone:
+        condition: service_started
+      tests:
+        condition: service_healthy
+
 
 
 # Workout Manager
   workout:
     container_name: workout
-    build: ../workout
+    build: ./workout
     restart: always
     ports:
      - "8013:8013"
@@ -146,12 +182,14 @@ services:
         condition: service_started
       user:
         condition: service_started
+      tests:
+        condition: service_healthy
 
 
 # Challenge Manager
   challenge:
     container_name: challenge
-    build: ../challenge
+    build: ./challenge
     restart: always
     ports:
      - "8014:8014"
@@ -175,4 +213,6 @@ services:
       db:
         condition: service_healthy
       rabbitmq:
+        condition: service_healthy
+      tests:
         condition: service_healthy
