@@ -1,7 +1,6 @@
 package services
 
 import (
-	"fmt"
 	"math"
 	"time"
 
@@ -90,12 +89,12 @@ func (zs *ZoneService) GetClosestTrail(zId uuid.UUID, currentLongitude float64, 
 			closestTrail = trail
 		}
 	}
-
 	// If a closest trail is found, update the ZoneManager
 	if closestTrail != nil {
+		logger.Info("closest trail retrieved", zap.Any("trail_name", closestTrail.TrailName))
 		return closestTrail.TrailID, nil
 	}
-	logger.Info("closest trail info retrieved", zap.Any("trail", closestTrail.TrailID))
+
 	return uuid.Nil, nil // Or return an appropriate error if necessary
 }
 
@@ -153,7 +152,6 @@ func (zs *ZoneService) CheckZone(zId uuid.UUID) error {
 	z, err := zs.repo.GetZoneByID(zId)
 
 	if err != nil || z.ZoneID != zId {
-		fmt.Println("z.ZoneID")
 		return err
 	}
 	return nil

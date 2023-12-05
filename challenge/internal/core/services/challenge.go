@@ -77,7 +77,7 @@ This is a function to monitor active challenges and create badges
 - Note: This should be handled by a cron job. When a challenge ends, the badges should be dispatched.
 */
 func (svc *ChallengeService) MonitorChallenges() {
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
 
 	for range ticker.C {

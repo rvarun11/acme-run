@@ -1,7 +1,7 @@
-package logger
+package log
 
 import (
-	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
+	"github.com/CAS735-F23/macrun-teamvsl/peripheral/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )

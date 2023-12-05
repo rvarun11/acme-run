@@ -46,7 +46,7 @@ func main() {
 
 	peripheralAMQPHandler, err1 := rabbitmqhandler.NewRabbitMQHandler(amqpURL) // Adjusted for package
 
-	client := clients.NewZoneServiceClient()
+	client := clients.NewZoneServiceClient(cfg.ZoneClient)
 
 	// Initialize the Peripheral service
 	peripheralService := services.NewPeripheralService(repo, peripheralAMQPHandler, client)

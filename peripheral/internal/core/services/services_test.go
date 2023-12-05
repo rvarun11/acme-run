@@ -1,11 +1,10 @@
 package services_test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
-	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/primary/rabbitmq"
+	rabbitmqhandler "github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/amqp"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/clients"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/adapters/secondary/repository"
 	"github.com/CAS735-F23/macrun-teamvsl/peripheral/internal/core/ports"
@@ -232,8 +231,6 @@ func TestGetHRMAvgReading(t *testing.T) {
 
 	// Now get the average HRM reading
 	hrmId, _, avgReading, err := service.GetHRMAvgReading(wId)
-	fmt.Println(err)
-	fmt.Println(hId, hrmId)
 	assert.NoError(t, err)
 	assert.Equal(t, hId, hrmId)
 	assert.Equal(t, 80, avgReading) // Ensure the avgReading matches what was set

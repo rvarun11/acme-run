@@ -33,8 +33,8 @@ services:
 
 # User Manager
   user:
-    container_name: acmerun-user
-    image: samkithkjain/acmerun-user
+    container_name: user
+    build: ../user
     restart: always
     ports:
      - "8010:8010"
@@ -58,8 +58,8 @@ services:
 
 # Zone Manager
   zone:
-    container_name: acmerun-zone
-    image: samkithkjain/acmerun-zone
+    container_name: zone
+    build: ../zone
     restart: always
     ports:
      - "8011:8011"
@@ -89,8 +89,8 @@ services:
 
 # Peripheral Service
   peripheral:
-    container_name: acmerun-peripheral
-    image: samkithkjain/acmerun-peripheral
+    container_name: peripheral
+    build: ../peripheral
     restart: always
     ports:
      - "8012:8012"
@@ -112,8 +112,8 @@ services:
 
 # Workout Manager
   workout:
-    container_name: acmerun-workout
-    image: samkithkjain/acmerun-workout
+    container_name: workout
+    build: ../workout
     restart: always
     ports:
      - "8013:8013"
@@ -150,8 +150,8 @@ services:
 
 # Challenge Manager
   challenge:
-    container_name: acmerun-challenge
-    image: samkithkjain/acmerun-challenge
+    container_name: challenge
+    build: ../challenge
     restart: always
     ports:
      - "8014:8014"

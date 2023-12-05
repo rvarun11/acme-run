@@ -45,7 +45,7 @@ func init() {
 		Port:                 getEnv("RABBITMQ_PORT", "5672"),
 		User:                 getEnv("RABBITMQ_USER", "guest"),
 		Password:             getEnv("RABBITMQ_PASSWORD", "guest"),
-		WorkoutStatsConsumer: getEnv("RABBITMQ_WORKOUT_STATS_CONSUMER", "WORKOUT_STATS_QUEUE"),
+		WorkoutStatsConsumer: getEnv("RABBITMQ_WORKOUT_STATS_CONSUMER", "stats_workout_challenge_queue"),
 	}
 
 	Config = &AppConfiguration{

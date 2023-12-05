@@ -56,7 +56,7 @@ func TestChallengeService_CreateOrUpdateChallengeStats(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.test, func(t *testing.T) {
 			// 2.1 Create a Challenge
-			ch, err := domain.NewChallenge(tc.challenge.name+uuid.NewString(), tc.challenge.desc, tc.challenge.badgeURL, domain.Criteria(tc.challenge.criteria), tc.challenge.goal, time.Now(), time.Now().Add(time.Second*30))
+			ch, err := domain.NewChallenge(tc.challenge.name+uuid.NewString(), tc.challenge.desc, tc.challenge.badgeURL, domain.Criteria(tc.challenge.criteria), tc.challenge.goal, time.Now(), time.Now().Add(time.Millisecond*1500))
 			if err != nil {
 				t.Errorf("unable to initialize challenge, got %v", err)
 			}
@@ -73,7 +73,7 @@ func TestChallengeService_CreateOrUpdateChallengeStats(t *testing.T) {
 				}
 			}
 			// added a delay for the challenge to end
-			time.Sleep(40 * time.Second)
+			time.Sleep(2000 * time.Millisecond)
 
 			// 2.3 Check for Badges
 			badges, err := service.ListBadgesByPlayerID(tc.playerID)

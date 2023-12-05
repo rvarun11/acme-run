@@ -112,13 +112,13 @@ func (lc *LocationConsumer) CreateChannel(exchangeName, queueName, bindingKey, c
 		zap.String("binding_key", bindingKey),
 	)
 
-	err = ch.QueueBind(
-		queue.Name,
-		bindingKey,
-		exchangeName,
-		queueNoWait,
-		nil,
-	)
+	// err = ch.QueueBind(
+	// 	queue.Name,
+	// 	bindingKey,
+	// 	exchangeName,
+	// 	queueNoWait,
+	// 	nil,
+	// )
 	if err != nil {
 		return nil, fmt.Errorf("error ch.QueueBind %w", err)
 	}

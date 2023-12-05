@@ -27,7 +27,7 @@ func main() {
 	logger.Info("user manager is starting...")
 
 	// Initialize router
-	router := gin.Default()
+	router := gin.New()
 	router.Use(gin.Recovery())
 
 	// Initialize postgres repository

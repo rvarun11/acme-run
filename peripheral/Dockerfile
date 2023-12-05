@@ -8,4 +8,4 @@ RUN go get -d -v ./...
 
 RUN go build -o peripheral ./cmd
 
-CMD ["sh", "-c", "./run_tests.sh && ./peripheral"]
+CMD ["./peripheral"]

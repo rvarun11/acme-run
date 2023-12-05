@@ -5,10 +5,11 @@ import "os"
 var Config *AppConfiguration
 
 type AppConfiguration struct {
-	Mode     string
-	Port     string
-	Postgres *Postgres
-	RabbitMQ *RabbitMQ
+	Mode       string
+	Port       string
+	Postgres   *Postgres
+	RabbitMQ   *RabbitMQ
+	ZoneClient string
 }
 
 type Postgres struct {
@@ -21,10 +22,12 @@ type Postgres struct {
 }
 
 type RabbitMQ struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
+	Host                     string
+	Port                     string
+	User                     string
+	Password                 string
+	WorkoutLocationPublisher string
+	ZoneLocationPublisher    string
 }
 
 func init() {
@@ -38,17 +41,20 @@ func init() {
 	}
 
 	rabbitmq := &RabbitMQ{
-		Host:     getEnv("RABBITMQ_HOSTNAME", "localhost"),
-		Port:     getEnv("RABBITMQ_PORT", "5672"),
-		User:     getEnv("RABBITMQ_USER", "guest"),
-		Password: getEnv("RABBITMQ_PASSWORD", "guest"),
+		Host:                     getEnv("RABBITMQ_HOSTNAME", "localhost"),
+		Port:                     getEnv("RABBITMQ_PORT", "5672"),
+		User:                     getEnv("RABBITMQ_USER", "guest"),
+		Password:                 getEnv("RABBITMQ_PASSWORD", "guest"),
+		WorkoutLocationPublisher: getEnv("RABBITMQ_WORKOUT_LOCATION_PUBLISHER", "location_peripheral_workout_queue"),
+		ZoneLocationPublisher:    getEnv("RABBITMQ_ZONE_LOCATION_PUBLISHER", "location_peripheral_zone_queue"),
 	}
 
 	Config = &AppConfiguration{
-		Mode:     getEnv("MODE", "dev"),
-		Port:     getEnv("PORT", "8012"),
-		Postgres: postgres,
-		RabbitMQ: rabbitmq,
+		Mode:       getEnv("MODE", "prod"),
+		Port:       getEnv("PORT", "8012"),
+		Postgres:   postgres,
+		RabbitMQ:   rabbitmq,
+		ZoneClient: getEnv("ZONE_CLIENT_URL", "http://localhost:8005"),
 	}
 }
 

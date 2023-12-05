@@ -1,7 +1,6 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -96,7 +95,6 @@ func (s *ZoneHandler) GetClosestShelterInfo(ctx *gin.Context) {
 	shelterDataInstance.ShelterAvailable = (sId == uuid.Nil)
 	shelterDataInstance.DistanceToShelter = distance
 	shelterDataInstance.ShelterCheckTime = time
-	fmt.Println(sId)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "shelter not found"})
 		return

@@ -6,9 +6,9 @@ import (
 	"strconv"
 	"time"
 
-	logger "github.com/CAS735-F23/macrun-teamvsl/challenge/log"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/domain"
 	"github.com/CAS735-F23/macrun-teamvsl/workout/internal/core/ports"
+	logger "github.com/CAS735-F23/macrun-teamvsl/workout/log"
 	"go.uber.org/zap"
 
 	"github.com/google/uuid"

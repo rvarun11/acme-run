@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/CAS735-F23/macrun-teamvsl/workout/config"
+	"github.com/CAS735-F23/macrun-teamvsl/challenge/config"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -20,6 +20,7 @@ func init() {
 		config.EncoderConfig.TimeKey = "timestamp"
 		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 		config.Level.SetLevel(zap.InfoLevel)
+		config.DisableCaller = true
 		zapLog, err = config.Build()
 
 		// production grade logger
@@ -35,7 +36,7 @@ func init() {
 		config.EncoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder
 		config.EncoderConfig.TimeKey = "timestamp"
 		config.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
-		zapLog, err = config.Build()
+		zapLog, err = config.Build(zap.AddCallerSkip(1))
 	}
 
 	if err != nil {

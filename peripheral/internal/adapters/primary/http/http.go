@@ -21,19 +21,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
-	uuidStr := ctx.Query(paramName)
-	uuidValue, err := uuid.Parse(uuidStr)
-	if err != nil {
-		return uuid.UUID{}, err
-	}
-	return uuidValue, nil
-}
-
-func randomFloat64(min, max float64) float64 {
-	return min + rand.Float64()*(max-min)
-}
-
 type HTTPHandler struct {
 	gin             *gin.Engine
 	svc             *services.PeripheralService
@@ -107,6 +94,7 @@ func (h *HTTPHandler) connectHRM(ctx *gin.Context) {
 		})
 		return
 	}
+	log.Info("hrm connected successfully", zap.Any("hrm_id", req.HRMId))
 	ctx.JSON(http.StatusOK, gin.H{"message": "hrm connected successfully"})
 }
 
@@ -149,6 +137,7 @@ func (h *HTTPHandler) disconnectHRM(ctx *gin.Context) {
 		})
 		return
 	}
+	log.Info("hrm disconnected successfully", zap.Any("hrm_id", hrmId))
 	ctx.JSON(http.StatusOK, gin.H{"message": "hrm disconnected successfully"})
 
 }
@@ -185,7 +174,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
 		longitudeStart, latitudeStart, longitudeEnd, latitudeEnd, err := h.svc.GetTrailLocationInfo(bindDataInstance.TrailOfWorkout)
 		if err != nil {
-			log.Error("peripheral: failed to get trail location, using default info now", zap.Error(err))
+			log.Debug("peripheral: failed to get trail location, using default info now", zap.Error(err))
 			longitudeStart = -79.919390
 			latitudeStart = 43.257715
 			longitudeEnd = 43.258012
@@ -194,7 +183,7 @@ func (h *HTTPHandler) BindPeripheralToData(ctx *gin.Context) {
 
 		h.svc.SetLiveStatus(bindDataInstance.WorkoutID, true)
 		h.StartBackgroundMockReading(ctx, h.bCtx, bindDataInstance.WorkoutID, bindDataInstance.HRMId, longitudeStart, latitudeStart, longitudeEnd, latitudeEnd)
-		log.Info("peripheral: bound to workout successfully", zap.Any("workout_id", bindDataInstance.WorkoutID), zap.Any("hrm_id", bindDataInstance.HRMId))
+		log.Info("peripheral bounded", zap.Any("workout_id", bindDataInstance.WorkoutID))
 		ctx.JSON(http.StatusOK, gin.H{
 			"message": "binding workout successful",
 		})
@@ -225,7 +214,7 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 
 	err = h.svc.SetLiveStatus(req.WorkoutID, false)
 	if err != nil {
-		log.Error("peripheral: failed to set live status of publising ", zap.Error(err))
+		log.Debug("peripheral: failed to set live status of publising ", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": "failed to unbind workout",
 		})
@@ -236,7 +225,7 @@ func (h *HTTPHandler) UnbindPeripheralToData(ctx *gin.Context) {
 	if h.hLiveCount == 0 {
 		h.cancelF()
 	}
-	log.Info("peripheral: bound to workout successfully", zap.Any("workout_id", req.WorkoutID))
+	log.Info("peripheral unbounded", zap.Any("workout_id", req.WorkoutID))
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "peripheral unbound from workout"})
 }
@@ -268,7 +257,7 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		var err error
 		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMAvgReading(wId)
 		if err != nil {
-			log.Error("peripheral: failed to read from device failure ", zap.Error(err))
+			log.Debug("peripheral: failed to read from device failure ", zap.Error(err))
 			ctx.JSON(http.StatusOK, gin.H{
 				"message": "heart rate record not found",
 			})
@@ -280,13 +269,13 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 
 		jsonData, err := json.Marshal(avgRate)
 		if err != nil {
-			log.Error("peripheral: failed to read from device,failed to marshal json ", zap.Error(err))
+			log.Debug("peripheral: failed to read from device,failed to marshal json ", zap.Error(err))
 			ctx.JSON(http.StatusInternalServerError, gin.H{
 				"error": "could not marshal JSON for average heart rate: " + err.Error(),
 			})
 			return
 		}
-		log.Info("average hrm read successfully", zap.Any("value", tLoc.HeartRate))
+		log.Info("average hrm read successfully", zap.Any("average heart rate value", tLoc.HeartRate), zap.Any("workout_id", avgRate.WorkoutID))
 		ctx.Writer.Header().Set("Content-Type", "application/json")
 		ctx.Writer.WriteHeader(http.StatusOK)
 		ctx.Writer.Write(jsonData)
@@ -295,7 +284,7 @@ func (h *HTTPHandler) getHRMReading(ctx *gin.Context) {
 		var err error
 		tLoc.HRMID, tLoc.TimeOfLocation, tLoc.HeartRate, err = h.svc.GetHRMReading(wId)
 		if err != nil {
-			log.Error("peripheral: failed to read from device failure ", zap.Error(err))
+			log.Debug("peripheral: failed to read from device failure ", zap.Error(err))
 			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": "reading from hrm failed",
 			})
@@ -373,7 +362,6 @@ func (h *HTTPHandler) SetHRMReading(ctx *gin.Context) {
 	rate := ctx.Query("current_reading")
 	intValue, intErr := strconv.Atoi(rate)
 	if intErr != nil {
-		fmt.Println(intErr)
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": intErr.Error()})
 		return
 	}
@@ -559,7 +547,7 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 					go h.svc.SendLastLocation(tLoc.WorkoutID, tLoc.Latitude, tLoc.Longitude, tLoc.TimeOfLocation)
 					err2 := h.svc.SetGeoLocation(wId, tLoc.Longitude, tLoc.Latitude)
 					if err2 != nil {
-						log.Error("Peripheral: error sending location", zap.Error(err2))
+						log.Debug("Peripheral: error sending location", zap.Error(err2))
 					}
 
 					randomInteger := rand.Intn(maxHR-minHR+1) + minHR
@@ -567,13 +555,12 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 					baseURL := "http://localhost:" + port + "/api/v1/hrm/" + hId.String()
 					params := url.Values{}
 					params.Add("hrm_id", hId.String())
-					fmt.Println(currentReadingStr)
 					params.Add("current_reading", currentReadingStr)
 					requestURL := fmt.Sprintf("%s?%s", baseURL, params.Encode())
 					req, err := http.NewRequest(http.MethodPut, requestURL, bytes.NewBuffer(nil))
 					if err != nil {
 						// Handle error
-						log.Error("Peripheral: Error creating request:", zap.Error(err))
+						log.Debug("Peripheral: Error creating request:", zap.Error(err))
 						return
 					}
 
@@ -585,7 +572,7 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 					resp, err := client.Do(req)
 					if err != nil {
 						// Handle error
-						log.Error("Peripheral: Error sending request:", zap.Error(err))
+						log.Debug("Peripheral: Error sending request:", zap.Error(err))
 						return
 					}
 					defer resp.Body.Close()
@@ -599,4 +586,18 @@ func (h *HTTPHandler) StartBackgroundMockReading(ctx context.Context, ctx1 conte
 			}
 		}
 	}()
+}
+
+// Helper Functions
+func parseUUID(ctx *gin.Context, paramName string) (uuid.UUID, error) {
+	uuidStr := ctx.Query(paramName)
+	uuidValue, err := uuid.Parse(uuidStr)
+	if err != nil {
+		return uuid.UUID{}, err
+	}
+	return uuidValue, nil
+}
+
+func randomFloat64(min, max float64) float64 {
+	return min + rand.Float64()*(max-min)
 }
