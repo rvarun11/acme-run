@@ -119,20 +119,12 @@
 
 ### Tests - services_test.go
 
-1. **TestZoneService_CreateZoneManager**: Tests creating a zone manager, verifying successful creation and ID generation.
+1. **TestZoneService_CreateTrail**: Confirms the creation of a trail, checking for a valid ID and error-free operation.
 
-2. **TestZoneService_CreateTrail**: Confirms the creation of a trail, checking for a valid ID and error-free operation.
+2. **TestZoneService_CreateShelter**: Verifies the creation of a shelter, ensuring it is properly registered with a unique ID.
 
-3. **TestZoneService_CreateShelter**: Verifies the creation of a shelter, ensuring it is properly registered with a unique ID.
+3. **TestZoneService_UpdateTrail**: Tests updating an existing trail, ensuring the changes are accurately reflected.
 
-4. **TestZoneService_UpdateTrail**: Tests updating an existing trail, ensuring the changes are accurately reflected.
+4. **TestZoneService_DeleteTrail**: Confirms the ability to delete a trail, verifying its removal from the system.
 
-5. **TestZoneService_DeleteTrail**: Confirms the ability to delete a trail, verifying its removal from the system.
-
-6. **TestZoneService_GetTrailByID**: Checks the retrieval of a trail by its ID, confirming accurate data fetching.
-
-7. **TestZoneService_AddDuplicateTrail**: Tests the service's handling of duplicate trail creation, expecting an error.
-
-8. **TestZoneService_AddDuplicateShelter**: Verifies the service's response to creating a duplicate shelter, expecting an error.
-
-9. **TestZoneService_AddDuplicateZone**: Tests the service's ability to handle duplicate zone creation, expecting an error.
+5. **TestZoneService_GetTrailByID**: Checks the retrieval of a trail by its ID, confirming accurate data fetching.
