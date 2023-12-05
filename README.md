@@ -27,7 +27,7 @@ docker compose up
 ```
 
 - This will run the tests and start the services.
-- It starts by running the tests. For additional information about the tests, refer to the [test description here](TESTS.md).
+- It starts by running the tests. For additional information about the tests, refer to the [test description here](tests.md).
 - Once the tests are done, it will start the services.
 - Services use ports 8010 to 8014 and 5432 (for PostgreSQL) by default; ensure they are available for API functionality.
 
