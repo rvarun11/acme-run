@@ -32,14 +32,15 @@ After successfully setting up the project, follow these steps to get started:
 
 ## Testing
 
-Run the tests with the following command:
+1. Simply reopen the repository in the Devcontainer (or Codespaces) to setup Golang and PostgreSQL for testing.
+2. Run the tests with the following command:
 ```bash
 ./run_tests.sh
 ```
-If you don't have Golang configured locally, you can use the preconfigured devcontainer. Simply reopen the repository in the Devcontainer (or Codespaces) and run the script. For additional information about the tests, refer to the [test description here](#TESTS.md).
+For additional information about the tests, refer to the [test description here](#TESTS.md).
 
 ## Contributors
 
 - Liuyin Shi (shil9@mcmaster.ca)
-- Samkith Jain (kishors@mcmaster.ca)
+- Samkith K Jain (kishors@mcmaster.ca)
 - Varun Rajput (rajpuv2@mcmaster.ca)
