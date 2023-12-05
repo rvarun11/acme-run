@@ -1,26 +1,282 @@
 {
 	"info": {
-		"_postman_id": "9d58d4fc-4c61-4f41-9944-6d29c3b2cd9e",
-		"name": "MacRun - Liuyin, Samkith, Varun",
+		"_postman_id": "b6260f24-54b8-4d85-8684-dcd9821a3545",
+		"name": "TeamVSL CAS 735 Project Scenarios",
+		"description": "# Welcome to ACME Run Scenarios\n\n**by Liuyin, Samkith & Varun**\n\n## How to get the most out of this collection?\n\n1. The collection is divided into 9 folders, first for initializing the application and the others for the different scenarios. Each folder has its own description explaining what it does.\n2. Ensure you have the application up and running already as described in the project's README.md.\n    \n3. All the folders and APIs are ordered to be run from top to bottom. We recommend you to each API one by one while simultaneously seeing the logs in the terminal where you are running the application.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "14312203",
-		"_collection_link": "https://winter-satellite-393249.postman.co/workspace/cas-735~2906f288-5f3e-4839-8f70-f7f36274cd09/collection/14312203-9d58d4fc-4c61-4f41-9944-6d29c3b2cd9e?action=share&source=collection_link&creator=14312203"
+		"_exporter_id": "30263612",
+		"_collection_link": "https://winter-satellite-393249.postman.co/workspace/cas-735~2906f288-5f3e-4839-8f70-f7f36274cd09/collection/14312203-b6260f24-54b8-4d85-8684-dcd9821a3545?action=share&source=collection_link&creator=30263612"
 	},
 	"item": [
 		{
-			"name": "Player Service",
+			"name": "Initializations",
 			"item": [
 				{
-					"name": "Create Player",
+					"name": "Create Geographical Zone",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
 									"const responseJson = pm.response.json();",
-									"const playerId = responseJson.id;",
-									"",
-									"pm.collectionVariables.set('playerId', playerId); ",
+									"const zoneId = responseJson.zone_id;",
+									"pm.collectionVariables.set('zoneId', zoneId);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"zone_name\": \"McMaster Region\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Trail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const trailId = responseJson.trail_id;",
+									"pm.collectionVariables.set('trailId', trailId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_name\" : \"McMaster Trail\", \n    \"start_longitude\" : 43.249706,\n    \"start_latitude\":-79.930948,\n    \"end_longitude\":43.252028,\n    \"end_latitude\":-79.934920\n}\n\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shelter 1",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shelter_name\":\"ITB Shelter\",\n    \"trail_id\":\"{{trailId}}\",\n    \"shelter_availability\":true,\n    \"longitude\":-79.918279,\n    \"latitude\": 43.257540\n}"
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail/{{trailId}}/shelter",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail",
+								"{{trailId}}",
+								"shelter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shelter 2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shelter_name\":\"ETB Shelter\",\n    \"trail_id\":\"{{trailId}}\",\n    \"shelter_availability\":true,\n    \"longitude\":-79.919279,\n    \"latitude\": 43.457540\n}"
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail/{{trailId}}/shelter",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail",
+								"{{trailId}}",
+								"shelter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shelter 3",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shelter_name\":\"JHE Shelter\",\n    \"trail_id\":\"{{trailId}}\",\n    \"shelter_availability\":false,\n    \"longitude\":-79.915874,\n    \"latitude\": 43.257616\n}"
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail/{{trailId}}/shelter",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail",
+								"{{trailId}}",
+								"shelter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shelter 4",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shelter_name\":\"Fortinos Shelter\",\n    \"trail_id\":\"{{trailId}}\",\n    \"shelter_availability\":false,\n    \"longitude\":-79.929630,\n    \"latitude\": 43.254928\n}"
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail/{{trailId}}/shelter",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail",
+								"{{trailId}}",
+								"shelter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Shelter 5",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"shelter_name\":\"Westdale Shelter\",\n    \"trail_id\":\"{{trailId}}\",\n    \"shelter_availability\":true,\n    \"longitude\":-79.901379,\n    \"latitude\": 43.263117\n}"
+						},
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail/{{trailId}}/shelter",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail",
+								"{{trailId}}",
+								"shelter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Register Player - Alice (cardio preferred)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const playerId = responseJson.player.id;",
+									"pm.collectionVariables.set('alicePlayerId', playerId); ",
 									""
 								],
 								"type": "text/javascript"
@@ -32,7 +288,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"user\": {\n        \"name\": \"Player1\",\n        \"email\": \"player1@gmail.com\",\n        \"dob\": \"1998-07-19\"\n    },\n    \"height\": 175,\n    \"weight\": 80,\n    \"geographicalZone\": \"McMaster University\"\n\n}",
+							"raw": "{\n    \"user\": {\n        \"name\": \"Alice Williams\",\n        \"email\": \"alice@dummy.com\",\n        \"dob\": \"2000-09-29\"\n    },\n    \"height\": 160,\n    \"weight\": 60,\n    \"preference\": \"cardio\",\n    \"zone_id\": \"{{zoneId}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -40,30 +296,13 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8000/player",
+							"raw": "{{umURL}}/api/v1/players",
 							"host": [
-								"localhost"
+								"{{umURL}}"
 							],
-							"port": "8000",
 							"path": [
-								"player"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "List Players",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8000/players",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
+								"api",
+								"v1",
 								"players"
 							]
 						}
@@ -71,37 +310,27 @@
 					"response": []
 				},
 				{
-					"name": "Get Player",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "localhost:8000/players/{{playerId}}",
-							"host": [
-								"localhost"
-							],
-							"port": "8000",
-							"path": [
-								"players",
-								"{{playerId}}"
-							]
+					"name": "Register Player - Bob (strength preferred)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const playerId = responseJson.player.id;",
+									"pm.collectionVariables.set('bobPlayerId', playerId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "HRM Service",
-			"item": [
-				{
-					"name": "Connect HRM",
+					],
 					"request": {
 						"method": "POST",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : true\n}",
+							"raw": "{\n    \"user\": {\n        \"name\": \"Bob Smith\",\n        \"email\": \"bob@dummy.cm\",\n        \"dob\": \"1995-07-19\"\n    },\n    \"height\": 175,\n    \"weight\": 80,\n    \"preference\": \"strength\",\n    \"zone_id\": \"{{zoneId}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -109,52 +338,89 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8004/hrms",
+							"raw": "{{umURL}}/api/v1/players",
 							"host": [
-								"localhost"
+								"{{umURL}}"
 							],
-							"port": "8004",
 							"path": [
-								"hrms"
+								"api",
+								"v1",
+								"players"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "# **Initializations for the Scenarios**\n\n**The folder does the following:**\n\n1. Creates a geographical zone called _McMaster Region._\n2. Create a trail in the _McMaster Region_ called the _McMaster Trail._\n3. Creates dummy shelters on the _McMaster Trail._\n4. Register two players, namely:\n    \n    1. _Bob (prefers strength training)_\n        \n    2. _Alice (prefers cardio training)_"
+		},
+		{
+			"name": "Scenario 1 - Workout Start / Stop without HRM",
+			"item": [
+				{
+					"name": "Get Player - Alice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{alicePlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{alicePlayerId}}"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Disconnect HRM",
+					"name": "Get Closest Trail",
 					"request": {
-						"method": "POST",
+						"method": "GET",
 						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : false\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
 						"url": {
-							"raw": "localhost:8004/hrms",
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
 							"host": [
-								"localhost"
+								"{{zmURL}}"
 							],
-							"port": "8004",
 							"path": [
-								"hrms"
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
 							]
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "WorkoutService",
-			"item": [
+				},
 				{
-					"name": "Start Work Out",
+					"name": "Start Workout",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -170,7 +436,217 @@
 							"script": {
 								"exec": [
 									"const responseJson = pm.response.json();",
-									"const workoutId = responseJson.id;",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\": \"{{trailId}}\",\n    \"player_id\": \"{{alicePlayerId}}\",\n    \"hrm_connected\": false,\n    \"hrm_id\": \"{{hrmId}}\",\n    \"hardcore_mode\": false\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Heartrate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm?workout_id={{workoutId}}&type=avg",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							],
+							"query": [
+								{
+									"key": "workout_id",
+									"value": "{{workoutId}}"
+								},
+								{
+									"key": "type",
+									"value": "avg"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In the first scenario, we do a workout without an HRM.\n\nThe following can be noted at the end of this scenario run:\n\n1. Stopping the Workout **returns the calculated distance covered**.\n2. It can also be noted that _Get Average Heartrate_ call, **returns \"heart rate record not found\" which is correct as the HRM is not connected yet.**"
+		},
+		{
+			"name": "Scenario 2 - Workout Start / Stop with HRM",
+			"item": [
+				{
+					"name": "Get Player - Alice",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{alicePlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{alicePlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Connect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player_id\": \"{{alicePlayerId}}\",\n    \"hrm_id\" : \"{{hrmId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
 									"",
 									"pm.collectionVariables.set('workoutId', workoutId); ",
 									""
@@ -184,7 +660,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"trailID\":\"{{trailId}}\",\n    \"playerID\":\"{{playerId}}\",\n    \"hrmConnected\":true,\n    \"hrmID\":\"{{hrmId}}\"\n}",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\":false\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -192,12 +668,13 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8001/workout",
+							"raw": "{{wmURL}}/api/v1/workout",
 							"host": [
-								"localhost"
+								"{{wmURL}}"
 							],
-							"port": "8001",
 							"path": [
+								"api",
+								"v1",
 								"workout"
 							]
 						}
@@ -205,18 +682,260 @@
 					"response": []
 				},
 				{
-					"name": "List Workouts",
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Heartrate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm?workout_id={{workoutId}}&type=avg",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							],
+							"query": [
+								{
+									"key": "workout_id",
+									"value": "{{workoutId}}"
+								},
+								{
+									"key": "type",
+									"value": "avg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect HRM",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm/{{hrmId}}",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm",
+								"{{hrmId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In this scenario, we do a workout with an HRM.\n\nThe following can be noted at the end of this scenario run:\n\n1. Stopping the workout returns the calculated distance covered (as in Scenario 1).\n2. The _Get Average Heartrate_ call this time however, it **returns valid heartrate data** which is correct as the HRM is now connected.\n    \n3. The _Disconnect HRM_ call **disconnects the HRM to stop sending heartrate data**."
+		},
+		{
+			"name": "Scenario 3 - Workout with HRM & Hardcore mode enabled",
+			"item": [
+				{
+					"name": "Get Player - Alice",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "localhost:8001/workouts",
+							"raw": "{{umURL}}/api/v1/players/{{alicePlayerId}}",
 							"host": [
-								"localhost"
+								"{{umURL}}"
 							],
-							"port": "8001",
 							"path": [
-								"workouts"
+								"api",
+								"v1",
+								"players",
+								"{{alicePlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Connect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player_id\": \"{{alicePlayerId}}\",\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
 							]
 						}
 					},
@@ -229,7 +948,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"workoutID\": \"4bbb5ae9-d7c4-4a24-8264-be12a2d8b5b5\"\n}",
+							"raw": "{\n    \"workout_id\": \"{{workoutId}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -237,19 +956,2342 @@
 							}
 						},
 						"url": {
-							"raw": "localhost:8001/workout",
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
 							"host": [
-								"localhost"
+								"{{wmURL}}"
 							],
-							"port": "8001",
 							"path": [
-								"workout"
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Heartrate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm?workout_id={{workoutId}}&type=avg",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							],
+							"query": [
+								{
+									"key": "workout_id",
+									"value": "{{workoutId}}"
+								},
+								{
+									"key": "type",
+									"value": "avg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect HRM",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm/{{hrmId}}",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm",
+								"{{hrmId}}"
 							]
 						}
 					},
 					"response": []
 				}
-			]
+			],
+			"description": "In this scenario, we do a workout with an HRM and Hardcore mode enabled.\n\nThe following can be noted at the end of this scenario run:\n\n- The _Get Workout Options_ call **does not show shelter as one of the options**."
+		},
+		{
+			"name": "Scenario 4 - Workout with HRM & Hardcore mode disabled",
+			"item": [
+				{
+					"name": "Get Player - Alice",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{alicePlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{alicePlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Connect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player_id\": \"{{alicePlayerId}}\",\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": false\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options (note: shelter preference available)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout Option - Take Shelter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"shelter\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout Option - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workout_id\" : \"{{workoutId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workout_id\": \"{{workoutId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Heartrate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm?workout_id={{workoutId}}&type=avg",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							],
+							"query": [
+								{
+									"key": "workout_id",
+									"value": "{{workoutId}}"
+								},
+								{
+									"key": "type",
+									"value": "avg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect HRM",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm/{{hrmId}}",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm",
+								"{{hrmId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In this scenario, we do a workout with an HRM and Hardcore mode disabled.\n\nThe following can be noted at the end of this scenario run:\n\n- The _Get Workout Options_ call **now shows sheltering as one of the workout options**."
+		},
+		{
+			"name": "Scenario 5 - Workout with HRM, Hardcore mode enabled & Player Profile is Strength",
+			"item": [
+				{
+					"name": "Get Player - Bob (strength preferred)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{bobPlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{bobPlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Connect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player_id\": \"{{bobPlayerId}}\",\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{bobPlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options (note: fight can rank over escape option)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout Option - Start Fighting",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"fight\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout Option - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options (note: fight ranks over escape)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout Option - Start Fighting",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"fight\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout Option - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options (note: escape  can rank over fight)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workout_id\": \"{{workoutId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Heartrate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm?workout_id={{workoutId}}&type=avg",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							],
+							"query": [
+								{
+									"key": "workout_id",
+									"value": "{{workoutId}}"
+								},
+								{
+									"key": "type",
+									"value": "avg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect HRM",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm/{{hrmId}}",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm",
+								"{{hrmId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In this scenario, Bob (who prefers strength training) does a workout with an HRM and Hardcore mode enabled.\n\nThe following can be noted at the end of this scenario run:\n\n- The _Get Workout Options_ calls show that Bob gets _Fight_ option ranked higher than _Escape_ option but this ranking may temporarily change based on their average heartrate and fight count during the workout to give some variety.\n    \n\n**NOTE**\n\nIt was not easily possible for us to mock the heartrate using Postman. The system **does take into consideration the average heartrate** for computing the workout options, however it may or may not be in the cardio zone to affect the options (heartrate > 70% of max heart rate). This case is tested in the Workout Manager, namely _TestWorkoutService_InitialWorkoutOptionsIfCardio_"
+		},
+		{
+			"name": "Scenario 6 - Workout with HRM, Hardcore mode enabled & Player Profile is Cardio",
+			"item": [
+				{
+					"name": "Get Player  - Alice (cardio preferred)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{alicePlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{alicePlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Connect HRM",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"player_id\": \"{{alicePlayerId}}\",\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"23fb93f6-8c3b-4c29-a320-d6ed8540bb85\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options (note: escape can rank over fight)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout Option - Start Escaping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"escape\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop WorkoutOption - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workout_id\" : \"{{workoutId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options (note: escape can rank over fight)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start WorkoutOption - Start Escaping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"escape\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop WorkoutOption - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"workout_id\" : \"{{workoutId}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options - (note: fight can rank over escape)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Average Heartrate",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm?workout_id={{workoutId}}&type=avg",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm"
+							],
+							"query": [
+								{
+									"key": "workout_id",
+									"value": "{{workoutId}}"
+								},
+								{
+									"key": "type",
+									"value": "avg"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disconnect HRM",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"hrm_id\" : \"{{hrmId}}\", \n    \"connect\" : false\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{psURL}}/api/v1/peripheral/hrm/{{hrmId}}",
+							"host": [
+								"{{psURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"peripheral",
+								"hrm",
+								"{{hrmId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In this scenario, Alice (who prefers cardio training) does a workout with an HRM and Hardcore mode enabled.\n\nThe following can be noted at the end of this scenario run:\n\n- The _Get Workout Options_ calls show that Alice gets _Escape_ option ranked higher than _Fight_ option but this ranking may temporarily change based on their average heartrate and escape count during the workout to give some variety.\n    \n\n**NOTE**\n\nIt was not easily possible for us to mock the heartrate using Postman. The system **does take into consideration the average heartrate** for computing the workout options, however it may or may not be in the cardio zone to affect the options (heartrate > 70% of max heart rate). This case is tested in the Workout Manager, namely _TestWorkoutService_InitialWorkoutOptionsIfCardio_"
+		},
+		{
+			"name": "Scenario 7 - Player Wins a Marathon Rush Challenge",
+			"item": [
+				{
+					"name": "Get Player - Alice (cardio preferred)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{alicePlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{alicePlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Challenge - Marathon Rush 2023",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const challengeId = responseJson.challenge.id;",
+									"",
+									"pm.collectionVariables.set('marathonChallengeId', challengeId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Write a script here that sets challenge start time as now and "
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Marathon Rush 2023\",\n    \"description\": \"Complete 26.2 miles in December 2023\",\n    \"criteria\": \"DistanceCovered\",\n    \"goal\": 26.2,\n    \"badge_url\": \"https://iconduck.com/icons/228129/marathon\",\n    \"start\": \"2020-12-01T00:00:00Z\",\n    \"end\": \"2023-12-31T23:59:59Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cmURL}}/api/v1/challenges",
+							"host": [
+								"{{cmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"challenges"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout 3",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout 3",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout 4",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{alicePlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout 4",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"setTimeout(() => {}, 2000)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "End Challenge Explicitly (note: read scenario description)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{cmURL}}/api/v1/challenges/{{marathonChallengeId}}",
+							"host": [
+								"{{cmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"challenges",
+								"{{marathonChallengeId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Badges for Player Alice",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cmURL}}/api/v1/badges?player_id={{alicePlayerId}}",
+							"host": [
+								"{{cmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"badges"
+							],
+							"query": [
+								{
+									"key": "player_id",
+									"value": "{{alicePlayerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In this scenario, we have an active challenge (Marathon Rush where distance covered should be greater than 26.2 kms). Alice does workouts during the challenge period and tries to earn a badge.\n\nThe following can be noted at the end of this scenario run:\n\n1. Alice does 4 workouts during the challenge period.\n2. When the challenge ends, Alice covers a total distance > 26.2 kms, and earns the Marathon Rush Badge\n    \n\n**For Acceptance Testing,** the following is done:\n\n1. We added minor delays in the pre-request script of the _Stop Workout_ calls and scaled up the distance covered so that the total distance covered after 3+ comes out to be greater than 26.2kms.\n    \n2. The _End Challenge Explicitly_ call was used to end the challenge on command to simulate what happens when a challenge ends. This is already implemented within the service but for the purposes of the demo we have provided this as a manual call as well."
+		},
+		{
+			"name": "Scenario 8 - Player Wins a HalloweeK Challenge",
+			"item": [
+				{
+					"name": "Get Player - Bob (strength preferred)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{umURL}}/api/v1/players/{{bobPlayerId}}",
+							"host": [
+								"{{umURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"players",
+								"{{bobPlayerId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Closest Trail",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{zmURL}}/api/v1/zone/{{zoneId}}/trail?longitude=-79.930928&latitude=43.245706",
+							"host": [
+								"{{zmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"zone",
+								"{{zoneId}}",
+								"trail"
+							],
+							"query": [
+								{
+									"key": "longitude",
+									"value": "-79.930928"
+								},
+								{
+									"key": "latitude",
+									"value": "43.245706"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Challenge - HalloweeK 2023",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const challengeId = responseJson.challenge.id;",
+									"",
+									"pm.collectionVariables.set('halloweekChallengeId', challengeId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"HalloweeK 2023\",\n    \"description\": \"Fight more enemies than escape in the given duration\",\n    \"criteria\": \"FightMoreThanEscape\",\n    \"goal\": 0,\n    \"badge_url\": \"https://iconduck.com/icons/228129/marathon\",\n    \"start\": \"2023-11-01T00:00:00Z\",\n    \"end\": \"2023-12-31T23:59:59Z\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cmURL}}/api/v1/challenges",
+							"host": [
+								"{{cmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"challenges"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{bobPlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StartWorkoutOption - Start Escaping",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"escape\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "StopWorkoutOption - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"const workoutId = responseJson.workout_id;",
+									"",
+									"pm.collectionVariables.set('workoutId', workoutId); ",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"trail_id\":\"{{trailId}}\",\n    \"player_id\":\"{{bobPlayerId}}\",\n    \"hrm_id\":\"{{hrmId}}\",\n    \"hrm_connected\":true,\n    \"hardcore_mode\": true\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Workout Options",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start WorkoutOption - Start Fighting",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"fight\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout Option - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start Workout Option - Start Fighting",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"option\": \"fight\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout Option - Stop Active Workout Option",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}/options",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}",
+								"options"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stop Workout",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{wmURL}}/api/v1/workout/{{workoutId}}",
+							"host": [
+								"{{wmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"workout",
+								"{{workoutId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "End Challenge Explicitly (note: read scenario description)",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{cmURL}}/api/v1/challenges/{{halloweekChallengeId}}",
+							"host": [
+								"{{cmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"challenges",
+								"{{halloweekChallengeId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List Badges for Player Bob",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{cmURL}}/api/v1/badges?player_id={{bobPlayerId}}",
+							"host": [
+								"{{cmURL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"badges"
+							],
+							"query": [
+								{
+									"key": "player_id",
+									"value": "{{bobPlayerId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "In this scenario, we have an active challenge (HalloweeK where enemies fought should be greater than enemies escaped). Bob does workouts during the challenge period and tries to earn a badge.\n\nThe following can be noted at the end of this scenario run:\n\n1. Bob does 2 workouts during the challenge period.\n    \n2. When the challenge ends, Bob has fought more enemies than he escaped, thus earning the HalloweeK Badge.\n    \n\n**For Acceptance Testing,** the following is done:\n\n1. The _End Challenge Explicitly_ call was used to end the challenge on command to simulate what happens when a challenge ends. This is already implemented within the service but for the purposes of the demo we have provided this as a manual call as well."
 		}
 	],
 	"event": [
@@ -274,13 +3316,13 @@
 	],
 	"variable": [
 		{
-			"key": "playerId",
-			"value": "",
+			"key": "hrmId",
+			"value": "f584c1a6-b791-4939-8472-419c784abf5a",
 			"type": "string"
 		},
 		{
-			"key": "hrmId",
-			"value": "",
+			"key": "zoneId",
+			"value": "e0518e73-e851-42e6-a58c-a9b551018596",
 			"type": "string"
 		},
 		{
@@ -289,8 +3331,52 @@
 			"type": "string"
 		},
 		{
-			"key": "workoutId",
+			"key": "alicePlayerId",
 			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bobPlayerId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "workoutId",
+			"value": ""
+		},
+		{
+			"key": "marathonChallengeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "halloweekChallengeId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "umURL",
+			"value": "localhost:8010",
+			"type": "string"
+		},
+		{
+			"key": "zmURL",
+			"value": "localhost:8011",
+			"type": "string"
+		},
+		{
+			"key": "psURL",
+			"value": "localhost:8012",
+			"type": "string"
+		},
+		{
+			"key": "wmURL",
+			"value": "localhost:8013",
+			"type": "string"
+		},
+		{
+			"key": "cmURL",
+			"value": "localhost:8014",
 			"type": "string"
 		}
 	]
