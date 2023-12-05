@@ -98,10 +98,10 @@ func (pub *WorkoutStatsPublisher) PublishWorkoutStats(workoutStats *domain.Worko
 	}
 
 	err = ch.Publish(
-		"",                    // exchange
-		"WORKOUT_STATS_QUEUE", // queue name
-		false,                 // mandatory
-		false,                 // immediate
+		"",                               // exchange
+		pub.config.WorkoutStatsPublisher, // queue name
+		false,                            // mandatory
+		false,                            // immediate
 		amqp.Publishing{
 			ContentType: "application/json",
 			Body:        body,
