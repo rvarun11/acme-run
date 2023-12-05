@@ -1,19 +1,6 @@
 version: "3.8"
 
 services:
-# RabbitMQ
-  rabbitmq:
-    container_name: rabbitmq
-    image: rabbitmq:management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: rabbitmq-diagnostics check_port_connectivity
-      interval: 5s
-      timeout: 5s
-      retries: 3
-
 # Database
   db:
     container_name: db
@@ -30,6 +17,43 @@ services:
       interval: 5s
       timeout: 10s
       retries: 3
+
+
+# Test Suite
+  tests:
+    container_name: acmerun-tests
+    image: samkithkjain/acmerun-tests
+    restart: no
+    environment:
+      - MODE=prod
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_ENCODING=UTF8
+      - POSTGRES_LOG_LEVEL=silent
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+# RabbitMQ
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      tests:
+        condition: service_completed_successfully
+
 
 # User Manager
   user:
@@ -54,6 +78,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      tests:
+        condition: service_completed_successfully
 
 
 # Zone Manager
@@ -80,12 +106,14 @@ services:
       - RABBITMQ_PASSWORD=guest
       - RABBIT_LOCATION_CONSUMER=location_peripheral_zone_queue
       - RABBITMQ_SHELTER_DISTANCE_PUBLISHER=shelter_zone_workout_queue
-
     depends_on:
       db:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      tests:
+        condition: service_completed_successfully
+
 
 # Peripheral Service
   peripheral:
@@ -108,6 +136,10 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
+      zone:
+        condition: service_started
+      tests:
+        condition: service_completed_successfully
 
 
 # Workout Manager
@@ -146,6 +178,8 @@ services:
         condition: service_started
       user:
         condition: service_started
+      tests:
+        condition: service_completed_successfully
 
 
 # Challenge Manager
@@ -176,3 +210,5 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      tests:
+        condition: service_completed_successfully
