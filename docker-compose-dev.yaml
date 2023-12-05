@@ -18,17 +18,12 @@ services:
       timeout: 10s
       retries: 3
 
+
 # Test Suite
   tests:
-    container_name: acme-run-tests
+    container_name: acmerun-tests
     build: ./
     restart: no
-    # TODO: A health check has to be added here
-    # healthcheck:
-    #   test: rabbitmq-diagnostics check_port_connectivity
-    #   interval: 10s
-    #   timeout: 30s # by when will tests finish running
-    #   retries: 1
     environment:
       - MODE=prod
       - POSTGRES_HOST=db
@@ -41,6 +36,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
 
 # RabbitMQ
   rabbitmq:
@@ -56,7 +52,7 @@ services:
       retries: 3
     depends_on:
       tests: # adding this check because we want tests to finish running before we start the application
-        condition: service_healthy
+        condition: service_completed_successfully
 
 
 # User Manager
@@ -83,7 +79,7 @@ services:
       rabbitmq:
         condition: service_healthy
       tests:
-        condition: service_healthy
+        condition: service_completed_successfully
 
 
 # Zone Manager
@@ -116,7 +112,8 @@ services:
       rabbitmq:
         condition: service_healthy
       tests:
-        condition: service_healthy
+        condition: service_completed_successfully
+
 
 # Peripheral Service
   peripheral:
@@ -142,8 +139,7 @@ services:
       zone:
         condition: service_started
       tests:
-        condition: service_healthy
-
+        condition: service_completed_successfully
 
 
 # Workout Manager
@@ -183,7 +179,7 @@ services:
       user:
         condition: service_started
       tests:
-        condition: service_healthy
+        condition: service_completed_successfully
 
 
 # Challenge Manager
@@ -215,4 +211,4 @@ services:
       rabbitmq:
         condition: service_healthy
       tests:
-        condition: service_healthy
+        condition: service_completed_successfully
