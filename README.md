@@ -20,7 +20,7 @@ docker compose up
 After successfully setting up the project, follow these steps to get started:
 
 1. **Import Postman Collection**:
-- Import the provided Postman Collection from the repository into your Postman workspace or use the [link]([https://winter-satellite-393249.postman.co/workspace/cas-735~2906f288-5f3e-4839-8f70-f7f36274cd09/collection/14312203-b6260f24-54b8-4d85-8684-dcd9821a3545?action=share&creator=14312203](https://winter-satellite-393249.postman.co/workspace/cas-735~2906f288-5f3e-4839-8f70-f7f36274cd09/collection/14312203-b6260f24-54b8-4d85-8684-dcd9821a3545?action=share&creator=14312203)).
+- Import the provided Postman Collection from the repository into your Postman workspace or use the [link](https://winter-satellite-393249.postman.co/workspace/cas-735~2906f288-5f3e-4839-8f70-f7f36274cd09/collection/14312203-b6260f24-54b8-4d85-8684-dcd9821a3545?action=share&creator=14312203).
 - The collection includes predefined API requests for ACME RUN.
 - The collection is divided into 9 folders, the first for initializing the application and the others for the different scenarios. Each folder has its description explaining what it does.
 - All the folders and APIs are ordered to be run from top to bottom. We recommend you to each API one by one while simultaneously seeing the logs in the terminal.
