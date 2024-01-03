@@ -1,7 +1,6 @@
-# ACME RUN - Liuyin, Samkith, Varun
+# ACME RUN
 
-Welcome to our implementation of ACME RUN, a collaborative project developed by Liuyin, Samkith, and Varun as part of CAS 735 (Fall 2023).
-
+Welcome to our implementation of ACME RUN. Please refer to the provided [case study](docs/case_study.pdf) and [design documentation](docs/report.pdf) for more details.
 
 ## Getting Started
 
